@@ -1,0 +1,9 @@
+.wrapper{
+    min-width: 275px;
+    --filter: invert(1) hue-rotate(180deg);
+}
+
+.month {
+    display: inline-block;
+}
+
