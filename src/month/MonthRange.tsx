@@ -18,7 +18,7 @@ import {
 } from "../util/object";
 import { WeekHeader, WeekHeaderProps } from "./Header";
 import style from "./Month.module.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type DateRange = {
 	start: string; //DateString;
@@ -73,7 +73,6 @@ function MonthRange(props: MonthRangeProps) {
 	} = props;
 
 	// props validations
-	const controlledValue = ensureDateRange(props.value);
 	const year = bound(notNullOrUndef(props.year, today.year) | 0, 0, 9999);
 	const month = bound(notNullOrUndef(props.month, today.month) | 0, 0, 11);
 	const weekStartDay = bound(notNullOrUndef(props.weekStartDay, 1) | 0, 0, 6);
@@ -81,6 +80,7 @@ function MonthRange(props: MonthRangeProps) {
 	const max = ensureDateString(props.max, MAX_DATE_STRING);
 	const disabledDays = new Set(ensureArray(props.disabledDays));
 	const disabledDates = new Set(ensureArray(props.disabledDates));
+	const controlledValue = ensureDateRange(props.value);
 
 	const isControlled = hasKey(props, "value");
 	const [uncontrolledValue, setUncontrolled] = useState(() =>
@@ -89,33 +89,35 @@ function MonthRange(props: MonthRangeProps) {
 
 	const effectiveValue = isControlled ? controlledValue : uncontrolledValue;
 
-	const completeSelection = uncontrolledValue.length === 2;
+	const isRangeSelected = uncontrolledValue.length === 2;
 	const startDate = uncontrolledValue[0];
 	const endDate = uncontrolledValue[1];
 
 	const [hoveredDate, setHoverDate] = useState<DateString | null>(null);
 	const hasHover = uncontrolledValue.length === 1 && hoveredDate != null;
 
-	const callback = useCallback(
+	const onClick = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
 			const dateString = (event.target as HTMLButtonElement).dataset.value as
 				| DateString
 				| undefined;
 
-			if (dateString) {
-				if (uncontrolledValue.length === 1) {
-					const newState =
-						uncontrolledValue[0] < dateString
-							? uncontrolledValue.concat(dateString)
-							: [dateString].concat(uncontrolledValue);
-					setUncontrolled(newState);
-					onChange({
-						start: newState[0],
-						end: newState[1],
-					});
-				} else {
-					setUncontrolled(() => [dateString]);
-				}
+			if (!dateString) {
+				return;
+			}
+
+			if (uncontrolledValue.length === 1) {
+				const newState =
+					uncontrolledValue[0] < dateString
+						? uncontrolledValue.concat(dateString)
+						: [dateString].concat(uncontrolledValue);
+				setUncontrolled(newState);
+				onChange({
+					start: newState[0],
+					end: newState[1],
+				});
+			} else {
+				setUncontrolled(() => [dateString]);
 			}
 		},
 		[uncontrolledValue, onChange],
@@ -148,7 +150,6 @@ function MonthRange(props: MonthRangeProps) {
 				{days.map((day, i) => {
 					const isNullDate = day == null;
 					const dateString = isNullDate ? MIN_DATE_STRING : day.isoString;
-
 					const isDisabled =
 						isNullDate ||
 						disabled ||
@@ -156,34 +157,32 @@ function MonthRange(props: MonthRangeProps) {
 						disabledDays.has(day.day) ||
 						dateString < min ||
 						dateString > max;
+					const isMouseEvent = isDisabled || isRangeSelected;
+					const className = classname([
+						dateString === today.isoString && style.today,
+						dateString === startDate && style.start,
+						dateString === endDate && style.end,
+						isRangeSelected &&
+							dateString > startDate &&
+							dateString < endDate &&
+							style.between,
+						hasHover &&
+							((dateString > startDate && dateString < hoveredDate) ||
+								(dateString > hoveredDate && dateString < startDate)) &&
+							style.between,
+
+						!isRangeSelected && dateString === hoveredDate && style.hover,
+					]);
 
 					return (
 						<Button
 							key={isNullDate ? "null-" + i : dateString}
 							data-value={isNullDate ? undefined : dateString}
-							className={classname([
-								dateString === today.isoString && style.today,
-								dateString === startDate && style.start,
-								dateString === endDate && style.end,
-								completeSelection &&
-									dateString > startDate &&
-									dateString < endDate &&
-									style.between,
-								hasHover &&
-									((dateString > startDate && dateString < hoveredDate) ||
-										(dateString > hoveredDate && dateString < startDate)) &&
-									style.between,
-
-								!completeSelection && dateString === hoveredDate && style.hover,
-							])}
+							className={className}
 							disabled={isDisabled}
-							onClick={isNullDate ? undefined : callback}
-							onMouseOver={
-								isDisabled || completeSelection ? undefined : onMouseOver
-							}
-							onMouseOut={
-								isDisabled || completeSelection ? undefined : onMouseOut
-							}
+							onClick={isNullDate ? undefined : onClick}
+							onMouseOver={isMouseEvent ? undefined : onMouseOver}
+							onMouseOut={isMouseEvent ? undefined : onMouseOut}
 						>
 							{isNullDate ? null : day.date}
 						</Button>

@@ -1,6 +1,6 @@
 import { Month, MonthProps } from "../month";
 import { MonthSelector } from "../month-selector";
-import { TDate } from "../util/date";
+import { DateString, TDate } from "../util/date";
 import { YearSelector } from "../year-selector";
 import { CalendarHeader } from "./CalendarHeader";
 import style from "./index.module.css";
@@ -29,7 +29,7 @@ interface CalendarProps extends Omit<ReactDiv, "onSelect"> {
 	disabledDates?: MonthProps["disabledDates"];
 	disabledDays?: MonthProps["disabledDays"];
 	dayNameformat?: MonthProps["dayNameFormat"];
-	onSelect?: (date: TDate) => void;
+	onSelect?: (date: DateString) => void;
 }
 
 function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {

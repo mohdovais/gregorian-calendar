@@ -19,7 +19,7 @@ import {
 } from "../util/object";
 import { WeekHeader, WeekHeaderProps } from "./Header";
 import style from "./Month.module.css";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface MonthProps {
 	className?: string;
@@ -49,7 +49,6 @@ function Month(props: MonthProps) {
 	} = props;
 
 	// props validations
-	const value = ensureDateStringOrUndefined(props.value);
 	const year = bound(notNullOrUndef(props.year, today.year) | 0, 0, 9999);
 	const month = bound(notNullOrUndef(props.month, today.month) | 0, 0, 11);
 	const weekStartDay = bound(notNullOrUndef(props.weekStartDay, 1) | 0, 0, 6);
@@ -57,22 +56,33 @@ function Month(props: MonthProps) {
 	const max = ensureDateString(props.max, MAX_DATE_STRING);
 	const disabledDays = new Set(ensureArray(props.disabledDays));
 	const disabledDates = new Set(ensureArray(props.disabledDates));
+	const controlledValue = ensureDateStringOrUndefined(props.value);
 
 	const isControlled = hasKey(props, "value");
-	const [vState, setState] = useState(() =>
+	const [uncontrolledValue, setUncontrolled] = useState(() =>
 		ensureDateStringOrUndefined(props.defaultValue),
 	);
-	const effectiveValue = isControlled ? value : vState;
+	const effectiveValue = isControlled ? controlledValue : uncontrolledValue;
 
 	const days = useMemo(
 		() => getPaddedMonthDays(year, month, weekStartDay),
 		[year, month, weekStartDay],
 	);
 
-	const callback = (date: TDate) => {
-		!isControlled && setState(date.isoString);
-		typeof onChange === "function" && onChange(date.isoString);
-	};
+	const onClick = useCallback(
+		(event: React.MouseEvent<HTMLButtonElement>) => {
+			const dateString = (event.target as HTMLButtonElement).dataset.value as
+				| DateString
+				| undefined;
+
+			if (!dateString) {
+				return;
+			}
+			!isControlled && setUncontrolled(dateString);
+			onChange(dateString);
+		},
+		[onChange],
+	);
 
 	return (
 		<div className={classname([style.wrapper, className])}>
@@ -81,7 +91,6 @@ function Month(props: MonthProps) {
 				{days.map((day, i) => {
 					const isNullDate = day == null;
 					const dateString = isNullDate ? MIN_DATE_STRING : day.isoString;
-
 					const isDisabled =
 						isNullDate ||
 						disabled ||
@@ -89,16 +98,18 @@ function Month(props: MonthProps) {
 						disabledDays.has(day.day) ||
 						dateString < min ||
 						dateString > max;
+					const className = classname([
+						dateString === today.isoString && style.today,
+						dateString === effectiveValue && style.selected,
+					]);
 
 					return (
 						<Button
 							key={isNullDate ? "null-" + i : dateString}
-							className={classname([
-								dateString === today.isoString && style.today,
-								dateString === effectiveValue && style.selected,
-							])}
+							data-value={isNullDate ? undefined : dateString}
+							className={className}
 							disabled={isDisabled}
-							onClick={isNullDate ? undefined : () => callback(day)}
+							onClick={isNullDate ? undefined : onClick}
 						>
 							{isNullDate ? null : day.date}
 						</Button>
