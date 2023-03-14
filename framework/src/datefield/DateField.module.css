@@ -1,0 +1,30 @@
+.field {
+    display: inline-block;
+    writing-mode: horizontal-tb !important;
+    text-rendering: auto;
+    color: fieldtext;
+    text-align: start;
+    appearance: textfield;
+    background-color: field;
+    margin: 0em;
+    padding: 1px 2px;
+    border: 1px solid #858585;
+    border-radius: 2px;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+.field br {
+    display: none;
+}
+
+.field * {
+    display: inline;
+}
+
+.field::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}

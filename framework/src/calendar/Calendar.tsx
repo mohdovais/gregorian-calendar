@@ -1,6 +1,8 @@
 import { Month, MonthProps } from "../month";
 import { MonthSelector } from "../month-selector";
-import { DateString, TDate } from "../util/date";
+import { classname } from "../util/classname";
+import { DateString } from "../util/date";
+import { noop } from "../util/function";
 import { YearSelector } from "../year-selector";
 import { CalendarHeader } from "./CalendarHeader";
 import style from "./index.module.css";
@@ -20,36 +22,36 @@ type ReactDiv = React.DetailedHTMLProps<
 	HTMLDivElement
 >;
 
-interface CalendarProps extends Omit<ReactDiv, "onSelect"> {
-	defaultValue?: string;
+interface CalendarProps extends Omit<ReactDiv, "onChange"> {
+	value?: string;
 	min?: string;
 	max?: string;
 	locale?: string;
 	weekStartDay?: MonthProps["weekStartDay"];
 	disabledDates?: MonthProps["disabledDates"];
 	disabledDays?: MonthProps["disabledDays"];
-	dayNameformat?: MonthProps["dayNameFormat"];
-	onSelect?: (date: DateString) => void;
+	dayNameFormat?: MonthProps["dayNameFormat"];
+	onChange?: (date: DateString) => void;
 }
 
 function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 	const {
+		className,
 		locale,
-		defaultValue,
+		value,
 		weekStartDay,
-		dayNameformat,
+		dayNameFormat,
 		disabledDates,
 		disabledDays,
 		max,
 		min,
-		onSelect,
-		className = "",
+		onChange = noop as CalendarProps["onChange"],
 		...divProps
 	} = props;
 
 	const [state, dispatch] = useReducer(
 		calendarReducer,
-		{ defaultValue },
+		{ value },
 		calendarInitializer,
 	);
 	const { currentMonth, currentYear, viewType } = state;
@@ -61,14 +63,15 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 				<Month
 					year={currentYear}
 					month={currentMonth}
+					value={value}
 					max={max}
 					min={min}
 					weekStartDay={weekStartDay}
-					dayNameFormat={dayNameformat}
+					dayNameFormat={dayNameFormat}
 					disabledDates={disabledDates}
 					disabledDays={disabledDays}
 					locale={locale}
-					onChange={(date) => typeof onSelect === "function" && onSelect(date)}
+					onChange={onChange}
 				/>
 			);
 			break;
@@ -76,7 +79,9 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 			view = (
 				<MonthSelector
 					locale={locale}
-					onSelect={(month) =>
+					year={currentYear}
+					value={currentMonth}
+					onChange={(month) =>
 						dispatch({ type: ACTION_TYPE_SELECT_MONTH, month })
 					}
 				/>
@@ -86,6 +91,7 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 			view = (
 				<YearSelector
 					decade={currentYear}
+					value={currentYear}
 					onSelect={(year) => dispatch({ type: ACTION_TYPE_SELECT_YEAR, year })}
 				/>
 			);
@@ -95,7 +101,7 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 	return (
 		<div
 			{...divProps}
-			className={style.wrapper + " " + className}
+			className={classname(style.wrapper, className)}
 			data-name="calendar"
 			ref={ref}
 		>

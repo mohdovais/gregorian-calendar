@@ -1,8 +1,8 @@
 import {
-	TDate,
+	DateParts,
 	getToday,
 	increaseMonth,
-	parseISODateString,
+	parseISODateStringToTDate,
 } from "../util/date";
 import { copy } from "../util/object";
 
@@ -28,7 +28,7 @@ type CalendarState = {
 };
 
 type InitializerArg = {
-	defaultValue?: string;
+	value?: string;
 };
 
 type ActionNext = { type: typeof ACTION_TYPE_NEXT };
@@ -39,7 +39,10 @@ type ActionSelectMonth = {
 	type: typeof ACTION_TYPE_SELECT_MONTH;
 	month: number;
 };
-type ActionSelectDate = { type: typeof ACTION_TYPE_SELECT_DATE; date: TDate };
+type ActionSelectDate = {
+	type: typeof ACTION_TYPE_SELECT_DATE;
+	date: DateParts;
+};
 
 type CalendarAction =
 	| ActionNext
@@ -50,16 +53,14 @@ type CalendarAction =
 	| ActionSelectDate;
 
 function calendarInitializer(initializerArg: InitializerArg): CalendarState {
-	const { defaultValue } = initializerArg;
-	const view = CAL_VIEW_DATE_SELECTOR;
-	let parsedDate = parseISODateString(defaultValue);
+	let parsedDate = parseISODateStringToTDate(initializerArg.value);
 
 	if (parsedDate == null) {
 		parsedDate = getToday();
 	}
 
 	return {
-		viewType: view,
+		viewType: CAL_VIEW_DATE_SELECTOR,
 		currentYear: parsedDate.year,
 		currentMonth: parsedDate.month,
 	};

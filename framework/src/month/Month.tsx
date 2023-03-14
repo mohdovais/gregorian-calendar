@@ -7,7 +7,6 @@ import {
 	MIN_DATE_STRING,
 	ensureDateString,
 	ensureDateStringOrUndefined,
-	getPaddedMonthDays,
 	getToday,
 } from "../util/date";
 import { noop } from "../util/function";
@@ -18,6 +17,7 @@ import {
 } from "../util/object";
 import { WeekHeader, WeekHeaderProps } from "./Header";
 import style from "./Month.module.css";
+import { getNormalizedDaysOfMonth } from "./util";
 import { useCallback, useMemo, useState } from "react";
 
 interface MonthProps {
@@ -64,7 +64,7 @@ function Month(props: MonthProps) {
 	const effectiveValue = isControlled ? controlledValue : uncontrolledValue;
 
 	const days = useMemo(
-		() => getPaddedMonthDays(year, month, weekStartDay),
+		() => getNormalizedDaysOfMonth(year, month, weekStartDay),
 		[year, month, weekStartDay],
 	);
 
@@ -84,19 +84,20 @@ function Month(props: MonthProps) {
 	);
 
 	return (
-		<div className={classname([style.wrapper, className])}>
+		<div className={classname(style.wrapper, className)}>
 			<WeekHeader format={dayNameFormat} locale={locale} start={weekStartDay} />
 			<div className={style.days}>
-				{days.map((day, i) => {
-					const isNullDate = day == null;
-					const dateString = isNullDate ? MIN_DATE_STRING : day.isoString;
+				{days.map((day) => {
+					const isAnotherMonth = day.month !== month || day.year !== year;
+					const dateString = day.isoString;
 					const isDisabled =
-						isNullDate ||
+						isAnotherMonth ||
 						disabled ||
 						disabledDates.has(dateString) ||
 						disabledDays.has(day.day) ||
 						dateString < min ||
 						dateString > max;
+
 					const className = classname([
 						dateString === today.isoString && style.today,
 						dateString === effectiveValue && style.selected,
@@ -104,13 +105,13 @@ function Month(props: MonthProps) {
 
 					return (
 						<Button
-							key={isNullDate ? "null-" + i : dateString}
-							data-value={isNullDate ? undefined : dateString}
+							key={dateString}
+							data-value={dateString}
 							className={className}
 							disabled={isDisabled}
-							onClick={isNullDate ? undefined : onClick}
+							onClick={isAnotherMonth ? undefined : onClick}
 						>
-							{isNullDate ? null : day.date}
+							{day.date}
 						</Button>
 					);
 				})}

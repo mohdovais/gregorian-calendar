@@ -1,11 +1,13 @@
-import { TDate } from "./common";
+import { bound } from "../number";
+import type { DateParts } from "./common";
 import { convertToTDate } from "./parser";
 
-function getToday(): TDate {
-	return convertToTDate(new Date());
+function getToday(): DateParts {
+	return convertToTDate(new Date())!;
 }
 
 function increaseMonth(year: number, month: number, encrement = 1) {
+	month = bound(month, 0, 11);
 	const total = (year | 0) * 12 + (month | 0) + (encrement | 0);
 	return { year: (total / 12) | 0, month: total % 12 };
 }

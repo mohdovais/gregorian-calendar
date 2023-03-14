@@ -1,1 +1,1 @@
-export * from "./_object";
+export * from "./object";

@@ -1,5 +1,6 @@
+import { bound } from "../number";
 import { leftPad } from "../string";
-import { DateString, TDate } from "./common";
+import { DateParts, DateString } from "./common";
 import { isLeapYear } from "./validations";
 import { dayOfDate } from "./zeller-rule";
 
@@ -7,75 +8,46 @@ const maxDaysInMonth = [
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
 ] as const;
 
-function getMonth(year: number, month: number) {
+function getDatesOfMonth(
+	year: number,
+	month: number,
+	startDate = 1, // negative will be treated as length from end (endDate - startDate)
+	endDate?: number,
+) {
+	// props sanity checks
 	month = month | 0;
 	if (month < 0 || month > 11) {
 		return [];
 	}
 	year = year | 0;
+
+	const daysInMonth =
+		month === 1 && isLeapYear(year) ? 29 : maxDaysInMonth[month];
+	endDate = endDate == null ? daysInMonth : Math.min(daysInMonth, endDate | 0);
+
+	startDate = startDate | 0;
+	startDate = bound(
+		startDate < 0 ? endDate + startDate + 1 : startDate,
+		1,
+		endDate,
+	);
+	// end
+
 	const mm = leftPad(month + 1, 2);
 	const yyyy = leftPad(year, 4);
-	const maxDay = month === 1 && isLeapYear(year) ? 29 : maxDaysInMonth[month];
-	const result: TDate[] = [];
-	let day = dayOfDate(`${yyyy}-${mm}-01`)!;
-	for (let date = 1; date <= maxDay; date++) {
-		const isoString = `${yyyy}-${mm}-${leftPad(date, 2)}` as DateString;
+	const firstDayOfMonth = dayOfDate(`${yyyy}-${mm}-01`)!;
+
+	const result: DateParts[] = [];
+	for (let date = startDate; date <= endDate; date++) {
 		result.push({
-			isoString,
+			isoString: `${yyyy}-${mm}-${leftPad(date, 2)}` as DateString,
+			day: (firstDayOfMonth + date - 1) % 7,
 			year,
 			month,
 			date,
-			day,
 		});
-		day = (1 + day) % 7;
 	}
-
 	return result;
 }
 
-function getPaddedMonthDays(
-	year: number,
-	month: number,
-	startDay = 1,
-	padding = 42,
-) {
-	const days = getMonth(year, month);
-
-	if (days.length === 0) {
-		return [];
-	}
-
-	startDay = startDay | 0;
-	startDay = startDay < -1 || startDay > 6 ? 1 : startDay;
-
-	const prefix = Array<null | TDate>((7 + days[0].day - startDay) % 7).fill(
-		null,
-		0,
-	);
-
-	const suffix = Array<null>(padding - prefix.length - days.length).fill(
-		null,
-		0,
-	);
-
-	return prefix.concat(days, suffix);
-}
-
-function getWeeksOfMonth(
-	year: number,
-	month: number,
-	startDay = 1,
-	padding?: number,
-) {
-	const days = getPaddedMonthDays(year, month, startDay, padding);
-	const weeks: (TDate | null)[][] = [];
-
-	const week = 7;
-	for (let i = 0; i < days.length; i += week) {
-		const chunk = days.slice(i, i + week);
-		weeks.push(chunk);
-	}
-	return weeks;
-}
-
-export { getMonth, getWeeksOfMonth, getPaddedMonthDays };
+export { getDatesOfMonth };

@@ -1,1 +1,1 @@
-export * from "./_string";
+export * from "./string";

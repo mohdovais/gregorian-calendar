@@ -7,18 +7,15 @@ import {
 	MIN_DATE_STRING,
 	ensureDateString,
 	ensureDateStringOrUndefined,
-	getPaddedMonthDays,
 	getToday,
 } from "../util/date";
 import { noop } from "../util/function";
 import { bound } from "../util/number";
-import {
-	ensureNotNullOrUndefined as notNullOrUndef,
-	hasKey,
-} from "../util/object";
+import { ensureNotNullOrUndefined as notNullOrUndef } from "../util/object";
 import { WeekHeader, WeekHeaderProps } from "./Header";
 import style from "./Month.module.css";
-import { useCallback, useMemo, useState } from "react";
+import { getNormalizedDaysOfMonth } from "./util";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 type DateRange = {
 	start: string; //DateString;
@@ -80,45 +77,49 @@ function MonthRange(props: MonthRangeProps) {
 	const max = ensureDateString(props.max, MAX_DATE_STRING);
 	const disabledDays = new Set(ensureArray(props.disabledDays));
 	const disabledDates = new Set(ensureArray(props.disabledDates));
-	const controlledValue = ensureDateRange(props.value);
 
-	const isControlled = hasKey(props, "value");
-	const [uncontrolledValue, setUncontrolled] = useState(() =>
-		ensureDateRange(props.defaultValue),
-	);
+	const uncontrolledValue = useRef(ensureDateRange(props.defaultValue));
+	const currentValue = uncontrolledValue.current;
 
-	const effectiveValue = isControlled ? controlledValue : uncontrolledValue;
+	// const isControlled = hasKey(props, "value");
+	// const controlledValue = isControlled ? ensureDateRange(props.value): [];
+	// const effectiveValue = isControlled ? controlledValue : uncontrolledValue;
 
-	const isRangeSelected = uncontrolledValue.length === 2;
-	const startDate = uncontrolledValue[0];
-	const endDate = uncontrolledValue[1];
+	const isRangeSelected = currentValue.length === 2;
+	const startDate = currentValue[0];
+	const endDate = currentValue[1];
+	const [_, forceRender] = useState(1);
 
 	const [hoveredDate, setHoverDate] = useState<DateString | null>(null);
-	const hasHover = uncontrolledValue.length === 1 && hoveredDate != null;
+	const hasHover = currentValue.length === 1 && hoveredDate != null;
 
 	const onClick = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
-			const dateString = (event.target as HTMLButtonElement).dataset.value as
-				| DateString
-				| undefined;
+			const dateString = ensureDateStringOrUndefined(
+				(event.target as HTMLButtonElement).dataset.value,
+			);
 
 			if (!dateString) {
 				return;
 			}
+			const currentValue = uncontrolledValue.current;
 
-			if (uncontrolledValue.length === 1) {
+			if (currentValue.length === 1) {
 				const newState =
-					uncontrolledValue[0] < dateString
-						? uncontrolledValue.concat(dateString)
-						: [dateString].concat(uncontrolledValue);
-				setUncontrolled(newState);
+					currentValue[0] < dateString
+						? currentValue.concat(dateString)
+						: [dateString].concat(currentValue);
+
+				uncontrolledValue.current = newState;
 				onChange({
 					start: newState[0],
 					end: newState[1],
 				});
 			} else {
-				setUncontrolled(() => [dateString]);
+				uncontrolledValue.current = [dateString];
 			}
+
+			forceRender((x) => x + 1);
 		},
 		[uncontrolledValue, onChange],
 	);
@@ -139,25 +140,25 @@ function MonthRange(props: MonthRangeProps) {
 	}, []);
 
 	const days = useMemo(
-		() => getPaddedMonthDays(year, month, weekStartDay),
+		() => getNormalizedDaysOfMonth(year, month, weekStartDay),
 		[year, month, weekStartDay],
 	);
 
 	return (
-		<div className={classname([style.wrapper, style.range, className])}>
+		<div className={classname(style.wrapper, style.range, className)}>
 			<WeekHeader format={dayNameFormat} locale={locale} start={weekStartDay} />
 			<div className={style.days}>
-				{days.map((day, i) => {
-					const isNullDate = day == null;
-					const dateString = isNullDate ? MIN_DATE_STRING : day.isoString;
+				{days.map((day) => {
+					const dateString = day.isoString;
+					const isAnotherMonth = day.month !== month || day.year !== year;
 					const isDisabled =
-						isNullDate ||
+						isAnotherMonth ||
 						disabled ||
 						disabledDates.has(dateString) ||
 						disabledDays.has(day.day) ||
 						dateString < min ||
 						dateString > max;
-					const isMouseEvent = isDisabled || isRangeSelected;
+					const isMouseEventDisabled = isDisabled || isRangeSelected;
 					const className = classname([
 						dateString === today.isoString && style.today,
 						dateString === startDate && style.start,
@@ -176,15 +177,15 @@ function MonthRange(props: MonthRangeProps) {
 
 					return (
 						<Button
-							key={isNullDate ? "null-" + i : dateString}
-							data-value={isNullDate ? undefined : dateString}
+							key={dateString}
+							data-value={dateString}
 							className={className}
 							disabled={isDisabled}
-							onClick={isNullDate ? undefined : onClick}
-							onMouseOver={isMouseEvent ? undefined : onMouseOver}
-							onMouseOut={isMouseEvent ? undefined : onMouseOut}
+							onClick={isAnotherMonth ? undefined : onClick}
+							onMouseOver={isMouseEventDisabled ? undefined : onMouseOver}
+							onMouseOut={isMouseEventDisabled ? undefined : onMouseOut}
 						>
-							{isNullDate ? null : day.date}
+							{day.date}
 						</Button>
 					);
 				})}

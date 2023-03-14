@@ -17,7 +17,7 @@ function getMonthNames(
 	return names;
 }
 
-function getWeekNames(
+function getWeekdayNames(
 	format: "long" | "short" | "narrow" = "long",
 	locale?: string,
 ) {
@@ -34,4 +34,4 @@ function getWeekNames(
 	return names;
 }
 
-export { getMonthNames, getWeekNames };
+export { getMonthNames, getWeekdayNames };

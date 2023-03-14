@@ -1,4 +1,5 @@
 import { Button } from "../button";
+import { classname } from "../util/classname";
 import { getMonthNames } from "../util/date";
 import style from "./MonthSelector.module.css";
 
@@ -6,14 +7,14 @@ type MonthSelectorProps = {
 	value?: number;
 	year?: number;
 	locale?: string;
-	onSelect: (month: number) => void;
+	onChange: (month: number) => void;
 };
 
 function MonthSelector(props: MonthSelectorProps) {
 	const today = new Date();
 	const currentMonth = today.getMonth();
 	const currentYear = today.getFullYear();
-	const { locale, value, year, onSelect } = props;
+	const { locale, value, year = currentYear, onChange } = props;
 	const months = getMonthNames("long", locale);
 
 	return (
@@ -23,12 +24,11 @@ function MonthSelector(props: MonthSelectorProps) {
 					key={month}
 					role="option"
 					aria-selected={i === value || undefined}
-					className={
-						(i === value ? style.selected : "") +
-						" " +
-						(i === currentMonth && year === currentYear ? style.current : "")
-					}
-					onClick={() => onSelect(i)}
+					className={classname(
+						i === value && style.selected,
+						i === currentMonth && year === currentYear && style.current,
+					)}
+					onClick={() => onChange(i)}
 				>
 					{month}
 				</Button>

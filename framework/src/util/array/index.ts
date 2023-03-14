@@ -1,1 +1,1 @@
-export * from "./_array";
+export * from "./array";

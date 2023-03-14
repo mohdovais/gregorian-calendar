@@ -1,1 +1,1 @@
-export * from "./_function";
+export * from "./function";

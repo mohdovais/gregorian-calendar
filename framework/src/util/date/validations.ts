@@ -1,13 +1,13 @@
 import { DateString } from "./common";
 
-const dateRe = /(\d{4})-(\d{2})-(\d{2})/;
+const _dateRe = /(\d{4})-(\d{2})-(\d{2})/;
 
 function isLeapYear(year: number) {
 	return year % 4 === 0;
 }
 
 function isDateStringFormat(dateString?: string | null) {
-	return dateString != null && dateRe.test(dateString);
+	return dateString != null && _dateRe.test(dateString);
 }
 
 function isValidDateString(

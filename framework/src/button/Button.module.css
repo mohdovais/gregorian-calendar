@@ -8,7 +8,11 @@
     font-size: inherit;
 }
 
-.btn:not(:disabled){
+button:disabled {
+    color: #fefefe;
+}
+
+.btn:not(:disabled) {
     cursor: pointer;
 }
 
