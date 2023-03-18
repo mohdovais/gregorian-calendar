@@ -6,6 +6,10 @@
     grid-row-gap: 0px;
 }
 
+.btn {
+    padding: 20px 5px;
+}
+
 .selected {
     background-color: hsl(225, 80%, 60%);
     color: #fff

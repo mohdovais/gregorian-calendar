@@ -3,8 +3,8 @@ import {
 	getToday,
 	increaseMonth,
 	parseISODateStringToTDate,
-} from "../util/date";
-import { copy } from "../util/object";
+} from "../utils/date";
+import { copy } from "../utils/object";
 
 const CAL_VIEW_DATE_SELECTOR = "month";
 const CAL_VIEW_MONTH_SELECTOR = "year";

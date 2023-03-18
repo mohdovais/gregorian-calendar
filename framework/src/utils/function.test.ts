@@ -1,4 +1,4 @@
-import { noop } from "./index";
+import { noop } from "./function";
 
 test("noop", () => {
 	expect(noop()).toBeUndefined();

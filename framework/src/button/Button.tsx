@@ -1,4 +1,4 @@
-import { classname } from "../util/classname";
+import { classname } from "../utils/classname";
 import style from "./Button.module.css";
 import { memo } from "react";
 
@@ -9,11 +9,11 @@ interface ButtonProps
 	> {}
 
 function Button(props: ButtonProps) {
-	const { children, className = "", type = "button", ...restProps } = props;
+	const { children, className, type = "button", ...restProps } = props;
 	return (
 		<button
 			{...restProps}
-			className={classname([style.btn, className])}
+			className={classname(style.btn, className)}
 			type={type}
 		>
 			{children}

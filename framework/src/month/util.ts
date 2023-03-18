@@ -3,7 +3,7 @@ import {
 	decreaseMonth,
 	getDatesOfMonth,
 	increaseMonth,
-} from "../util/date";
+} from "../utils/date";
 
 function getNormalizedDaysOfMonth(
 	year: number,

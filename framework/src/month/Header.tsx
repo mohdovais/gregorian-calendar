@@ -1,4 +1,4 @@
-import { getWeekdayNames } from "../util/date";
+import { getWeekdayNames } from "../utils/date";
 import style from "./Header.module.css";
 import { memo, useMemo } from "react";
 

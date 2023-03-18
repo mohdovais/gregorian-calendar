@@ -1,4 +1,4 @@
-import { copy, ensureNotNullOrUndefined, hasKey, typeOf } from "./index";
+import { copy, ensureNotNullOrUndefined, hasKey, typeOf } from "./object";
 
 test("copy", () => {
 	const a = { A: 1, B: 3 };

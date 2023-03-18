@@ -16,7 +16,7 @@ import {
 	isValidDateString,
 	parseDate,
 	parseISODateStringToTDate,
-} from "./index";
+} from "./date";
 
 test("convertToTDate", () => {
 	const date = new Date(2023, 1, 1);

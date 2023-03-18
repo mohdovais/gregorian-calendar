@@ -1,6 +1,6 @@
 import { Button } from "../button";
-import { classname } from "../util/classname";
-import { getDecade } from "../util/date";
+import { classname } from "../utils/classname";
+import { getDecade } from "../utils/date";
 import style from "./YearSelector.module.css";
 
 type YearSelectorProps = {
@@ -28,7 +28,7 @@ function YearSelector(props: YearSelectorProps) {
 				return (
 					<Button
 						key={year}
-						className={className}
+						className={classname(style.btn, className)}
 						disabled={disabled}
 						onClick={disabled ? undefined : () => onSelect(year)}
 					>

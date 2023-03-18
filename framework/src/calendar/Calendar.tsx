@@ -1,8 +1,8 @@
 import { Month, MonthProps } from "../month";
 import { MonthSelector } from "../month-selector";
-import { classname } from "../util/classname";
-import { DateString } from "../util/date";
-import { noop } from "../util/function";
+import { classname } from "../utils/classname";
+import { DateString } from "../utils/date";
+import { noop } from "../utils/function";
 import { YearSelector } from "../year-selector";
 import { CalendarHeader } from "./CalendarHeader";
 import style from "./index.module.css";

@@ -1,5 +1,5 @@
 import { Button } from "../button";
-import { getMonthNames } from "../util/date";
+import { getMonthNames } from "../utils/date";
 import style from "./CalendarHeader.module.css";
 import {
 	ACTION_TYPE_CHANGE_VIEW,

@@ -1,6 +1,6 @@
 import { Button } from "../button";
-import { ensureArray } from "../util/array";
-import { classname } from "../util/classname";
+import { ensureArray } from "../utils/array";
+import { classname } from "../utils/classname";
 import {
 	DateString,
 	MAX_DATE_STRING,
@@ -8,13 +8,13 @@ import {
 	ensureDateString,
 	ensureDateStringOrUndefined,
 	getToday,
-} from "../util/date";
-import { noop } from "../util/function";
-import { bound } from "../util/number";
+} from "../utils/date";
+import { noop } from "../utils/function";
+import { bound } from "../utils/number";
 import {
 	ensureNotNullOrUndefined as notNullOrUndef,
 	hasKey,
-} from "../util/object";
+} from "../utils/object";
 import { WeekHeader, WeekHeaderProps } from "./Header";
 import style from "./Month.module.css";
 import { getNormalizedDaysOfMonth } from "./util";

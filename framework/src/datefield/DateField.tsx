@@ -1,6 +1,9 @@
 import { Calendar, CalendarProps } from "../calendar";
 import commonStyle from "../css/common.module.css";
-import { ensureArray } from "../util/array";
+import { usePickerPosition } from "../hooks/usePickerPosition";
+import { Input } from "../input";
+import { ensureArray } from "../utils/array";
+import { classname } from "../utils/classname";
 import {
 	DateString,
 	MAX_DATE_STRING,
@@ -8,13 +11,12 @@ import {
 	ensureDateString,
 	ensureDateStringOrUndefined,
 	parseDate,
-} from "../util/date";
-import { format } from "../util/date/format";
-import { noop } from "../util/function";
-import { ensureNotNullOrUndefined } from "../util/object";
-import style from "./Datefield.module.css";
-import { autoPlacement, useFloating } from "@floating-ui/react-dom";
-import { useCallback, useEffect, useRef, useState } from "react";
+} from "../utils/date";
+import { format } from "../utils/date";
+import { noop } from "../utils/function";
+import { ensureNotNullOrUndefined } from "../utils/object";
+import style from "./DateField.module.css";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 interface DateFieldProps {
 	id?: string;
@@ -28,6 +30,7 @@ interface DateFieldProps {
 	disabledDays?: CalendarProps["disabledDays"];
 	dayNameFormat?: CalendarProps["dayNameFormat"];
 	onChange?: (date: DateString | undefined) => void;
+	required?: boolean;
 }
 
 function DateField(props: DateFieldProps) {
@@ -37,6 +40,7 @@ function DateField(props: DateFieldProps) {
 		id,
 		locale,
 		weekStartDay,
+		required,
 		onChange = (noop as DateFieldProps["onChange"])!,
 	} = props;
 
@@ -49,24 +53,7 @@ function DateField(props: DateFieldProps) {
 	const self = useRef({ value });
 	const hiddenInputRef = useRef<HTMLInputElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
-	const { x, y, strategy, refs } = useFloating({
-		open: isOpen,
-		middleware: [
-			autoPlacement({
-				crossAxis: true,
-				allowedPlacements: [
-					"bottom-end",
-					"bottom-start",
-					"top-end",
-					"top-start",
-				],
-			}),
-		],
-	});
-
-	const onBlur = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
-		triggerChange(parseDate(event.target.value.trim()));
-	}, []);
+	const { floatStyle, refs } = usePickerPosition(isOpen);
 
 	const triggerChange = useCallback(
 		(value: DateString | undefined) => {
@@ -78,38 +65,71 @@ function DateField(props: DateFieldProps) {
 				value !== self.current.value
 			) {
 				self.current.value = value;
-				hiddenInput.value = ensureNotNullOrUndefined(value as string, "");
+				hiddenInput.value = ensureNotNullOrUndefined(
+					value as string | undefined,
+					"",
+				);
 				input.value = format(value, locale);
 				onChange(value);
 			}
+
+			setIsOpen(false);
 		},
-		[refs, onChange],
+		[refs.reference, onChange, locale],
 	);
 
+	const onBlur = useCallback(
+		(event: React.FocusEvent<HTMLInputElement>) => {
+			triggerChange(parseDate(event.target.value.trim()));
+		},
+		[triggerChange],
+	);
+
+	useEffect(() => {
+		var input = refs.reference.current as HTMLInputElement;
+		if (input != null) {
+			input.value = format(value, locale);
+			self.current = { value };
+			if (value != null) {
+				let validity = "";
+				if (value < min) {
+					validity = `Minimum date allowed is ${format(min, locale)}`;
+				} else if (value > max) {
+					validity = `Maximun date allowed is ${format(max, locale)}`;
+				} else if (disabledDates.includes(value)) {
+					validity = `Date ${format(max, locale)} is not allowed`;
+				}
+				input.setCustomValidity(validity);
+			}
+		}
+	}, [value, locale, min, max, disabledDates]);
+
 	return (
-		<>
+		<span className={style.wrapper}>
 			<input type="hidden" name={name} value={value} ref={hiddenInputRef} />
-			<input
+			<Input
 				id={id}
+				className={style.field}
 				defaultValue={format(value, locale)}
+				required={required}
 				autoCapitalize="off"
 				autoCorrect="off"
 				autoComplete="off"
 				ref={refs.setReference}
 				onBlur={onBlur}
 			/>
+			<button
+				type="button"
+				className={classname(style.trigger, isOpen && style.active)}
+				onClick={() => setIsOpen((isOpen) => !isOpen)}
+			>
+				&#128197;
+			</button>
 			{isOpen ? (
 				<Calendar
 					ref={refs.setFloating}
 					className={commonStyle.window}
-					style={{
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-						width: "max-content",
-						display: "inline-block",
-						padding: 20,
-					}}
+					style={floatStyle}
 					dayNameFormat={dayNameFormat}
 					disabledDates={disabledDates}
 					disabledDays={disabledDays}
@@ -121,8 +141,9 @@ function DateField(props: DateFieldProps) {
 					weekStartDay={weekStartDay}
 				/>
 			) : null}
-		</>
+		</span>
 	);
 }
 
-export { DateField };
+const DateFieldMemo = memo(DateField);
+export { DateFieldMemo as DateField };

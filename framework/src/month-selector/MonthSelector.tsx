@@ -1,6 +1,6 @@
 import { Button } from "../button";
-import { classname } from "../util/classname";
-import { getMonthNames } from "../util/date";
+import { classname } from "../utils/classname";
+import { getMonthNames } from "../utils/date";
 import style from "./MonthSelector.module.css";
 
 type MonthSelectorProps = {
@@ -25,6 +25,7 @@ function MonthSelector(props: MonthSelectorProps) {
 					role="option"
 					aria-selected={i === value || undefined}
 					className={classname(
+						style.btn,
 						i === value && style.selected,
 						i === currentMonth && year === currentYear && style.current,
 					)}

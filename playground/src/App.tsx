@@ -1,18 +1,21 @@
-import { DateField } from "../../framework/src/datefield";
-import { Calendar } from "framework/calendar";
+import { DateField } from "framework/datefield";
 import { useState } from "react";
 const weekends = [0, 6];
 const disabledDates = ["2023-01-26", "2023-08-15"];
 function App() {
-	const [value, setValue] = useState("2023-01-01");
+	const [value, setValue] = useState<string | undefined>("2023-01-01");
 	return (
-		<div style={{ display: "inline-flex", flexDirection: "column" }}>
-			<Calendar value={value} onChange={setValue} disabledDays={weekends} />
-			{value}
-			<Calendar value={value} onChange={setValue} />
+		<form style={{ display: "inline-flex", flexDirection: "column" }}>
 			<br />
-			<DateField value={value} locale="en-US" />
-		</div>
+			<DateField
+				name="dob"
+				value={value}
+				max='2023-01-05'
+				onChange={setValue}
+			/>
+			<br />
+			<button type="submit">Submit</button>
+		</form>
 	);
 }
 

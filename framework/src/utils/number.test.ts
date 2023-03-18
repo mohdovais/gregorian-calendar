@@ -1,4 +1,4 @@
-import { bound } from "./index";
+import { bound } from "./number";
 
 test("bound", () => {
 	expect(bound(0, 0, 0)).toBe(0);

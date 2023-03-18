@@ -1,4 +1,4 @@
-import { leftPad } from "./index";
+import { leftPad } from "./string";
 
 test("leftPad", () => {
 	expect(leftPad(0, 2)).toBe("00");

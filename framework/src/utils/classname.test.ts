@@ -1,4 +1,4 @@
-import { classname } from "./index";
+import { classname } from "./classname";
 
 test("classname", () => {
 	expect(classname([null])).toBe("");

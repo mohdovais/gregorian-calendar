@@ -5,7 +5,7 @@
 }
 
 .wrapper button {
-    outline: 1px solid rgba(0, 0, 0, 0.02);
+    --outline: 1px solid rgba(0, 0, 0, 0.02);
     font-variant: tabular-nums;
 }
 

@@ -1,4 +1,4 @@
-import { ensureArray } from "./index";
+import { ensureArray } from "./array";
 
 test("ensureArray", () => {
 	expect(ensureArray(null)).toEqual([]);
