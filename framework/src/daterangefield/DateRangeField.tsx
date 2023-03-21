@@ -16,10 +16,10 @@ import {
 import { format } from "../utils/date";
 import { noop } from "../utils/function";
 import { ensureNotNullOrUndefined } from "../utils/object";
-import style from "./DateField.module.css";
+import style from "./DateRangeField.module.css";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
-interface DateFieldProps extends Omit<InputProps, "onChange"> {
+interface DateRangeFieldProps extends Omit<InputProps, "onChange"> {
 	value?: string;
 	min?: string;
 	max?: string;
@@ -31,7 +31,7 @@ interface DateFieldProps extends Omit<InputProps, "onChange"> {
 	onChange?: (date: DateString | undefined) => void;
 }
 
-function DateField(props: DateFieldProps) {
+function DateRanngeField(props: DateRangeFieldProps) {
 	const {
 		className,
 		dayNameFormat,
@@ -43,7 +43,7 @@ function DateField(props: DateFieldProps) {
 		min: _min,
 		max: _max,
 		value: _value,
-		onChange = (noop as DateFieldProps["onChange"])!,
+		onChange = (noop as DateRangeFieldProps["onChange"])!,
 		...inputProps
 	} = props;
 
@@ -153,5 +153,5 @@ function DateField(props: DateFieldProps) {
 	);
 }
 
-const DateFieldMemo = memo(DateField);
-export { DateFieldMemo as DateField };
+const DateRangeFieldMemo = memo(DateRanngeField);
+export { DateRangeFieldMemo as DateRangeField };

@@ -4,8 +4,8 @@ import { classname } from "../utils/classname";
 import { DateString } from "../utils/date";
 import { noop } from "../utils/function";
 import { YearSelector } from "../year-selector";
+import style from "./Calendar.module.css";
 import { CalendarHeader } from "./CalendarHeader";
-import style from "./index.module.css";
 import {
 	ACTION_TYPE_SELECT_MONTH,
 	ACTION_TYPE_SELECT_YEAR,

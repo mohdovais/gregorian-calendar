@@ -1,4 +1,4 @@
-import { Button } from "../button";
+import { StockButton } from "../button";
 import { classname } from "../utils/classname";
 import { getDecade } from "../utils/date";
 import style from "./YearSelector.module.css";
@@ -26,14 +26,14 @@ function YearSelector(props: YearSelectorProps) {
 				const disabled = year < min || year > max;
 
 				return (
-					<Button
+					<StockButton
 						key={year}
 						className={classname(style.btn, className)}
 						disabled={disabled}
 						onClick={disabled ? undefined : () => onSelect(year)}
 					>
 						{year}
-					</Button>
+					</StockButton>
 				);
 			})}
 		</div>

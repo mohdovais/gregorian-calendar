@@ -1,4 +1,4 @@
-import { Button } from "../button";
+import { StockButton } from "../button";
 import { classname } from "../utils/classname";
 import { getMonthNames } from "../utils/date";
 import style from "./MonthSelector.module.css";
@@ -20,7 +20,7 @@ function MonthSelector(props: MonthSelectorProps) {
 	return (
 		<div className={style.wrapper}>
 			{months.map((month, i) => (
-				<Button
+				<StockButton
 					key={month}
 					role="option"
 					aria-selected={i === value || undefined}
@@ -32,7 +32,7 @@ function MonthSelector(props: MonthSelectorProps) {
 					onClick={() => onChange(i)}
 				>
 					{month}
-				</Button>
+				</StockButton>
 			))}
 		</div>
 	);

@@ -1,0 +1,32 @@
+.wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.mask {
+    border: 1px solid transparent;
+    padding: 5px 10px;
+    background-color: transparent;
+    color: #ccc;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    box-sizing: border-box;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    font-variant-numeric: tabular-nums lining-nums
+}
+
+.input {
+    caret-color: #1c1c1c;
+    font-family: monospace;
+    font-variant-numeric: tabular-nums lining-nums
+}
+
+.num {
+    color: #1c1c1c
+}

@@ -100,6 +100,7 @@ const config = soruces.flatMap((input) => {
 			plugins,
 			output: {
 				file: mjs,
+				sourcemap: false,
 			},
 		},
 		{
@@ -109,6 +110,7 @@ const config = soruces.flatMap((input) => {
 			output: {
 				file: cjs,
 				format: "cjs",
+				sourcemap: false,
 			},
 		},
 	];

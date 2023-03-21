@@ -4,25 +4,47 @@ interface InputProps
 		HTMLInputElement
 	> {
 	ref?: React.Ref<HTMLInputElement>;
+	customValidity?: (value: string) => string;
 }
 
 import { classname } from "../utils/classname";
+import { noop } from "../utils/function";
 import style from "./Input.module.css";
-import { forwardRef } from "react";
+import { forwardRef, useCallback } from "react";
 
 const Input = forwardRef(function Input(
 	props: InputProps,
 	ref?: React.Ref<HTMLInputElement>,
 ) {
-	const { type = "text", className, ...restInputProps } = props;
+	const {
+		type = "text",
+		className,
+		customValidity,
+		onChange = noop,
+		...restInputProps
+	} = props;
+
+	const changeHandler = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			var input = event.target;
+			if (typeof customValidity === "function") {
+				input.setCustomValidity(customValidity(event.target.value));
+			}
+			onChange(event);
+		},
+		[onChange],
+	);
+
 	return (
 		<input
 			type={type}
 			className={classname(style.field, className)}
 			{...restInputProps}
+			onChange={changeHandler}
 			ref={ref}
 		/>
 	);
 });
 
 export { Input };
+export type { InputProps };

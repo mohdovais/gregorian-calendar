@@ -1,4 +1,4 @@
-import { Button } from "../button";
+import { StockButton } from "../button";
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import {
@@ -176,7 +176,7 @@ function MonthRange(props: MonthRangeProps) {
 					]);
 
 					return (
-						<Button
+						<StockButton
 							key={dateString}
 							data-value={dateString}
 							className={className}
@@ -186,7 +186,7 @@ function MonthRange(props: MonthRangeProps) {
 							onMouseOut={isMouseEventDisabled ? undefined : onMouseOut}
 						>
 							{day.date}
-						</Button>
+						</StockButton>
 					);
 				})}
 			</div>

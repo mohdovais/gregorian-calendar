@@ -19,7 +19,7 @@
 
 .field:invalid {
     border-color: #900;
-
+    background-color: beige;
 }
 
 .field:invalid:focus {
