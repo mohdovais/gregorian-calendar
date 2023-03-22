@@ -112,7 +112,7 @@ function DateField(props: DateFieldProps) {
 			<input
 				type="hidden"
 				name={name}
-				value={value}
+				value={value == null ? "" : value}
 				ref={hiddenInputRef}
 				readOnly
 			/>
@@ -125,6 +125,8 @@ function DateField(props: DateFieldProps) {
 				autoComplete="off"
 				ref={refs.setReference}
 				onBlur={onBlur}
+				min={min}
+				max={max}
 			/>
 			<button
 				type="button"

@@ -19,8 +19,18 @@ import { ensureNotNullOrUndefined } from "../utils/object";
 import style from "./DateRangeField.module.css";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 
-interface DateRangeFieldProps extends Omit<InputProps, "onChange"> {
-	value?: string;
+type DateRange = {
+	start: string; //DateString;
+	end: string; //DateString;
+};
+
+type DateStringRange = {
+	start: DateString;
+	end: DateString;
+};
+
+interface DateRangeFieldProps extends Omit<InputProps, "onChange" | "value"> {
+	value?: DateRange;
 	min?: string;
 	max?: string;
 	locale?: string;
@@ -28,7 +38,7 @@ interface DateRangeFieldProps extends Omit<InputProps, "onChange"> {
 	disabledDates?: CalendarProps["disabledDates"];
 	disabledDays?: CalendarProps["disabledDays"];
 	dayNameFormat?: CalendarProps["dayNameFormat"];
-	onChange?: (date: DateString | undefined) => void;
+	onChange?: (date: DateStringRange | undefined) => void;
 }
 
 function DateRanngeField(props: DateRangeFieldProps) {
