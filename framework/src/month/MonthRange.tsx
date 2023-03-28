@@ -194,5 +194,5 @@ function MonthRange(props: MonthRangeProps) {
 	);
 }
 
-export { MonthRange };
+export { MonthRange, ensureDateRange };
 export type { MonthRangeProps };

@@ -1,3 +1,5 @@
 const noop = Function.prototype;
 
-export { noop };
+const identityFn = <T>(x: T) => x;
+
+export { noop, identityFn };
