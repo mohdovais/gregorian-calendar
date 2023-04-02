@@ -1,10 +1,14 @@
 const emptyArray = Object.freeze([]);
 
-function ensureArray<T>(value: T | T[] | null | undefined): T[] {
+function ensureArray<T>(value: T | T[] | null | undefined, copy = false): T[] {
 	return value == null
-		? (emptyArray as unknown as T[])
+		? copy
+			? []
+			: (emptyArray as unknown as T[])
 		: Array.isArray(value)
-		? value
+		? copy
+			? value.slice()
+			: value
 		: [value];
 }
 

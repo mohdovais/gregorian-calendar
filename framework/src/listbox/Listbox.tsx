@@ -7,14 +7,17 @@ import {
 	GroupOrOption,
 	Option,
 	OptGroup,
-	selectMultiple,
+	updateMultipleSelection,
 	createItems,
 	PrivateGroupOrOption,
-	findNextOption,
+	findNextFocusableOption,
 	PrivateOption,
-	findPreviousOption,
+	findPrevFocusableOption,
 	selectAll,
 	NODE_TYPE_OPTION,
+	findFirstFoucsableOption,
+	findOptionByValue,
+	useStateRef,
 } from "./utils";
 
 const TRUE = true;
@@ -103,12 +106,11 @@ function renderTree<T, U>(
 							: () =>
 									onSelect(
 										multiple
-											? selectMultiple(selection, node.value)
+											? updateMultipleSelection(selection, node.value)
 											: node.value,
 									)
 					}
 					onKeyDown={undefined}
-					tabIndex={-1}
 				>
 					{typeof ItemTpl === "function" ? <ItemTpl item={node} /> : node.label}
 				</li>,
@@ -143,8 +145,12 @@ function renderTree<T, U>(
 }
 
 type LocalState<ValueType> = {
+	items: PrivateGroupOrOption<ValueType>[];
 	activeNode?: PrivateOption<ValueType>;
 	selection: ValueType[];
+	multiple: boolean;
+	onSelect: CallableFunction;
+	onActiveDescendantChange: CallableFunction;
 };
 
 const preventEvent = (event: React.KeyboardEvent<Element>) => {
@@ -172,24 +178,35 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 		PrivateOption<ValueType> | undefined
 	>();
 
-	const activeNodesRef = useRef<LocalState<ValueType>>({
-		selection,
-	});
-	activeNodesRef.current = { activeNode, selection };
-
 	const items = useMemo(
 		() => createItems(props.items, disabled === true),
 		[props.items, disabled],
 	);
 
+	const stateRef = useStateRef<LocalState<ValueType>>({
+		activeNode,
+		selection,
+		items,
+		multiple: multiple === true,
+		onSelect,
+		onActiveDescendantChange,
+	});
+
 	const onKeyDown = useCallback(
 		(event: React.KeyboardEvent<HTMLUListElement>) => {
-			const { activeNode, selection } = activeNodesRef.current;
+			const {
+				activeNode,
+				selection,
+				items,
+				multiple,
+				onActiveDescendantChange,
+				onSelect,
+			} = stateRef.current;
 
 			switch (event.key) {
 				case "ArrowDown": {
 					preventEvent(event);
-					const nextNode = findNextOption(items, activeNode);
+					const nextNode = findNextFocusableOption(items, activeNode);
 					setActiveNode((state) => (nextNode == null ? state : nextNode));
 
 					if (nextNode != null) {
@@ -200,7 +217,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 				}
 				case "ArrowUp": {
 					preventEvent(event);
-					const nextNode = findPreviousOption(items, activeNode);
+					const nextNode = findPrevFocusableOption(items, activeNode);
 					setActiveNode((state) => (nextNode == null ? state : nextNode));
 
 					if (nextNode != null) {
@@ -221,15 +238,27 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 						preventEvent(event);
 						onSelect(
 							multiple
-								? selectMultiple(selection, activeNode.value)
+								? updateMultipleSelection(selection, activeNode.value)
 								: activeNode.value,
 						);
 					}
 				}
 			}
 		},
-		[items, multiple, onSelect, onActiveDescendantChange],
+		[],
 	);
+
+	const onFocus = useCallback(() => {
+		const { activeNode, selection, items } = stateRef.current;
+		let toBeFocused = activeNode;
+		if (activeNode == null && selection[0] != null) {
+			toBeFocused = findOptionByValue(items, selection[0]);
+		}
+
+		setActiveNode(
+			toBeFocused == null ? findFirstFoucsableOption(items) : toBeFocused,
+		);
+	}, []);
 
 	const onBlur = useCallback(() => {
 		setActiveNode(undefined);
@@ -245,6 +274,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			aria-multiselectable={multiple || undefined}
 			tabIndex={0}
 			onKeyDown={onKeyDown}
+			onFocus={onFocus}
 			onBlur={onBlur}
 			ref={ref}
 		>

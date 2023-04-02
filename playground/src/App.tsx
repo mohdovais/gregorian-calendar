@@ -16,7 +16,7 @@ const customValidity = (str: string) => {
 function App() {
 	const [value, setValue] = useState<string | undefined>("2023-01-01");
 	const [v1, setV1] = useState("orange");
-	const [multipleValues, setMultipleValues] = useState<string[]>([]);
+	const [multipleValues, setMultipleValues] = useState<string[]>(["clean-by"]);
 	return (
 		<form>
 			<br />
@@ -46,7 +46,6 @@ function App() {
 				selection={multipleValues}
 				onSelect={setMultipleValues}
 			/>
-			<Listbox items={menu} selection={v1} onSelect={setV1} />
 			<MenuButton items={menu} onSelect={(menu) => console.log(menu)}>
 				File
 			</MenuButton>
@@ -55,3 +54,8 @@ function App() {
 }
 
 export { App };
+
+/*
+ 
+			<Listbox items={menu} selection={v1} onSelect={setV1} />
+ */

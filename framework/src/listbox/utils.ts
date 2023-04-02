@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { createRandomId } from "../hooks/useId";
 import { ensureArray } from "../utils/array";
 import { hasKey } from "../utils/object";
@@ -52,7 +53,63 @@ function getKeyForObject(obj: object, prefix?: string): string {
 	}
 }
 
-function selectMultiple<T>(currentSelections: T[], newSelection: T): T[] {
+function useStateRef<T>(state: T) {
+	const stateRef = useRef(state);
+	stateRef.current = state;
+	return stateRef;
+}
+
+function doFindOption<T>(
+	options: PrivateGroupOrOption<T>[],
+	callback: (
+		item: PrivateOption<T>,
+		array: Readonly<PrivateGroupOrOption<T>[]>,
+	) => unknown,
+	reverse = false,
+): PrivateOption<T> | undefined {
+	const items = reverse
+		? ensureArray(options, true).reverse()
+		: ensureArray(options);
+
+	for (let i = 0, length = items.length; i < length; i++) {
+		const optionOrGroup = items[i];
+		if (optionOrGroup.type === NODE_TYPE_OPTION) {
+			if (callback(optionOrGroup, items) === true) {
+				return optionOrGroup;
+			}
+		} else {
+			const result = doFindOption(optionOrGroup.items, callback, reverse);
+			if (result != null) {
+				return result;
+			}
+		}
+	}
+}
+
+function findOption<T>(
+	options: PrivateGroupOrOption<T>[],
+	callback: (
+		item: PrivateOption<T>,
+		array: Readonly<PrivateGroupOrOption<T>[]>,
+	) => unknown,
+) {
+	return doFindOption(options, callback);
+}
+
+function findOptionReverse<T>(
+	options: PrivateGroupOrOption<T>[],
+	callback: (
+		item: PrivateOption<T>,
+		array: Readonly<PrivateGroupOrOption<T>[]>,
+	) => unknown,
+) {
+	return doFindOption(options, callback, true);
+}
+
+function updateMultipleSelection<T>(
+	currentSelections: T[],
+	newSelection: T,
+): T[] {
 	const result: T[] = [];
 	let removed = false;
 	currentSelections.forEach((oldSelection) => {
@@ -103,96 +160,6 @@ function createItems<T>(
 	return items;
 }
 
-function _doFindNextOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentActiveNode: PrivateOption<T> | undefined,
-	foundCurrentNode = false,
-): { node: PrivateOption<T> | undefined; found: boolean } {
-	const noCurrentActiveNode = currentActiveNode == null;
-
-	for (let i = 0, length = options.length; i < length; i++) {
-		const option = options[i];
-
-		if (option.type === NODE_TYPE_OPTION && !option.disabled) {
-			if (noCurrentActiveNode || foundCurrentNode) {
-				return { node: option, found: foundCurrentNode };
-			}
-
-			if (option === currentActiveNode) {
-				foundCurrentNode = true;
-			}
-		}
-
-		if (option.type === NODE_TYPE_GROUP && !option.disabled) {
-			const group = _doFindNextOption(
-				option.items,
-				currentActiveNode,
-				foundCurrentNode,
-			);
-			foundCurrentNode = group.found;
-			if (group.node != null) {
-				return group;
-			}
-		}
-	}
-
-	return { node: undefined, found: foundCurrentNode };
-}
-
-function findNextOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentActiveNode: PrivateOption<T> | undefined,
-): PrivateOption<T> | undefined {
-	return (
-		_doFindNextOption(options, currentActiveNode).node || currentActiveNode
-	);
-}
-
-function _doFindPreviousOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentActiveNode: PrivateOption<T> | undefined,
-	foundCurrentNode = false,
-): { node: PrivateOption<T> | undefined; found: boolean } {
-	const noCurrentActiveNode = currentActiveNode == null;
-
-	for (let i = options.length - 1; i >= 0; i--) {
-		const option = options[i];
-
-		if (option.type === NODE_TYPE_OPTION && !option.disabled) {
-			if (noCurrentActiveNode || foundCurrentNode) {
-				return { node: option, found: foundCurrentNode };
-			}
-
-			if (option === currentActiveNode) {
-				foundCurrentNode = true;
-			}
-		}
-
-		if (option.type === NODE_TYPE_GROUP && !option.disabled) {
-			const group = _doFindPreviousOption(
-				option.items,
-				currentActiveNode,
-				foundCurrentNode,
-			);
-			foundCurrentNode = group.found;
-			if (group.node != null) {
-				return group;
-			}
-		}
-	}
-
-	return { node: undefined, found: foundCurrentNode };
-}
-
-function findPreviousOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentActiveNode: PrivateOption<T> | undefined,
-): PrivateOption<T> | undefined {
-	return (
-		_doFindPreviousOption(options, currentActiveNode).node || currentActiveNode
-	);
-}
-
 function selectAll<T>(options: PrivateGroupOrOption<T>[]) {
 	let result: T[] = [];
 	options.forEach((node) => {
@@ -209,14 +176,58 @@ function selectAll<T>(options: PrivateGroupOrOption<T>[]) {
 	return result;
 }
 
+function findFirstFoucsableOption<T>(options: PrivateGroupOrOption<T>[]) {
+	return findOption(options, (option) => {
+		if (!option.disabled) {
+			return true;
+		}
+	});
+}
+
+function findOptionByValue<T>(options: PrivateGroupOrOption<T>[], value: T) {
+	return findOption(options, (option) => {
+		if (option.value === value) {
+			return true;
+		}
+	});
+}
+
+function findNextFocusableOption<T>(
+	options: PrivateGroupOrOption<T>[],
+	currentOption: PrivateOption<T> | undefined,
+	reverse = false,
+) {
+	const iterator = reverse ? findOptionReverse : findOption;
+	let found = false;
+	const nextOption = iterator(options, (item) => {
+		if (!item.disabled && (found || currentOption === undefined)) {
+			return true;
+		}
+		if (item === currentOption) {
+			found = true;
+		}
+	});
+	return found ? nextOption : currentOption;
+}
+
+function findPrevFocusableOption<T>(
+	options: PrivateGroupOrOption<T>[],
+	currentOption: PrivateOption<T> | undefined,
+) {
+	return findNextFocusableOption(options, currentOption, true);
+}
+
 export {
-	selectMultiple,
+	updateMultipleSelection,
 	createItems,
-	findNextOption,
-	findPreviousOption,
+	findNextFocusableOption,
+	findPrevFocusableOption,
+	findFirstFoucsableOption,
+	findOptionByValue,
 	selectAll,
 	NODE_TYPE_GROUP,
 	NODE_TYPE_OPTION,
+	useStateRef,
 };
 export type {
 	Option,

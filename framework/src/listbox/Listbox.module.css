@@ -44,7 +44,7 @@
 
 
 .listitem:not(.disabled):hover,
-.active {
+.list:focus-visible .active {
     background-color: rgb(115, 160, 252);
     color: #fff;
 }
