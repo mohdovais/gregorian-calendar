@@ -1,3 +1,4 @@
+import { StockButton } from "../button";
 import { Calendar, CalendarProps } from "../calendar";
 import commonStyle from "../css/common.module.css";
 import { usePickerPosition } from "../hooks/usePickerPosition";
@@ -43,7 +44,7 @@ function DateField(props: DateFieldProps) {
 		min: _min,
 		max: _max,
 		value: _value,
-		onChange = (noop as DateFieldProps["onChange"])!,
+		onChange = noop as Required<DateFieldProps>["onChange"],
 		...inputProps
 	} = props;
 
@@ -89,7 +90,7 @@ function DateField(props: DateFieldProps) {
 	);
 
 	useEffect(() => {
-		var input = refs.reference.current as HTMLInputElement;
+		const input = refs.reference.current as HTMLInputElement;
 		if (input != null) {
 			input.value = format(value, locale);
 			self.current = { value: value };
@@ -128,13 +129,13 @@ function DateField(props: DateFieldProps) {
 				min={min}
 				max={max}
 			/>
-			<button
-				type="button"
-				className={classname(style.trigger, isOpen && style.active)}
+			<StockButton
+				className={style.trigger}
+				active={isOpen}
 				onClick={() => setIsOpen((isOpen) => !isOpen)}
 			>
 				<ClarityCalendarLine width={16} height={16} />
-			</button>
+			</StockButton>
 			{isOpen ? (
 				<Calendar
 					ref={refs.setFloating}

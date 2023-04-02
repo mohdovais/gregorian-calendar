@@ -1,6 +1,6 @@
 .menu {
     display: inline-block;
-    background-color: rgba(239, 236, 231, .6);
+    background-color: #f5f4f1;
     border: 1px solid rgb(198, 198, 198);
     box-shadow: 0 5px 10px 0 rgba(0, 0, 0, 0.1),
         5px 5px 10px 0 rgba(0, 0, 0, 0.05),
@@ -17,5 +17,3 @@
     padding-right: 1rem;
     white-space: nowrap;
 }
-
-.shortcut {}

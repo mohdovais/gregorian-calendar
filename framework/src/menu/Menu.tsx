@@ -1,16 +1,19 @@
+import { useState } from "react";
 import { CalrityAngleRight } from "../icons/ClarityAngleRight";
-import { OptGroup, Option, OptionList } from "../option-list";
+import { OptGroup, Option, Listbox } from "../listbox";
+import { Portal } from "../portal";
 import { classname } from "../utils/classname";
 import { hasKey } from "../utils/object";
 import css from "./Menu.module.css";
+import { useFloating } from "@floating-ui/react-dom";
 
 type MenuItem<T> = Option<T> & {
 	more?: MenuGroupOrItem<T>[];
 	keys?: string;
 };
 
-type MenuGroup<T> = Omit<OptGroup<T>, "options"> & {
-	options: MenuItem<T>[];
+type MenuGroup<T> = Omit<OptGroup<T>, "items"> & {
+	items: MenuItem<T>[];
 };
 
 type MenuGroupOrItem<T> = MenuItem<T> | MenuGroup<T>;
@@ -21,35 +24,71 @@ interface MenuProps<T> {
 	style?: React.CSSProperties;
 
 	items: MenuGroupOrItem<T>[];
-	onMouseOver?: (option: T) => void;
-	onClick?: (option: T) => void;
+	onSelect?: (option: T) => void;
 }
 
-function optionTpl<T>(node: MenuItem<T>) {
+type OptionTplProps<T> = {
+	item: MenuItem<T>;
+};
+
+function OptionTpl<T>(props: OptionTplProps<T>) {
+	const node = props.item;
+	const more = hasKey(node, "more");
+	const [open, setOpen] = useState(false);
+
+	const { x, y, strategy, refs } = useFloating({
+		open,
+		placement: "right",
+	});
+
 	return (
-		<div className={css.wrapper}>
+		<div
+			className={css.wrapper}
+			onMouseOver={() => setOpen(true)}
+			onMouseOut={() => setOpen(false)}
+			onFocus={() => setOpen(true)}
+			onBlur={() => setOpen(false)}
+			ref={refs.setReference}
+		>
 			<div className={css.text}>{node.label}</div>
-			{hasKey(node, "more") ? (
+			{more ? (
 				<CalrityAngleRight />
 			) : hasKey(node, "keys") ? (
 				<div>{node.keys as React.ReactNode}</div>
+			) : null}
+
+			{more && open ? (
+				<Portal>
+					<div
+						ref={refs.setFloating}
+						style={{
+							position: strategy,
+							top: y ?? 0,
+							left: x ?? 0,
+						}}
+					>
+						{/* rome-ignore lint/style/noNonNullAssertion: verified */}
+						<Menu items={node.more!} />
+					</div>
+				</Portal>
 			) : null}
 		</div>
 	);
 }
 
 function Menu<T>(props: MenuProps<T>) {
-	const { className, style, onClick, onMouseOver, items } = props;
+	const { id, className, style, onSelect, items } = props;
 
 	return (
-		<OptionList
+		<Listbox
 			role="menu"
+			itemRole="menuitem"
+			id={id}
 			className={classname(css.menu, className)}
 			style={style}
-			options={items}
-			optionTpl={optionTpl}
-			onSelection={onClick}
-			onMouseOver={onMouseOver}
+			items={items}
+			ItemTpl={OptionTpl}
+			onSelect={onSelect}
 		/>
 	);
 }

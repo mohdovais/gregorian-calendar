@@ -1,7 +1,7 @@
 import { classname } from "../utils/classname";
 import style from "./Button.module.css";
-import { StockButton } from "./StockButton";
-import { ReactNode } from "react";
+import { StockButton, StockButtonProps } from "./StockButton";
+import { ReactNode, forwardRef } from "react";
 
 const COLOR_PRIMARY = "primary";
 const COLOR_NEUTRAL = "neutral";
@@ -29,11 +29,7 @@ type UI =
 	| typeof UI_OUTLINED
 	| typeof UI_SOLID;
 
-interface ButtonProps
-	extends React.DetailedHTMLProps<
-		React.ButtonHTMLAttributes<HTMLButtonElement>,
-		HTMLButtonElement
-	> {
+interface ButtonProps extends StockButtonProps {
 	color?: Color;
 	ui?: UI;
 	icon?: ReactNode;
@@ -69,7 +65,7 @@ const getUiClassName = (ui?: UI) => {
 	}
 };
 
-function Button(props: ButtonProps) {
+function Button(props: ButtonProps, ref?: React.LegacyRef<HTMLButtonElement>) {
 	const {
 		ui,
 		color,
@@ -89,6 +85,7 @@ function Button(props: ButtonProps) {
 				className,
 			)}
 			type={type}
+			ref={ref}
 		>
 			<span className={style.icon}>{icon}</span>
 			<span className={style.text}>{children}</span>
@@ -96,5 +93,7 @@ function Button(props: ButtonProps) {
 	);
 }
 
-export { Button };
+const ButtonWithRef = forwardRef(Button) as typeof Button;
+
+export { ButtonWithRef as Button };
 export type { ButtonProps };

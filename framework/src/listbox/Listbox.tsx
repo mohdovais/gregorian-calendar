@@ -1,179 +1,260 @@
-import { createRandomId, useEnsuredId, useId } from "../hooks/useId";
-import { getNextItem, getPreviousItem } from "../utils/array";
+import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
+import { noop } from "../utils/function";
 import css from "./Listbox.module.css";
-import { initializer, store } from "./store";
 import {
-	useCallback,
-	useEffect,
-	useMemo,
-	useReducer,
-	useRef,
-	useState,
-} from "react";
+	GroupOrOption,
+	Option,
+	OptGroup,
+	selectMultiple,
+	createItems,
+	PrivateGroupOrOption,
+	findNextOption,
+	PrivateOption,
+	findPreviousOption,
+	selectAll,
+	NODE_TYPE_OPTION,
+} from "./utils";
 
-interface ListboxProps<T> {
+const TRUE = true;
+
+type OptionTplProps<T> = {
+	item: Option<T>;
+};
+
+interface OptionListCommonProps<T> {
 	id?: string;
 	className?: string;
 	style?: React.CSSProperties;
-	options: T[];
+
+	items: GroupOrOption<T>[];
+	ItemTpl?: (props: OptionTplProps<T>) => JSX.Element;
+	role?: React.AriaRole;
+	itemRole?: React.AriaRole;
+
+	groupClassName?: string;
 	optionClassName?: string;
-	value?: T;
-	displayField?: keyof T;
-	displayTpl?: (value: T) => JSX.Element | string;
-	onChange?: (newValue: T, oldValue: T, props: ListboxProps<T>) => void;
-	onSelection?: (selection: T, props: ListboxProps<T>) => void;
+	disabled?: boolean;
+
+	onActiveDescendantChange?: (activeDescendant: string) => void;
 }
 
-type Item = { id: string; display: string | JSX.Element };
-type Self = {
-	activeDescendant: string;
-	items: Item[];
+interface OptionListSingleProps<T> extends OptionListCommonProps<T> {
+	selection?: T;
+	onSelect?: (newSelection: T) => void;
+}
+
+interface OptionListMultipleProps<T> extends OptionListCommonProps<T> {
+	selection?: T[];
+	onSelect?: (newSelection: T[]) => void;
+}
+
+type OptionListProps<T, U> = U extends typeof TRUE
+	? OptionListMultipleProps<T>
+	: OptionListSingleProps<T>;
+
+type ListboxProps<ValueType, IsMultiple> = {
+	multiple?: IsMultiple;
+} & OptionListProps<ValueType, IsMultiple>;
+
+function renderTree<T, U>(
+	options: PrivateGroupOrOption<T>[],
+	props: ListboxProps<T, U>,
+	activeNode?: PrivateOption<T>,
+) {
+	const nodes: React.ReactNode[] = [];
+	const {
+		itemRole = "option",
+		multiple = false,
+		onSelect = noop,
+		ItemTpl,
+	} = props;
+	const selection = ensureArray(props.selection);
+	const singleValue = selection[0];
+
+	ensureArray(options).forEach((node) => {
+		const isDisabled = node.disabled;
+
+		if (node.type === NODE_TYPE_OPTION) {
+			const isSelected = multiple
+				? selection.includes(node.value)
+				: node.value === singleValue;
+
+			const isActive = !isDisabled && activeNode === node;
+
+			nodes.push(
+				<li
+					key={node.id}
+					id={node.id}
+					className={classname(
+						css.listitem,
+						isDisabled && css.disabled,
+						isSelected && css.selected,
+						isActive && css.active,
+						props.optionClassName,
+					)}
+					role={itemRole}
+					aria-disabled={isDisabled || undefined}
+					aria-selected={isDisabled ? undefined : isSelected}
+					onClick={
+						isDisabled
+							? undefined
+							: () =>
+									onSelect(
+										multiple
+											? selectMultiple(selection, node.value)
+											: node.value,
+									)
+					}
+					onKeyDown={undefined}
+					tabIndex={-1}
+				>
+					{typeof ItemTpl === "function" ? <ItemTpl item={node} /> : node.label}
+				</li>,
+			);
+		} else {
+			const key = node.id;
+			nodes.push(
+				<li key={key}>
+					{node.label === "" ? null : (
+						<div
+							className={css.groupTitle}
+							role="presentation"
+							aria-owns={key}
+							aria-expanded="true"
+						>
+							{node.label}
+						</div>
+					)}
+					<ul
+						id={key}
+						role="group"
+						className={classname(css.group, props.groupClassName)}
+					>
+						{renderTree<T, U>(node.items, props, activeNode)}
+					</ul>
+				</li>,
+			);
+		}
+	});
+
+	return nodes;
+}
+
+type LocalState<ValueType> = {
+	activeNode?: PrivateOption<ValueType>;
+	selection: ValueType[];
 };
 
-function Listbox<T>(props: ListboxProps<T>) {
+const preventEvent = (event: React.KeyboardEvent<Element>) => {
+	event.preventDefault();
+	event.stopPropagation();
+};
+
+function Listbox<ValueType, IsMultiple extends boolean>(
+	props: ListboxProps<ValueType, IsMultiple>,
+	ref?: React.Ref<HTMLUListElement>,
+) {
 	const {
-		options,
+		role = "listbox",
+		id,
 		className,
 		style,
-		displayField,
-		displayTpl,
-		onChange,
-		onSelection,
-		value,
-		optionClassName,
+		multiple,
+		disabled,
+		onSelect = noop,
+		onActiveDescendantChange = noop,
 	} = props;
 
-	const id = useEnsuredId("listbox-", props.id);
-	const [activeDescendant, setActiveDescendant] = useState("");
+	const selection = ensureArray(props.selection);
+	const [activeNode, setActiveNode] = useState<
+		PrivateOption<ValueType> | undefined
+	>();
 
-	const effectiveDisplayTpl = useCallback(
-		(value: T) => {
-			return typeof displayTpl === "function"
-				? displayTpl(value)
-				: displayField == null
-				? typeof value === "object"
-					? JSON.stringify(value)
-					: String(value)
-				: String(value[displayField]);
-		},
-		[displayTpl, displayField],
+	const activeNodesRef = useRef<LocalState<ValueType>>({
+		selection,
+	});
+	activeNodesRef.current = { activeNode, selection };
+
+	const items = useMemo(
+		() => createItems(props.items, disabled === true),
+		[props.items, disabled],
 	);
 
-	const items = useMemo(() => {
-		return options.map((item) => ({
-			id: id + "-" + createRandomId("option-"),
-			value: item,
-			display: effectiveDisplayTpl(item),
-		}));
-	}, [options, effectiveDisplayTpl, id]);
+	const onKeyDown = useCallback(
+		(event: React.KeyboardEvent<HTMLUListElement>) => {
+			const { activeNode, selection } = activeNodesRef.current;
 
-	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent<HTMLDivElement>) => {
-			var key = event.key;
-			const { activeDescendant, items } = selfRef.current;
-			var currentItem =
-				items.find((item) => item.id === activeDescendant) || items[0];
-			var nextItem = currentItem;
+			switch (event.key) {
+				case "ArrowDown": {
+					preventEvent(event);
+					const nextNode = findNextOption(items, activeNode);
+					setActiveNode((state) => (nextNode == null ? state : nextNode));
 
-			if (!currentItem) {
-				return;
-			}
-
-			switch (key) {
-				case "ArrowUp":
-					if (activeDescendant === "") {
-						setActiveDescendant(currentItem.id);
-						break;
+					if (nextNode != null) {
+						onActiveDescendantChange(nextNode.id);
 					}
-					nextItem = getPreviousItem(items, currentItem)!;
-					event.preventDefault();
-					setActiveDescendant(nextItem.id);
-					break;
 
-				case "ArrowDown":
-					if (activeDescendant === "") {
-						setActiveDescendant(currentItem.id);
-						break;
+					break;
+				}
+				case "ArrowUp": {
+					preventEvent(event);
+					const nextNode = findPreviousOption(items, activeNode);
+					setActiveNode((state) => (nextNode == null ? state : nextNode));
+
+					if (nextNode != null) {
+						onActiveDescendantChange(nextNode.id);
 					}
-					nextItem = getNextItem(items, currentItem)!;
-					event.preventDefault();
-					setActiveDescendant(nextItem.id);
 
 					break;
-				case "Home":
-					event.preventDefault();
-					setActiveDescendant(items[0].id);
-
-					break;
-				case "End":
-					event.preventDefault();
-					setActiveDescendant(items[items.length - 1].id);
-
-					break;
+				}
+				case "a":
+				case "A": {
+					if (multiple && event.ctrlKey) {
+						preventEvent(event);
+						onSelect(selectAll(items));
+					}
+				}
+				case "Enter": {
+					if (activeNode != null) {
+						preventEvent(event);
+						onSelect(
+							multiple
+								? selectMultiple(selection, activeNode.value)
+								: activeNode.value,
+						);
+					}
+				}
 			}
 		},
-		[],
+		[items, multiple, onSelect, onActiveDescendantChange],
 	);
 
-	useEffect(() => {
-		const el = document.getElementById(activeDescendant);
-		if (el !== null) {
-			el.scrollIntoView({ behavior: "smooth" });
-		}
-	}, [activeDescendant]);
-
-	useEffect(() => {
-		const id = items.find((x) => x.value === value)?.id;
-		console.log(id);
-
-		if (id != null) {
-			const el = document.getElementById(id);
-			if (el !== null) {
-				el.scrollIntoView({ behavior: "smooth" });
-			}
-		}
-	}, [items, value]);
-
-	const selfRef = useRef<Self>({ activeDescendant: "", items: [] });
-	selfRef.current.activeDescendant = activeDescendant;
-	selfRef.current.items = items;
+	const onBlur = useCallback(() => {
+		setActiveNode(undefined);
+	}, []);
 
 	return (
-		<div
+		<ul
 			id={id}
-			className={classname(css.listbox, className)}
+			className={classname(css.list, className)}
 			style={style}
-			role="listbox"
+			role={role}
+			aria-activedescendant={activeNode == null ? "" : activeNode.id}
+			aria-multiselectable={multiple || undefined}
 			tabIndex={0}
-			aria-labelledby=""
-			aria-activedescendant={activeDescendant}
-			aria-multiselectable="false"
-			onFocus={undefined}
-			onKeyDown={handleKeyDown}
+			onKeyDown={onKeyDown}
+			onBlur={onBlur}
+			ref={ref}
 		>
-			{items.map((item) => {
-				return (
-					<div
-						key={item.id}
-						role="option"
-						id={item.id}
-						className={classname(
-							css.option,
-							optionClassName,
-							item.id === activeDescendant && css.focused,
-							item.value === value && css.selected,
-						)}
-						aria-selected={item.value === value || undefined}
-						onClick={undefined}
-						onKeyDown={undefined}
-					>
-						{item.display}
-					</div>
-				);
-			})}
-		</div>
+			{renderTree<ValueType, IsMultiple>(items, props, activeNode)}
+		</ul>
 	);
 }
 
-export { Listbox };
+const ListboxWithRef = forwardRef(Listbox) as typeof Listbox;
+
+export { ListboxWithRef as Listbox };
+
+export type { Option, OptGroup, GroupOrOption, ListboxProps };

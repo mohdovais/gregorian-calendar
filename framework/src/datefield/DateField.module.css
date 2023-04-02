@@ -12,16 +12,7 @@
     right: 2px;
     top: 2px;
     bottom: 2px;
-    background-color: transparent;
+    padding: 0;
     border: 0;
     width: 28px;
-}
-
-.trigger:hover {
-    background-color: #e6e6e6;
-}
-
-.trigger.active {
-    background-color: #444;
-    color: #fff;
 }

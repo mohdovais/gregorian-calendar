@@ -26,9 +26,9 @@ const Input = forwardRef(function Input(
 
 	const changeHandler = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			var input = event.target;
+			const input = event.target;
 			if (typeof customValidity === "function") {
-				input.setCustomValidity(customValidity(event.target.value));
+				input.setCustomValidity(customValidity(input.value));
 			}
 			onChange(event);
 		},

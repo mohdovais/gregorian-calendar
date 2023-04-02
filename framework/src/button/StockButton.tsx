@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { classname } from "../utils/classname";
 import style from "./StockButton.module.css";
 
@@ -5,20 +6,28 @@ interface StockButtonProps
 	extends React.DetailedHTMLProps<
 		React.ButtonHTMLAttributes<HTMLButtonElement>,
 		HTMLButtonElement
-	> {}
+	> {
+	active?: boolean;
+}
 
-function StockButton(props: StockButtonProps) {
-	const { children, className, type = "button", ...restProps } = props;
+function StockButton(
+	props: StockButtonProps,
+	ref?: React.LegacyRef<HTMLButtonElement>,
+) {
+	const { active, children, className, type = "button", ...restProps } = props;
 	return (
 		<button
 			{...restProps}
-			className={classname(style.btn, className)}
+			className={classname(style.btn, active && style.active, className)}
 			type={type}
+			ref={ref}
 		>
 			{children}
 		</button>
 	);
 }
 
-export { StockButton };
+const StockButtonWithRef = forwardRef(StockButton) as typeof StockButton;
+
+export { StockButtonWithRef as StockButton };
 export type { StockButtonProps };

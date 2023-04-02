@@ -22,7 +22,7 @@ function copy<T>(object: T, props: Partial<T>): T {
 }
 
 function hasKey<T>(obj: T, propName: Key): propName is keyof T {
-	return Object.prototype.hasOwnProperty.call(obj, propName);
+	return obj != null && Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
 function typeOf(subject: unknown) {
