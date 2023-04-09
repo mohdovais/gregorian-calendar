@@ -1,38 +1,38 @@
-import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useState } from "react";
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
-import { noop } from "../utils/function";
+import { isFunction, noop } from "../utils/function";
 import css from "./Listbox.module.css";
 import {
-	GroupOrOption,
-	Option,
-	OptGroup,
+	ListGroupOrItem,
+	ListItem,
+	ListGroup,
 	updateMultipleSelection,
 	createItems,
-	PrivateGroupOrOption,
-	findNextFocusableOption,
-	PrivateOption,
-	findPrevFocusableOption,
+	ListGroupOrItemConfig,
+	findNextFocusableItem,
+	ListItemConfig,
+	findPrevFocusableItem,
 	selectAll,
-	NODE_TYPE_OPTION,
-	findFirstFoucsableOption,
-	findOptionByValue,
+	findFirstFoucsableItem,
+	findItemByValue,
 	useStateRef,
+	preventEvent,
 } from "./utils";
+import { useEnsuredId } from "../hooks/useId";
+import { ListboxItemProps } from "./ListboxItem";
+import { renderTree } from "./tree";
 
 const TRUE = true;
 
-type OptionTplProps<T> = {
-	item: Option<T>;
-};
-
-interface OptionListCommonProps<T> {
+interface ListboxCommonProps<T> {
 	id?: string;
 	className?: string;
 	style?: React.CSSProperties;
+	show?: boolean;
+	ref?: React.Ref<HTMLUListElement>;
 
-	items: GroupOrOption<T>[];
-	ItemTpl?: (props: OptionTplProps<T>) => JSX.Element;
+	items: ListGroupOrItem<T>[];
 	role?: React.AriaRole;
 	itemRole?: React.AriaRole;
 
@@ -40,122 +40,39 @@ interface OptionListCommonProps<T> {
 	optionClassName?: string;
 	disabled?: boolean;
 
-	onActiveDescendantChange?: (activeDescendant: string) => void;
+	onActiveDescendantChange?: (
+		activeDescendant: ListItem<T> | undefined,
+	) => void;
+	onKeyDown?: React.KeyboardEventHandler<HTMLUListElement>;
 }
 
-interface OptionListSingleProps<T> extends OptionListCommonProps<T> {
+interface ListboxSingleProps<T> extends ListboxCommonProps<T> {
 	selection?: T;
 	onSelect?: (newSelection: T) => void;
 }
 
-interface OptionListMultipleProps<T> extends OptionListCommonProps<T> {
+interface ListboxMultipleProps<T> extends ListboxCommonProps<T> {
 	selection?: T[];
 	onSelect?: (newSelection: T[]) => void;
 }
 
-type OptionListProps<T, U> = U extends typeof TRUE
-	? OptionListMultipleProps<T>
-	: OptionListSingleProps<T>;
+type ListboxConditionalProps<ValueType, IsMultiple> =
+	IsMultiple extends typeof TRUE
+		? ListboxMultipleProps<ValueType>
+		: ListboxSingleProps<ValueType>;
 
 type ListboxProps<ValueType, IsMultiple> = {
 	multiple?: IsMultiple;
-} & OptionListProps<ValueType, IsMultiple>;
-
-function renderTree<T, U>(
-	options: PrivateGroupOrOption<T>[],
-	props: ListboxProps<T, U>,
-	activeNode?: PrivateOption<T>,
-) {
-	const nodes: React.ReactNode[] = [];
-	const {
-		itemRole = "option",
-		multiple = false,
-		onSelect = noop,
-		ItemTpl,
-	} = props;
-	const selection = ensureArray(props.selection);
-	const singleValue = selection[0];
-
-	ensureArray(options).forEach((node) => {
-		const isDisabled = node.disabled;
-
-		if (node.type === NODE_TYPE_OPTION) {
-			const isSelected = multiple
-				? selection.includes(node.value)
-				: node.value === singleValue;
-
-			const isActive = !isDisabled && activeNode === node;
-
-			nodes.push(
-				<li
-					key={node.id}
-					id={node.id}
-					className={classname(
-						css.listitem,
-						isDisabled && css.disabled,
-						isSelected && css.selected,
-						isActive && css.active,
-						props.optionClassName,
-					)}
-					role={itemRole}
-					aria-disabled={isDisabled || undefined}
-					aria-selected={isDisabled ? undefined : isSelected}
-					onClick={
-						isDisabled
-							? undefined
-							: () =>
-									onSelect(
-										multiple
-											? updateMultipleSelection(selection, node.value)
-											: node.value,
-									)
-					}
-					onKeyDown={undefined}
-				>
-					{typeof ItemTpl === "function" ? <ItemTpl item={node} /> : node.label}
-				</li>,
-			);
-		} else {
-			const key = node.id;
-			nodes.push(
-				<li key={key}>
-					{node.label === "" ? null : (
-						<div
-							className={css.groupTitle}
-							role="presentation"
-							aria-owns={key}
-							aria-expanded="true"
-						>
-							{node.label}
-						</div>
-					)}
-					<ul
-						id={key}
-						role="group"
-						className={classname(css.group, props.groupClassName)}
-					>
-						{renderTree<T, U>(node.items, props, activeNode)}
-					</ul>
-				</li>,
-			);
-		}
-	});
-
-	return nodes;
-}
+	ItemTpl: ListboxItemProps<ValueType>["ItemTpl"];
+} & ListboxConditionalProps<ValueType, IsMultiple>;
 
 type LocalState<ValueType> = {
-	items: PrivateGroupOrOption<ValueType>[];
-	activeNode?: PrivateOption<ValueType>;
+	items: ListGroupOrItemConfig<ValueType>[];
+	activeNode?: ListItemConfig<ValueType>;
 	selection: ValueType[];
 	multiple: boolean;
 	onSelect: CallableFunction;
-	onActiveDescendantChange: CallableFunction;
-};
-
-const preventEvent = (event: React.KeyboardEvent<Element>) => {
-	event.preventDefault();
-	event.stopPropagation();
+	onActiveDescendantChange: ListboxCommonProps<ValueType>["onActiveDescendantChange"];
 };
 
 function Listbox<ValueType, IsMultiple extends boolean>(
@@ -164,23 +81,28 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 ) {
 	const {
 		role = "listbox",
-		id,
 		className,
 		style,
 		multiple,
 		disabled,
 		onSelect = noop,
-		onActiveDescendantChange = noop,
+		onActiveDescendantChange = noop as Required<
+			ListboxProps<ValueType, IsMultiple>
+		>["onActiveDescendantChange"],
+		show = true,
+		onKeyDown,
 	} = props;
 
 	const selection = ensureArray(props.selection);
 	const [activeNode, setActiveNode] = useState<
-		PrivateOption<ValueType> | undefined
+		ListItemConfig<ValueType> | undefined
 	>();
 
+	const id = useEnsuredId("listbox-", props.id);
+
 	const items = useMemo(
-		() => createItems(props.items, disabled === true),
-		[props.items, disabled],
+		() => createItems(props.items, disabled === true, id),
+		[props.items, disabled, id],
 	);
 
 	const stateRef = useStateRef<LocalState<ValueType>>({
@@ -192,7 +114,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 		onActiveDescendantChange,
 	});
 
-	const onKeyDown = useCallback(
+	const keyDownHandler = useCallback(
 		(event: React.KeyboardEvent<HTMLUListElement>) => {
 			const {
 				activeNode,
@@ -206,23 +128,25 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			switch (event.key) {
 				case "ArrowDown": {
 					preventEvent(event);
-					const nextNode = findNextFocusableOption(items, activeNode);
-					setActiveNode((state) => (nextNode == null ? state : nextNode));
+					const nextNode = findNextFocusableItem(items, activeNode);
 
-					if (nextNode != null) {
-						onActiveDescendantChange(nextNode.id);
+					if (nextNode != null && isFunction(onActiveDescendantChange)) {
+						onActiveDescendantChange(nextNode);
 					}
+
+					setActiveNode((state) => (nextNode == null ? state : nextNode));
 
 					break;
 				}
 				case "ArrowUp": {
 					preventEvent(event);
-					const nextNode = findPrevFocusableOption(items, activeNode);
-					setActiveNode((state) => (nextNode == null ? state : nextNode));
+					const nextNode = findPrevFocusableItem(items, activeNode);
 
-					if (nextNode != null) {
-						onActiveDescendantChange(nextNode.id);
+					if (nextNode != null && isFunction(onActiveDescendantChange)) {
+						onActiveDescendantChange(nextNode);
 					}
+
+					setActiveNode((state) => (nextNode == null ? state : nextNode));
 
 					break;
 				}
@@ -240,28 +164,60 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 							multiple
 								? updateMultipleSelection(selection, activeNode.value)
 								: activeNode.value,
+							activeNode,
 						);
 					}
+				}
+				default: {
+					isFunction(onKeyDown) && onKeyDown(event);
 				}
 			}
 		},
 		[],
 	);
 
-	const onFocus = useCallback(() => {
-		const { activeNode, selection, items } = stateRef.current;
-		let toBeFocused = activeNode;
-		if (activeNode == null && selection[0] != null) {
-			toBeFocused = findOptionByValue(items, selection[0]);
-		}
+	const focusHandler = useCallback(
+		(event: React.FocusEvent<HTMLUListElement>) => {
+			// if relatedTarget is null, then most probably it is not keyboard tab
+			if (event.relatedTarget == null) {
+				return;
+			}
 
-		setActiveNode(
-			toBeFocused == null ? findFirstFoucsableOption(items) : toBeFocused,
-		);
+			const { activeNode, selection, items } = stateRef.current;
+
+			let activeDescendant = activeNode;
+
+			if (activeDescendant == null && selection[0] != null) {
+				activeDescendant = findItemByValue(items, selection[0]);
+			}
+
+			if (activeDescendant == null) {
+				activeDescendant = findFirstFoucsableItem(items);
+			}
+
+			if (isFunction(onActiveDescendantChange)) {
+				onActiveDescendantChange(activeDescendant);
+			}
+
+			setActiveNode(activeDescendant);
+		},
+		[],
+	);
+
+	const blurHandler = useCallback(() => {
+		const activeDescendant = undefined;
+		if (isFunction(onActiveDescendantChange)) {
+			onActiveDescendantChange(activeDescendant);
+		}
+		setActiveNode(activeDescendant);
 	}, []);
 
-	const onBlur = useCallback(() => {
-		setActiveNode(undefined);
+	const selectionHandler = useCallback((item: ListItemConfig<ValueType>) => {
+		const { multiple, selection } = stateRef.current;
+		onSelect(
+			multiple ? updateMultipleSelection(selection, item.value) : item.value,
+			item,
+		);
 	}, []);
 
 	return (
@@ -273,12 +229,19 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			aria-activedescendant={activeNode == null ? "" : activeNode.id}
 			aria-multiselectable={multiple || undefined}
 			tabIndex={0}
-			onKeyDown={onKeyDown}
-			onFocus={onFocus}
-			onBlur={onBlur}
+			onKeyDown={keyDownHandler}
+			onFocus={focusHandler}
 			ref={ref}
+			hidden={!show}
 		>
-			{renderTree<ValueType, IsMultiple>(items, props, activeNode)}
+			{show
+				? renderTree<ValueType, IsMultiple>(
+						items,
+						props,
+						activeNode,
+						selectionHandler,
+				  )
+				: null}
 		</ul>
 	);
 }
@@ -287,4 +250,4 @@ const ListboxWithRef = forwardRef(Listbox) as typeof Listbox;
 
 export { ListboxWithRef as Listbox };
 
-export type { Option, OptGroup, GroupOrOption, ListboxProps };
+export type { ListItem, ListGroup, ListGroupOrItem, ListboxProps };

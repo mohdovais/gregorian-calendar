@@ -34,7 +34,7 @@
             {
                 "label": "Sort By",
                 "value": "sort",
-                "more": [
+                "menu": [
                     {
                         "label": "hh",
                         "value": "bb"
@@ -48,7 +48,7 @@
             {
                 "label": "Clean Up By",
                 "value": "clean-by",
-                "more": [
+                "menu": [
                     {
                         "label": "hh",
                         "value": "bb"
@@ -87,15 +87,109 @@
         "items": [
             {
                 "label": "Show Preview items",
-                "value": "show-preview-items",
-                "more": [
+                "value": "preview",
+                "menu": [
                     {
-                        "label": "Hide Toolbar",
-                        "value": "hide-toolbar"
+                        "disabled": true,
+                        "items": [
+                            {
+                                "label": "as Icons",
+                                "value": "icons",
+                                "keys": "⌘ 1"
+                            },
+                            {
+                                "label": "as List",
+                                "value": "list",
+                                "keys": "⌘ 2"
+                            },
+                            {
+                                "label": "as Columns",
+                                "value": "columns",
+                                "keys": "⌘ 3"
+                            },
+                            {
+                                "label": "as Gallery",
+                                "value": "gallery",
+                                "keys": "⌘ 4"
+                            }
+                        ]
                     },
                     {
-                        "label": "Show All Tabs",
-                        "value": "show-all-tabs"
+                        "items": [
+                            {
+                                "label": "Use Stacks",
+                                "value": "stacks",
+                                "keys": "⌃ ⌘ 0"
+                            },
+                            {
+                                "label": "Sort By",
+                                "value": "sort",
+                                "menu": [
+                                    {
+                                        "label": "hh",
+                                        "value": "bb"
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "Clean Up",
+                                "value": "clean"
+                            },
+                            {
+                                "label": "Clean Up By",
+                                "value": "clean-by",
+                                "menu": [
+                                    {
+                                        "label": "hh",
+                                        "value": "bb"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "disabled": true,
+                        "items": [
+                            {
+                                "label": "Hide Sidebar",
+                                "value": "hide-sidebar"
+                            },
+                            {
+                                "label": "Hide Preview",
+                                "value": "hide-preview"
+                            }
+                        ]
+                    },
+                    {
+                        "disabled": true,
+                        "items": [
+                            {
+                                "label": "Hide Toolbar",
+                                "value": "hide-toolbar"
+                            },
+                            {
+                                "label": "Show All Tabs",
+                                "value": "show-all-tabs"
+                            }
+                        ]
+                    },
+                    {
+                        "items": [
+                            {
+                                "label": "Show Preview items",
+                                "value": "preview",
+                                "menu": [
+                                    {
+                                        "label": "Hide Toolbar",
+                                        "value": "hide-toolbar"
+                                    },
+                                    {
+                                        "label": "Show All Tabs",
+                                        "value": "show-all-tabs"
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }

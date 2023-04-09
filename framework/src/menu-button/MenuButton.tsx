@@ -1,5 +1,5 @@
 import { autoPlacement, useFloating } from "@floating-ui/react-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../button";
 import { Menu, MenuGroupOrItem } from "../menu";
 
@@ -26,6 +26,12 @@ function MenuButton<T>(props: MenuButtonProps<T>) {
 		],
 	});
 
+	useEffect(() => {
+		if (open && refs.floating.current) {
+			refs.floating.current.focus();
+		}
+	}, [open, refs.floating.current]);
+
 	return (
 		<>
 			<Button
@@ -39,16 +45,17 @@ function MenuButton<T>(props: MenuButtonProps<T>) {
 			>
 				{children}
 			</Button>
-			<div
-				ref={refs.setFloating}
+			<Menu
+				show={open}
+				items={items}
+				onSelect={onSelect}
 				style={{
 					position: strategy,
 					top: y ?? 0,
 					left: x ?? 0,
 				}}
-			>
-				{open ? <Menu items={items} onSelect={onSelect} /> : null}
-			</div>
+				ref={refs.setFloating}
+			/>
 		</>
 	);
 }

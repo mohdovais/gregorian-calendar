@@ -1,57 +1,50 @@
 import { useRef } from "react";
-import { createRandomId } from "../hooks/useId";
+import { createSmallRandomId } from "../hooks/useId";
 import { ensureArray } from "../utils/array";
 import { hasKey } from "../utils/object";
 
-const NODE_TYPE_OPTION = "o";
-const NODE_TYPE_GROUP = "g";
+const NODE_TYPE_ITEM = "item";
+const NODE_TYPE_GROUP = "group";
 
-interface Option<T> extends Record<string, unknown> {
+interface ListItem<T> extends Record<string, unknown> {
 	id?: string;
 	label: string | React.ReactNode;
 	value: T;
+	items?: never;
 	disabled?: boolean;
 }
 
-interface OptGroup<T> extends Record<string, unknown> {
+interface ListGroup<T> extends Record<string, unknown> {
+	id?: string;
+	label?: string | React.ReactNode;
+	value?: T; //?? or never
+	items: ListItem<T>[];
 	disabled?: boolean;
-	label?: string;
-	items: Option<T>[];
 }
 
-type GroupOrOption<T> = Option<T> | OptGroup<T>;
+type ListGroupOrItem<T> = ListItem<T> | ListGroup<T>;
 
-interface PrivateOption<T> extends Option<T> {
-	type: typeof NODE_TYPE_OPTION;
+interface ListItemConfig<T> extends Record<string, unknown> {
+	type: typeof NODE_TYPE_ITEM;
 	id: string;
+	label: string | React.ReactNode;
+	value: T;
 	disabled: boolean;
 }
 
-interface PrivateOptGroup<T> extends OptGroup<T> {
+interface ListGroupConfig<T> extends Record<string, unknown> {
 	type: typeof NODE_TYPE_GROUP;
 	id: string;
-	disabled: boolean;
 	label: string;
-	items: PrivateOption<T>[];
+	items: ListItemConfig<T>[];
+	disabled: boolean;
 }
 
-type PrivateGroupOrOption<T> = PrivateOption<T> | PrivateOptGroup<T>;
+type ListGroupOrItemConfig<T> = ListItemConfig<T> | ListGroupConfig<T>;
 
-const isOption = <T>(option: GroupOrOption<T>): option is Option<T> => {
-	return hasKey(option, "value");
+const isItem = <T>(option: ListGroupOrItem<T>): option is ListItem<T> => {
+	return !hasKey(option, "items");
 };
-
-const keysCache = new WeakMap<object, string>();
-function getKeyForObject(obj: object, prefix?: string): string {
-	const oldKey = keysCache.get(obj);
-	if (oldKey != null) {
-		return oldKey;
-	} else {
-		const newKey = createRandomId(prefix);
-		keysCache.set(obj, newKey);
-		return newKey;
-	}
-}
 
 function useStateRef<T>(state: T) {
 	const stateRef = useRef(state);
@@ -59,26 +52,26 @@ function useStateRef<T>(state: T) {
 	return stateRef;
 }
 
-function doFindOption<T>(
-	options: PrivateGroupOrOption<T>[],
+function doFindItem<T>(
+	options: ListGroupOrItemConfig<T>[],
 	callback: (
-		item: PrivateOption<T>,
-		array: Readonly<PrivateGroupOrOption<T>[]>,
+		item: ListItemConfig<T>,
+		array: Readonly<ListGroupOrItemConfig<T>[]>,
 	) => unknown,
 	reverse = false,
-): PrivateOption<T> | undefined {
+): ListItemConfig<T> | undefined {
 	const items = reverse
 		? ensureArray(options, true).reverse()
 		: ensureArray(options);
 
 	for (let i = 0, length = items.length; i < length; i++) {
 		const optionOrGroup = items[i];
-		if (optionOrGroup.type === NODE_TYPE_OPTION) {
+		if (optionOrGroup.type === NODE_TYPE_ITEM) {
 			if (callback(optionOrGroup, items) === true) {
 				return optionOrGroup;
 			}
 		} else {
-			const result = doFindOption(optionOrGroup.items, callback, reverse);
+			const result = doFindItem(optionOrGroup.items, callback, reverse);
 			if (result != null) {
 				return result;
 			}
@@ -86,24 +79,24 @@ function doFindOption<T>(
 	}
 }
 
-function findOption<T>(
-	options: PrivateGroupOrOption<T>[],
+function findItem<T>(
+	options: ListGroupOrItemConfig<T>[],
 	callback: (
-		item: PrivateOption<T>,
-		array: Readonly<PrivateGroupOrOption<T>[]>,
+		item: ListItemConfig<T>,
+		array: Readonly<ListGroupOrItemConfig<T>[]>,
 	) => unknown,
 ) {
-	return doFindOption(options, callback);
+	return doFindItem(options, callback);
 }
 
-function findOptionReverse<T>(
-	options: PrivateGroupOrOption<T>[],
+function findItemReverse<T>(
+	options: ListGroupOrItemConfig<T>[],
 	callback: (
-		item: PrivateOption<T>,
-		array: Readonly<PrivateGroupOrOption<T>[]>,
+		item: ListItemConfig<T>,
+		array: Readonly<ListGroupOrItemConfig<T>[]>,
 	) => unknown,
 ) {
-	return doFindOption(options, callback, true);
+	return doFindItem(options, callback, true);
 }
 
 function updateMultipleSelection<T>(
@@ -126,44 +119,44 @@ function updateMultipleSelection<T>(
 }
 
 function createItems<T>(
-	options: GroupOrOption<T>[],
+	options: ListGroupOrItem<T>[],
 	parentDisabled: boolean,
-	optionTpl?: (option: Option<T>) => React.ReactNode,
-): PrivateGroupOrOption<T>[] {
-	const items: PrivateGroupOrOption<T>[] = [];
-	const hasOptionTpl = typeof optionTpl === "function";
+	parentId: string,
+): ListGroupOrItemConfig<T>[] {
+	const result: ListGroupOrItemConfig<T>[] = [];
 
 	ensureArray(options).forEach((option) => {
 		const disabled = parentDisabled || option.disabled === true;
-		if (isOption(option)) {
-			items.push(
-				Object.assign({}, option, {
-					type: NODE_TYPE_OPTION,
-					id: option.id || getKeyForObject(option, "item-"),
-					label: hasOptionTpl ? optionTpl(option) : option.label,
-					disabled,
-				}) as PrivateOption<T>,
+		if (isItem(option)) {
+			result.push(
+				Object.freeze(
+					Object.assign({}, option, {
+						type: NODE_TYPE_ITEM,
+						id: option.id || createSmallRandomId(parentId + "-item-"),
+						disabled,
+					}),
+				) as ListItemConfig<T>,
 			);
 		} else {
-			items.push(
+			result.push(
 				Object.assign({}, option, {
 					type: NODE_TYPE_GROUP,
-					id: option.id || getKeyForObject(option, "group-"),
+					id: option.id || createSmallRandomId(parentId + "-group-"),
 					disabled,
 					label: option.label || "",
-					items: createItems(option.items, disabled),
-				}) as PrivateOptGroup<T>,
+					items: createItems(option.items, disabled, parentId),
+				}) as ListGroupConfig<T>,
 			);
 		}
 	});
 
-	return items;
+	return result;
 }
 
-function selectAll<T>(options: PrivateGroupOrOption<T>[]) {
+function selectAll<T>(options: ListGroupOrItemConfig<T>[]) {
 	let result: T[] = [];
 	options.forEach((node) => {
-		if (node.type === NODE_TYPE_OPTION && !node.disabled) {
+		if (node.type === NODE_TYPE_ITEM && !node.disabled) {
 			result.push(node.value);
 			return;
 		}
@@ -176,64 +169,67 @@ function selectAll<T>(options: PrivateGroupOrOption<T>[]) {
 	return result;
 }
 
-function findFirstFoucsableOption<T>(options: PrivateGroupOrOption<T>[]) {
-	return findOption(options, (option) => {
-		if (!option.disabled) {
-			return true;
-		}
-	});
+function findFirstFoucsableItem<T>(items: ListGroupOrItemConfig<T>[]) {
+	return findItem(items, (item) => !item.disabled);
 }
 
-function findOptionByValue<T>(options: PrivateGroupOrOption<T>[], value: T) {
-	return findOption(options, (option) => {
-		if (option.value === value) {
-			return true;
-		}
-	});
+function findItemByValue<T>(items: ListGroupOrItemConfig<T>[], item: T) {
+	return findItem(items, (option) => option.value === item);
 }
 
-function findNextFocusableOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentOption: PrivateOption<T> | undefined,
+function findNextFocusableItem<T>(
+	items: ListGroupOrItemConfig<T>[],
+	currentItem: ListItemConfig<T> | undefined,
 	reverse = false,
 ) {
-	const iterator = reverse ? findOptionReverse : findOption;
+	const iterator = reverse ? findItemReverse : findItem;
 	let found = false;
-	const nextOption = iterator(options, (item) => {
-		if (!item.disabled && (found || currentOption === undefined)) {
+	const nextOption = iterator(items, (item) => {
+		if (!item.disabled && (found || currentItem === undefined)) {
 			return true;
 		}
-		if (item === currentOption) {
+		if (item === currentItem) {
 			found = true;
 		}
 	});
-	return found ? nextOption : currentOption;
+	return found ? nextOption : currentItem;
 }
 
-function findPrevFocusableOption<T>(
-	options: PrivateGroupOrOption<T>[],
-	currentOption: PrivateOption<T> | undefined,
+function findPrevFocusableItem<T>(
+	options: ListGroupOrItemConfig<T>[],
+	currentOption: ListItemConfig<T> | undefined,
 ) {
-	return findNextFocusableOption(options, currentOption, true);
+	return findNextFocusableItem(options, currentOption, true);
+}
+
+function preventEvent(
+	event:
+		| React.KeyboardEvent<Element>
+		| React.MouseEvent<Element>
+		| React.FocusEvent<Element>,
+) {
+	event.preventDefault();
+	event.stopPropagation();
 }
 
 export {
 	updateMultipleSelection,
 	createItems,
-	findNextFocusableOption,
-	findPrevFocusableOption,
-	findFirstFoucsableOption,
-	findOptionByValue,
+	findNextFocusableItem,
+	findPrevFocusableItem,
+	findFirstFoucsableItem,
+	findItemByValue,
 	selectAll,
 	NODE_TYPE_GROUP,
-	NODE_TYPE_OPTION,
+	NODE_TYPE_ITEM,
 	useStateRef,
+	preventEvent,
 };
 export type {
-	Option,
-	OptGroup,
-	GroupOrOption,
-	PrivateGroupOrOption,
-	PrivateOptGroup,
-	PrivateOption,
+	ListItem,
+	ListGroup,
+	ListGroupOrItem,
+	ListGroupOrItemConfig,
+	ListGroupConfig,
+	ListItemConfig,
 };

@@ -1,18 +1,26 @@
-import { useState } from "react";
+import {
+	createContext,
+	forwardRef,
+	memo,
+	useCallback,
+	useContext,
+	useRef,
+	useState,
+} from "react";
 import { CalrityAngleRight } from "../icons/ClarityAngleRight";
-import { OptGroup, Option, Listbox } from "../listbox";
+import { ListGroup, ListItem, Listbox } from "../listbox";
 import { Portal } from "../portal";
 import { classname } from "../utils/classname";
 import { hasKey } from "../utils/object";
 import css from "./Menu.module.css";
 import { useFloating } from "@floating-ui/react-dom";
 
-type MenuItem<T> = Option<T> & {
-	more?: MenuGroupOrItem<T>[];
+type MenuItem<T> = ListItem<T> & {
+	menu?: MenuGroupOrItem<T>[];
 	keys?: string;
 };
 
-type MenuGroup<T> = Omit<OptGroup<T>, "items"> & {
+type MenuGroup<T> = Omit<ListGroup<T>, "items"> & {
 	items: MenuItem<T>[];
 };
 
@@ -22,6 +30,8 @@ interface MenuProps<T> {
 	id?: string;
 	className?: string;
 	style?: React.CSSProperties;
+	show?: boolean;
+	ref?: React.Ref<HTMLUListElement>;
 
 	items: MenuGroupOrItem<T>[];
 	onSelect?: (option: T) => void;
@@ -32,9 +42,13 @@ type OptionTplProps<T> = {
 };
 
 function OptionTpl<T>(props: OptionTplProps<T>) {
-	const node = props.item;
-	const more = hasKey(node, "more");
+	const { item, disabled } = props;
+	const node = item;
+	const hasMenu = hasKey(node, "menu");
+	const shouldNotListen = disabled || !hasMenu;
 	const [open, setOpen] = useState(false);
+
+	console.log(props);
 
 	const { x, y, strategy, refs } = useFloating({
 		open,
@@ -44,40 +58,50 @@ function OptionTpl<T>(props: OptionTplProps<T>) {
 	return (
 		<div
 			className={css.wrapper}
-			onMouseOver={() => setOpen(true)}
-			onMouseOut={() => setOpen(false)}
-			onFocus={() => setOpen(true)}
-			onBlur={() => setOpen(false)}
+			onMouseOver={shouldNotListen ? undefined : () => setOpen(true)}
+			onMouseOut={shouldNotListen ? undefined : () => setOpen(false)}
+			onFocus={shouldNotListen ? undefined : () => setOpen(true)}
+			onBlur={shouldNotListen ? undefined : () => setOpen(false)}
 			ref={refs.setReference}
 		>
 			<div className={css.text}>{node.label}</div>
-			{more ? (
+			{hasMenu ? (
 				<CalrityAngleRight />
 			) : hasKey(node, "keys") ? (
 				<div>{node.keys as React.ReactNode}</div>
 			) : null}
 
-			{more && open ? (
-				<Portal>
-					<div
-						ref={refs.setFloating}
-						style={{
-							position: strategy,
-							top: y ?? 0,
-							left: x ?? 0,
-						}}
-					>
-						{/* rome-ignore lint/style/noNonNullAssertion: verified */}
-						<Menu items={node.more!} />
-					</div>
-				</Portal>
+			{hasMenu && open ? (
+				<Listbox
+					role="menu"
+					itemRole="menuitem"
+					id={item.id + "-menu"}
+					className={css.menu}
+					style={{
+						position: strategy,
+						top: y ?? 0,
+						left: x ?? 0,
+					}}
+					items={item.menu}
+					ItemTpl={OptionTplMemo}
+					onSelect={undefined}
+					show={open}
+					ref={refs.setFloating}
+				/>
 			) : null}
 		</div>
 	);
 }
 
-function Menu<T>(props: MenuProps<T>) {
-	const { id, className, style, onSelect, items } = props;
+const OptionTplMemo = memo(OptionTpl) as typeof OptionTpl;
+
+// rome-ignore lint/suspicious/noExplicitAny: Generic
+const MenuContext = createContext<((value: any) => void) | undefined>(
+	undefined,
+);
+
+function Menu<T>(props: MenuProps<T>, ref?: React.Ref<HTMLUListElement>) {
+	const { id, className, style, onSelect, items, show } = props;
 
 	return (
 		<Listbox
@@ -87,11 +111,15 @@ function Menu<T>(props: MenuProps<T>) {
 			className={classname(css.menu, className)}
 			style={style}
 			items={items}
-			ItemTpl={OptionTpl}
+			ItemTpl={OptionTplMemo}
 			onSelect={onSelect}
+			show={show}
+			ref={ref}
 		/>
 	);
 }
 
-export { Menu };
+const MenuWithRef = forwardRef(Menu) as typeof Menu;
+
+export { MenuWithRef as Menu };
 export type { MenuProps, MenuGroup, MenuItem, MenuGroupOrItem };

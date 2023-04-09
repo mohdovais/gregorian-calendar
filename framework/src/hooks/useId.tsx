@@ -1,7 +1,14 @@
 import { useState } from "react";
 
 function createRandomId(prefix = "") {
-	return prefix + (Date.now() + ((Math.random() * 1e10) | 0)).toString(32);
+	return prefix + (Date.now() + ((Math.random() * 1e5) | 0)).toString(32);
+}
+
+function createSmallRandomId(prefix = "") {
+	return (
+		prefix +
+		(((Math.random() * 1e5) | 0) + ((Math.random() * 1e5) | 0)).toString(32)
+	);
 }
 
 function useId(prefix?: string) {
@@ -10,8 +17,8 @@ function useId(prefix?: string) {
 }
 
 function useEnsuredId(prefix?: string, defaultId?: string) {
-	const randomId = useId("listbox-");
+	const randomId = useId(prefix);
 	return typeof defaultId === "string" ? defaultId : randomId;
 }
 
-export { useId, createRandomId, useEnsuredId };
+export { useId, createRandomId, createSmallRandomId, useEnsuredId };

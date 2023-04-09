@@ -1,7 +1,7 @@
 import { Button } from "../../framework/src/button";
 import { DateField } from "../../framework/src/datefield";
 import { MaskedField } from "../../framework/src/maskedfield";
-import { MenuButton } from "../../framework/src/menu-button";
+import { Menu } from "../../framework/src/menu";
 import { Listbox } from "../../framework/src/listbox";
 import { isValidDateString } from "../../framework/src/utils/date";
 import { useState } from "react";
@@ -39,16 +39,14 @@ function App() {
 				size={10}
 			/>
 			<Button type="submit">Submit</Button>
-			<br />
-			<Listbox
+			<button type="button">hello</button>
+			<Menu
 				multiple={true}
 				items={menu}
 				selection={multipleValues}
 				onSelect={setMultipleValues}
 			/>
-			<MenuButton items={menu} onSelect={(menu) => console.log(menu)}>
-				File
-			</MenuButton>
+			<br />
 		</form>
 	);
 }
@@ -58,4 +56,16 @@ export { App };
 /*
  
 			<Listbox items={menu} selection={v1} onSelect={setV1} />
+			<MenuButton
+				items={menu}
+				onSelect={(value, config) => console.log(value, config)}
+			>
+				File
+			</MenuButton>
+			<Listbox
+				multiple={true}
+				items={menu}
+				selection={multipleValues}
+				onSelect={setMultipleValues}
+			/>
  */

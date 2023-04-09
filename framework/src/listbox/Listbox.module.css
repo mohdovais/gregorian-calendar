@@ -27,6 +27,11 @@
     display: none;
 }
 
+.group:empty,
+.list:empty {
+    display: none;
+}
+
 .groupTitle {
     font-size: 0.75rem;
     color: rgb(162, 160, 158);
@@ -44,7 +49,7 @@
 
 
 .listitem:not(.disabled):hover,
-.list:focus-visible .active {
+.active:not(.disabled) {
     background-color: rgb(115, 160, 252);
     color: #fff;
 }
@@ -54,10 +59,7 @@
     cursor: unset
 }
 
-.selected:not(.disabled) {
-    color: red;
-}
-
 .selected:after {
     content: "✓";
+    margin-left: 0.5em;
 }
