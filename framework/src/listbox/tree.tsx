@@ -1,14 +1,15 @@
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import { ListboxProps } from "./Listbox";
+import css from "./Listbox.module.css";
 import { ListboxItem, ListboxItemProps } from "./ListboxItem";
 import { ListGroupOrItemConfig, ListItemConfig, NODE_TYPE_ITEM } from "./utils";
-import css from "./Listbox.module.css";
 
 function renderTree<T, U>(
 	options: ListGroupOrItemConfig<T>[],
 	props: ListboxProps<T, U>,
-	activeNode?: ListItemConfig<T>,
+	hoverNode?: ListItemConfig<T>,
+	focusNode?: ListItemConfig<T>,
 	onSelect?: ListboxItemProps<T>["onSelect"],
 	onMouseOver?: ListboxItemProps<T>["onMouseOver"],
 ) {
@@ -26,7 +27,7 @@ function renderTree<T, U>(
 				? selection.includes(item.value)
 				: item.value === singleValue;
 
-			const isActive = !isDisabled && activeNode === item;
+			const isActive = !isDisabled && focusNode === item;
 
 			treeNodes.push(
 				<ListboxItem
@@ -37,6 +38,7 @@ function renderTree<T, U>(
 					itemTpl={itemTpl}
 					role={itemRole}
 					multiple={isMultiple}
+					hover={hoverNode === item}
 					active={isActive}
 					disabled={isDisabled}
 					selected={isSelected}
@@ -66,7 +68,8 @@ function renderTree<T, U>(
 						{renderTree<T, U>(
 							item.items,
 							props,
-							activeNode,
+							hoverNode,
+							focusNode,
 							onSelect,
 							onMouseOver,
 						)}

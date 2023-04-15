@@ -1,5 +1,6 @@
 import { classname } from "../utils/classname";
 import { isFunction, noop } from "../utils/function";
+import { copy } from "../utils/object";
 import css from "./Listbox.module.css";
 import { ListItemConfig, preventEvent } from "./utils";
 import { cloneElement, isValidElement, memo } from "react";
@@ -11,6 +12,7 @@ type ItemTplProps<T> = {
 	selected: boolean;
 	multiple: boolean;
 	disabled: boolean;
+	hover: boolean;
 	active: boolean;
 };
 
@@ -19,6 +21,7 @@ type ListboxItemProps<T> = {
 	role: string;
 	disabled: boolean;
 	selected: boolean;
+	hover: boolean;
 	active: boolean;
 	multiple: boolean;
 	className?: string;
@@ -32,6 +35,7 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 	const {
 		id,
 		item,
+		hover,
 		active,
 		disabled,
 		selected,
@@ -67,7 +71,7 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 	};
 
 	const jsxElement = isFunction(itemTpl)
-		? itemTpl({ item, selected, multiple, disabled, active })
+		? itemTpl({ item, selected, multiple, disabled, active, hover })
 		: undefined;
 
 	if (
@@ -76,8 +80,8 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 		jsxElement.type === "li"
 	) {
 		// @TODO merge props
-		//const { children, ...customProps } = jsxElement.props as HTMLLIAttributes;
-		return cloneElement(jsxElement, liProps);
+		const { children, ...customProps } = jsxElement.props as HTMLLIAttributes;
+		return cloneElement(jsxElement, copy(customProps, liProps));
 	}
 
 	return (

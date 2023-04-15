@@ -96,7 +96,10 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 	} = props;
 
 	const selection = ensureArray(props.selection);
-	const [activeNode, setActiveNode] = useState<
+	const [pointerActiveNode, setPointerActiveNode] = useState<
+		ListItemConfig<ValueType> | undefined
+	>();
+	const [keyboardActiveNode, setKeyboardActiveNode] = useState<
 		ListItemConfig<ValueType> | undefined
 	>();
 
@@ -108,7 +111,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 	);
 
 	const stateRef = useStateRef<LocalState<ValueType>>({
-		activeNode,
+		activeNode: keyboardActiveNode,
 		selection,
 		items,
 		multiple: multiple === true,
@@ -132,11 +135,15 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 					preventEvent(event);
 					const nextNode = findNextFocusableItem(items, activeNode);
 
-					if (nextNode != null && isFunction(onActiveDescendantChange)) {
-						onActiveDescendantChange(nextNode);
+					if (nextNode != null) {
+						document.getElementById(nextNode.id)?.focus();
+						isFunction(onActiveDescendantChange) &&
+							onActiveDescendantChange(nextNode);
 					}
 
-					setActiveNode((state) => (nextNode == null ? state : nextNode));
+					setKeyboardActiveNode((state) =>
+						nextNode == null ? state : nextNode,
+					);
 
 					break;
 				}
@@ -144,11 +151,15 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 					preventEvent(event);
 					const nextNode = findPrevFocusableItem(items, activeNode);
 
-					if (nextNode != null && isFunction(onActiveDescendantChange)) {
-						onActiveDescendantChange(nextNode);
+					if (nextNode != null) {
+						document.getElementById(nextNode.id)?.focus();
+						isFunction(onActiveDescendantChange) &&
+							onActiveDescendantChange(nextNode);
 					}
 
-					setActiveNode((state) => (nextNode == null ? state : nextNode));
+					setKeyboardActiveNode((state) =>
+						nextNode == null ? state : nextNode,
+					);
 
 					break;
 				}
@@ -170,10 +181,9 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 						);
 					}
 				}
-				default: {
-					isFunction(onKeyDown) && onKeyDown(event);
-				}
 			}
+
+			isFunction(onKeyDown) && onKeyDown(event);
 		},
 		[],
 	);
@@ -201,25 +211,20 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 				onActiveDescendantChange(activeDescendant);
 			}
 
-			setActiveNode(activeDescendant);
+			setKeyboardActiveNode(activeDescendant);
 		},
 		[],
 	);
 
-	const mouseOverHandler = useCallback((item: ListItemConfig<ValueType>) => {
-		const activeDescendant = item.disabled ? undefined : item;
-		setActiveNode(activeDescendant);
-		if (isFunction(onActiveDescendantChange)) {
-			onActiveDescendantChange(activeDescendant);
-		}
-	}, []);
+	const itemMouseOverHandler = useCallback(
+		(item: ListItemConfig<ValueType>) => {
+			setPointerActiveNode(item.disabled ? undefined : item);
+		},
+		[],
+	);
 
 	const mouseOutHandler = useCallback(() => {
-		const activeDescendant = undefined;
-		if (isFunction(onActiveDescendantChange)) {
-			onActiveDescendantChange(activeDescendant);
-		}
-		setActiveNode(activeDescendant);
+		setPointerActiveNode(undefined);
 	}, []);
 
 	const blurHandler = useCallback(
@@ -229,7 +234,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			const activeDescendant = undefined;
 
 			if (relatedTarget == null && !target.contains(relatedTarget)) {
-				setActiveNode(activeDescendant);
+				setKeyboardActiveNode(activeDescendant);
 				if (isFunction(onActiveDescendantChange)) {
 					onActiveDescendantChange(activeDescendant);
 				}
@@ -259,16 +264,19 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			onFocus={focusHandler}
 			onBlur={blurHandler}
 			onKeyDown={keyDownHandler}
-			aria-activedescendant={activeNode == null ? "" : activeNode.id}
+			aria-activedescendant={
+				keyboardActiveNode == null ? "" : keyboardActiveNode.id
+			}
 			aria-multiselectable={multiple || undefined}
 		>
 			{show
 				? renderTree<ValueType, IsMultiple>(
 						items,
 						props,
-						activeNode,
+						pointerActiveNode,
+						keyboardActiveNode,
 						selectionHandler,
-						mouseOverHandler,
+						itemMouseOverHandler,
 				  )
 				: null}
 		</ul>

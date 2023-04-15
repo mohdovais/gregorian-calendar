@@ -5,7 +5,14 @@ import { classname } from "../utils/classname";
 import { hasKey } from "../utils/object";
 import css from "./Menu.module.css";
 import { useFloating } from "@floating-ui/react-dom";
-import { createContext, forwardRef, useCallback } from "react";
+import {
+	createContext,
+	forwardRef,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 
 type MenuItem<T> = ListItem<T> & {
 	menu?: MenuGroupOrItem<T>[];
@@ -33,23 +40,55 @@ type OptionTplProps<T> = {
 	item: MenuItem<T>;
 	disabled: boolean;
 	active: boolean;
+	hover: boolean;
 };
 
 function ItemTpl<T>(props: OptionTplProps<T>) {
-	const { item, disabled, active } = props;
+	const { item, disabled, active, hover } = props;
 	const node = item;
 	const hasMenu = hasKey(node, "menu");
 
-	const open = !disabled && active;
+	const ref = useRef<HTMLLIElement>(null);
+	const [open, setOpen] = useState(false);
+	const ooo = hover || open;
 
 	const { x, y, strategy, refs } = useFloating({
-		open,
+		open: ooo,
 		placement: "right",
 		strategy: "fixed",
 	});
 
+	const itemKeyDownHandler = useCallback(
+		(event: React.KeyboardEvent<HTMLLIElement>) => {
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+				event.stopPropagation();
+				setOpen(true);
+			}
+		},
+		[],
+	);
+
+	const menuKeyDownHandler = useCallback(
+		(event: React.KeyboardEvent<HTMLUListElement>) => {
+			if (event.key === "ArrowLeft" || event.key === "Escape") {
+				event.preventDefault();
+				event.stopPropagation();
+				setOpen(false);
+				ref.current?.focus();
+			}
+		},
+		[],
+	);
+
+	useEffect(() => {
+		if (open && refs.floating.current) {
+			refs.floating.current.focus();
+		}
+	}, [open, refs.floating.current]);
+
 	return (
-		<li className="menu">
+		<li className="menu" onKeyDown={itemKeyDownHandler} ref={ref}>
 			<div className={css.wrapper} ref={refs.setReference}>
 				<div className={css.text}>{node.label}</div>
 				{hasMenu ? (
@@ -58,7 +97,7 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 					<div>{node.keys as React.ReactNode}</div>
 				) : null}
 			</div>
-			{hasMenu && open ? (
+			{hasMenu && ooo ? (
 				<Listbox
 					role="menu"
 					itemRole="menuitem"
@@ -73,8 +112,9 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 					items={ensureArray(item.menu)}
 					itemTpl={ItemTpl}
 					onSelect={undefined}
-					show={open}
+					show={ooo}
 					ref={refs.setFloating}
+					onKeyDown={menuKeyDownHandler}
 				/>
 			) : null}
 		</li>
@@ -93,7 +133,7 @@ function Menu<T>(props: MenuProps<T>, ref?: React.Ref<HTMLUListElement>) {
 
 	const onActiveDescendantChange = useCallback(
 		(activeDescendant?: MenuItem<T>) => {
-			console.log(activeDescendant);
+			//console.log(activeDescendant);
 		},
 		[],
 	);
