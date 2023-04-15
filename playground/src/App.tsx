@@ -40,12 +40,7 @@ function App() {
 			/>
 			<Button type="submit">Submit</Button>
 			<button type="button">hello</button>
-			<Menu
-				multiple={true}
-				items={menu}
-				selection={multipleValues}
-				onSelect={setMultipleValues}
-			/>
+			<Menu items={menu} onSelect={setV1} />
 			<br />
 		</form>
 	);

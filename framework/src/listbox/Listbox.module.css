@@ -39,7 +39,7 @@
     padding: 0.625em 0.625em 0.125em 0.625rem;
 }
 
-.listitem {
+.listitem:not(.custom) {
     cursor: pointer;
     padding: 0.25em 0.625rem;
     border: 1px solid transparent;

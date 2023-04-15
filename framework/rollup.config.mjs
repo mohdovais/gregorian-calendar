@@ -15,11 +15,11 @@ const includeRegExp = /\.tsx?$/i;
  * @returns
  */
 function getIndexFile(dir) {
-	var indexts = path.join(dir, "index.ts");
+	const indexts = path.join(dir, "index.ts");
 	if (fs.existsSync(indexts)) {
 		return indexts;
 	}
-	var indextsx = path.join(dir, "index.tsx");
+	const indextsx = path.join(dir, "index.tsx");
 	if (fs.existsSync(indextsx)) {
 		return indextsx;
 	}
@@ -31,14 +31,14 @@ function getIndexFile(dir) {
  * @returns {string[]}
  */
 function getBuildFiles(root, deep = true) {
-	var files = [];
+	const files = [];
 
 	fs.readdirSync(root).forEach((child) => {
-		var file = path.join(root, child);
-		var lstat = fs.lstatSync(file);
+		const file = path.join(root, child);
+		const lstat = fs.lstatSync(file);
 
 		if (lstat.isDirectory()) {
-			var indexFile = getIndexFile(file);
+			const indexFile = getIndexFile(file);
 			if (indexFile != null) {
 				files.push(indexFile);
 			} else if (deep) {
@@ -68,7 +68,7 @@ const soruces = getBuildFiles(path.resolve("./", "src"));
 const exports = {};
 
 const config = soruces.flatMap((input) => {
-	var dist = input.replace("src/", "dist/");
+	const dist = input.replace("src/", "dist/");
 	const cjs = dist.replace(/\.tsx?/, ".js");
 	const mjs = dist.replace(/\.tsx?/, ".mjs");
 

@@ -1,27 +1,27 @@
-import { forwardRef, useCallback, useMemo, useState } from "react";
+import { useEnsuredId } from "../hooks/useId";
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import { isFunction, noop } from "../utils/function";
 import css from "./Listbox.module.css";
-import {
-	ListGroupOrItem,
-	ListItem,
-	ListGroup,
-	updateMultipleSelection,
-	createItems,
-	ListGroupOrItemConfig,
-	findNextFocusableItem,
-	ListItemConfig,
-	findPrevFocusableItem,
-	selectAll,
-	findFirstFoucsableItem,
-	findItemByValue,
-	useStateRef,
-	preventEvent,
-} from "./utils";
-import { useEnsuredId } from "../hooks/useId";
 import { ListboxItemProps } from "./ListboxItem";
 import { renderTree } from "./tree";
+import {
+	ListGroup,
+	ListGroupOrItem,
+	ListGroupOrItemConfig,
+	ListItem,
+	ListItemConfig,
+	createItems,
+	findFirstFoucsableItem,
+	findItemByValue,
+	findNextFocusableItem,
+	findPrevFocusableItem,
+	preventEvent,
+	selectAll,
+	updateMultipleSelection,
+	useStateRef,
+} from "./utils";
+import { forwardRef, useCallback, useMemo, useState } from "react";
 
 const TRUE = true;
 
@@ -31,14 +31,16 @@ interface ListboxCommonProps<T> {
 	style?: React.CSSProperties;
 	show?: boolean;
 	ref?: React.Ref<HTMLUListElement>;
+	role?: React.AriaRole;
+	disabled?: boolean;
+	tabIndex?: number;
 
 	items: ListGroupOrItem<T>[];
-	role?: React.AriaRole;
+	itemTpl: ListboxItemProps<T>["itemTpl"];
 	itemRole?: React.AriaRole;
+	itemClassName?: string;
 
 	groupClassName?: string;
-	optionClassName?: string;
-	disabled?: boolean;
 
 	onActiveDescendantChange?: (
 		activeDescendant: ListItem<T> | undefined,
@@ -63,7 +65,6 @@ type ListboxConditionalProps<ValueType, IsMultiple> =
 
 type ListboxProps<ValueType, IsMultiple> = {
 	multiple?: IsMultiple;
-	ItemTpl: ListboxItemProps<ValueType>["ItemTpl"];
 } & ListboxConditionalProps<ValueType, IsMultiple>;
 
 type LocalState<ValueType> = {
@@ -85,6 +86,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 		style,
 		multiple,
 		disabled,
+		tabIndex = 0,
 		onSelect = noop,
 		onActiveDescendantChange = noop as Required<
 			ListboxProps<ValueType, IsMultiple>
@@ -204,13 +206,37 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 		[],
 	);
 
-	const blurHandler = useCallback(() => {
+	const mouseOverHandler = useCallback((item: ListItemConfig<ValueType>) => {
+		const activeDescendant = item.disabled ? undefined : item;
+		setActiveNode(activeDescendant);
+		if (isFunction(onActiveDescendantChange)) {
+			onActiveDescendantChange(activeDescendant);
+		}
+	}, []);
+
+	const mouseOutHandler = useCallback(() => {
 		const activeDescendant = undefined;
 		if (isFunction(onActiveDescendantChange)) {
 			onActiveDescendantChange(activeDescendant);
 		}
 		setActiveNode(activeDescendant);
 	}, []);
+
+	const blurHandler = useCallback(
+		(event: React.FocusEvent<HTMLUListElement>) => {
+			const target = event.target;
+			const relatedTarget = event.relatedTarget;
+			const activeDescendant = undefined;
+
+			if (relatedTarget == null && !target.contains(relatedTarget)) {
+				setActiveNode(activeDescendant);
+				if (isFunction(onActiveDescendantChange)) {
+					onActiveDescendantChange(activeDescendant);
+				}
+			}
+		},
+		[],
+	);
 
 	const selectionHandler = useCallback((item: ListItemConfig<ValueType>) => {
 		const { multiple, selection } = stateRef.current;
@@ -226,13 +252,15 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			className={classname(css.list, className)}
 			style={style}
 			role={role}
-			aria-activedescendant={activeNode == null ? "" : activeNode.id}
-			aria-multiselectable={multiple || undefined}
-			tabIndex={0}
-			onKeyDown={keyDownHandler}
-			onFocus={focusHandler}
+			tabIndex={tabIndex}
 			ref={ref}
 			hidden={!show}
+			onMouseOut={mouseOutHandler}
+			onFocus={focusHandler}
+			onBlur={blurHandler}
+			onKeyDown={keyDownHandler}
+			aria-activedescendant={activeNode == null ? "" : activeNode.id}
+			aria-multiselectable={multiple || undefined}
 		>
 			{show
 				? renderTree<ValueType, IsMultiple>(
@@ -240,6 +268,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 						props,
 						activeNode,
 						selectionHandler,
+						mouseOverHandler,
 				  )
 				: null}
 		</ul>

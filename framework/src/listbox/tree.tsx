@@ -10,9 +10,10 @@ function renderTree<T, U>(
 	props: ListboxProps<T, U>,
 	activeNode?: ListItemConfig<T>,
 	onSelect?: ListboxItemProps<T>["onSelect"],
+	onMouseOver?: ListboxItemProps<T>["onMouseOver"],
 ) {
 	const treeNodes: React.ReactNode[] = [];
-	const { itemRole = "option", multiple, ItemTpl } = props;
+	const { itemRole = "option", multiple, itemTpl } = props;
 	const selection = ensureArray(props.selection);
 	const singleValue = selection[0];
 	const isMultiple = multiple === true;
@@ -30,16 +31,17 @@ function renderTree<T, U>(
 			treeNodes.push(
 				<ListboxItem
 					key={item.id}
+					id={item.id}
+					className={props.itemClassName}
+					item={item}
+					itemTpl={itemTpl}
+					role={itemRole}
+					multiple={isMultiple}
 					active={isActive}
 					disabled={isDisabled}
-					id={item.id}
-					item={item}
-					ItemTpl={ItemTpl}
-					multiple={isMultiple}
-					role={itemRole}
 					selected={isSelected}
-					className={props.optionClassName}
 					onSelect={onSelect}
+					onMouseOver={onMouseOver}
 				/>,
 			);
 		} else {
@@ -61,7 +63,13 @@ function renderTree<T, U>(
 						role="group"
 						className={classname(css.group, props.groupClassName)}
 					>
-						{renderTree<T, U>(item.items, props, activeNode)}
+						{renderTree<T, U>(
+							item.items,
+							props,
+							activeNode,
+							onSelect,
+							onMouseOver,
+						)}
 					</ul>
 				</li>,
 			);

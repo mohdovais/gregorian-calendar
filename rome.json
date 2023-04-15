@@ -6,5 +6,8 @@
                 "useTemplate": "off"
             }
         }
+    },
+    "organizeImports": {
+        "enabled": true
     }
 }
