@@ -46,12 +46,6 @@ const isItem = <T>(option: ListGroupOrItem<T>): option is ListItem<T> => {
 	return !hasKey(option, "items");
 };
 
-function useStateRef<T>(state: T) {
-	const stateRef = useRef(state);
-	stateRef.current = state;
-	return stateRef;
-}
-
 function doFindItem<T>(
 	options: ListGroupOrItemConfig<T>[],
 	callback: (
@@ -222,7 +216,6 @@ export {
 	selectAll,
 	NODE_TYPE_GROUP,
 	NODE_TYPE_ITEM,
-	useStateRef,
 	preventEvent,
 };
 export type {

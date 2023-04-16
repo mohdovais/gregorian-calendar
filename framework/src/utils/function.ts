@@ -6,4 +6,8 @@ function isFunction(arg: unknown): arg is CallableFunction {
 	return typeof arg === "function";
 }
 
-export { noop, identityFn, isFunction };
+function ensureCallableFunction<T extends CallableFunction>(fn: T | undefined) {
+	return isFunction(fn) ? fn : (noop as T);
+}
+
+export { noop, identityFn, isFunction, ensureCallableFunction };
