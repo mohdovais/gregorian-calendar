@@ -1,5 +1,7 @@
 {
-    "formatter": {},
+    "formatter": {
+        "enabled": true
+    },
     "linter": {
         "rules": {
             "style": {

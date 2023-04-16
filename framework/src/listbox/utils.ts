@@ -1,7 +1,7 @@
-import { useRef } from "react";
 import { createSmallRandomId } from "../hooks/useId";
 import { ensureArray } from "../utils/array";
 import { hasKey } from "../utils/object";
+import { useRef } from "react";
 
 const NODE_TYPE_ITEM = "item";
 const NODE_TYPE_GROUP = "group";

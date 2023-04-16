@@ -16,8 +16,8 @@ interface ComboboxProps<T> {
 function Combobox() {
 	return (
 		<div>
-			<div></div>
-			<div></div>
+			<div />
+			<div />
 		</div>
 	);
 }

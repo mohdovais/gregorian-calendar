@@ -3,7 +3,7 @@ import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import { isFunction, noop } from "../utils/function";
 import css from "./Listbox.module.css";
-import { ListboxItemProps } from "./ListboxItem";
+import { ListboxItemProps, ListboxItemTplProps } from "./ListboxItem";
 import { renderTree } from "./tree";
 import {
 	ListGroup,
@@ -25,27 +25,23 @@ import { forwardRef, useCallback, useMemo, useState } from "react";
 
 const TRUE = true;
 
-interface ListboxCommonProps<T> {
-	id?: string;
-	className?: string;
-	style?: React.CSSProperties;
-	show?: boolean;
-	ref?: React.Ref<HTMLUListElement>;
-	role?: React.AriaRole;
+interface ListboxCommonProps<T>
+	extends Omit<
+		React.DetailedHTMLProps<
+			React.HTMLAttributes<HTMLUListElement>,
+			HTMLUListElement
+		>,
+		"onSelect"
+	> {
+	expanded?: boolean;
 	disabled?: boolean;
-	tabIndex?: number;
-
 	items: ListGroupOrItem<T>[];
 	itemTpl: ListboxItemProps<T>["itemTpl"];
 	itemRole?: React.AriaRole;
 	itemClassName?: string;
-
 	groupClassName?: string;
-
-	onActiveDescendantChange?: (
-		activeDescendant: ListItem<T> | undefined,
-	) => void;
-	onKeyDown?: React.KeyboardEventHandler<HTMLUListElement>;
+	onActiveDescChange?: (activeDescendant: ListItem<T> | undefined) => void;
+	onCollapse?: () => void;
 }
 
 interface ListboxSingleProps<T> extends ListboxCommonProps<T> {
@@ -73,7 +69,7 @@ type LocalState<ValueType> = {
 	selection: ValueType[];
 	multiple: boolean;
 	onSelect: CallableFunction;
-	onActiveDescendantChange: ListboxCommonProps<ValueType>["onActiveDescendantChange"];
+	onActiveDescendantChange: ListboxCommonProps<ValueType>["onActiveDescChange"];
 };
 
 function Listbox<ValueType, IsMultiple extends boolean>(
@@ -82,21 +78,29 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 ) {
 	const {
 		role = "listbox",
-		className,
-		style,
-		multiple,
-		disabled,
+		itemRole = "listitem",
+		itemTpl,
+		expanded = true,
 		tabIndex = 0,
+		multiple = false,
+		disabled = false,
+		className,
+		items,
+
 		onSelect = noop,
-		onActiveDescendantChange = noop as Required<
+		onCollapse = noop,
+		onActiveDescChange = noop as Required<
 			ListboxProps<ValueType, IsMultiple>
-		>["onActiveDescendantChange"],
-		show = true,
+		>["onActiveDescChange"],
+		onMouseOut,
 		onKeyDown,
+		onFocus,
+		onBlur,
+		...restUlProps
 	} = props;
 
 	const selection = ensureArray(props.selection);
-	const [pointerActiveNode, setPointerActiveNode] = useState<
+	const [hoverNode, setHoverNode] = useState<
 		ListItemConfig<ValueType> | undefined
 	>();
 	const [keyboardActiveNode, setKeyboardActiveNode] = useState<
@@ -105,18 +109,18 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 
 	const id = useEnsuredId("listbox-", props.id);
 
-	const items = useMemo(
-		() => createItems(props.items, disabled === true, id),
-		[props.items, disabled, id],
+	const listboxItems = useMemo(
+		() => createItems(items, disabled === true, id),
+		[items, disabled, id],
 	);
 
 	const stateRef = useStateRef<LocalState<ValueType>>({
 		activeNode: keyboardActiveNode,
 		selection,
-		items,
+		items: listboxItems,
 		multiple: multiple === true,
 		onSelect,
-		onActiveDescendantChange,
+		onActiveDescendantChange: onActiveDescChange,
 	});
 
 	const keyDownHandler = useCallback(
@@ -169,6 +173,7 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 						preventEvent(event);
 						onSelect(selectAll(items));
 					}
+					break;
 				}
 				case "Enter": {
 					if (activeNode != null) {
@@ -180,10 +185,29 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 							activeNode,
 						);
 					}
+					break;
 				}
+				case "Escape":
+					onCollapse();
+					break;
 			}
 
 			isFunction(onKeyDown) && onKeyDown(event);
+		},
+		[],
+	);
+
+	const itemMouseOverHandler = useCallback(
+		(item: ListItemConfig<ValueType>) => {
+			setHoverNode(item.disabled ? undefined : item);
+		},
+		[],
+	);
+
+	const mouseOutHandler = useCallback(
+		(event: React.MouseEvent<HTMLUListElement>) => {
+			setHoverNode(undefined);
+			isFunction(onMouseOut) && onMouseOut(event);
 		},
 		[],
 	);
@@ -207,25 +231,16 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 				activeDescendant = findFirstFoucsableItem(items);
 			}
 
-			if (isFunction(onActiveDescendantChange)) {
-				onActiveDescendantChange(activeDescendant);
+			if (isFunction(onActiveDescChange)) {
+				onActiveDescChange(activeDescendant);
 			}
 
 			setKeyboardActiveNode(activeDescendant);
+
+			isFunction(onFocus) && onFocus(event);
 		},
 		[],
 	);
-
-	const itemMouseOverHandler = useCallback(
-		(item: ListItemConfig<ValueType>) => {
-			setPointerActiveNode(item.disabled ? undefined : item);
-		},
-		[],
-	);
-
-	const mouseOutHandler = useCallback(() => {
-		setPointerActiveNode(undefined);
-	}, []);
 
 	const blurHandler = useCallback(
 		(event: React.FocusEvent<HTMLUListElement>) => {
@@ -235,10 +250,12 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 
 			if (relatedTarget == null && !target.contains(relatedTarget)) {
 				setKeyboardActiveNode(activeDescendant);
-				if (isFunction(onActiveDescendantChange)) {
-					onActiveDescendantChange(activeDescendant);
+				if (isFunction(onActiveDescChange)) {
+					onActiveDescChange(activeDescendant);
 				}
 			}
+
+			isFunction(onBlur) && onBlur(event);
 		},
 		[],
 	);
@@ -253,13 +270,13 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 
 	return (
 		<ul
+			{...restUlProps}
+			ref={ref}
 			id={id}
 			className={classname(css.list, className)}
-			style={style}
 			role={role}
 			tabIndex={tabIndex}
-			ref={ref}
-			hidden={!show}
+			hidden={!expanded}
 			onMouseOut={mouseOutHandler}
 			onFocus={focusHandler}
 			onBlur={blurHandler}
@@ -269,11 +286,11 @@ function Listbox<ValueType, IsMultiple extends boolean>(
 			}
 			aria-multiselectable={multiple || undefined}
 		>
-			{show
+			{expanded
 				? renderTree<ValueType, IsMultiple>(
-						items,
+						listboxItems,
 						props,
-						pointerActiveNode,
+						hoverNode,
 						keyboardActiveNode,
 						selectionHandler,
 						itemMouseOverHandler,
@@ -287,4 +304,10 @@ const ListboxWithRef = forwardRef(Listbox) as typeof Listbox;
 
 export { ListboxWithRef as Listbox };
 
-export type { ListItem, ListGroup, ListGroupOrItem, ListboxProps };
+export type {
+	ListItem,
+	ListGroup,
+	ListGroupOrItem,
+	ListboxProps,
+	ListboxItemTplProps,
+};

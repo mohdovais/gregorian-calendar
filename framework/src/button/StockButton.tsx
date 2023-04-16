@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
 import { classname } from "../utils/classname";
 import style from "./StockButton.module.css";
+import { forwardRef } from "react";
 
 interface StockButtonProps
 	extends React.DetailedHTMLProps<

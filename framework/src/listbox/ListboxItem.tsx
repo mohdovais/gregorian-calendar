@@ -7,7 +7,7 @@ import { cloneElement, isValidElement, memo } from "react";
 
 type HTMLLIAttributes = React.LiHTMLAttributes<HTMLLIElement>;
 
-type ItemTplProps<T> = {
+type ListboxItemTplProps<T> = {
 	item: ListItemConfig<T>;
 	selected: boolean;
 	multiple: boolean;
@@ -26,7 +26,7 @@ type ListboxItemProps<T> = {
 	multiple: boolean;
 	className?: string;
 	item: ListItemConfig<T>;
-	itemTpl?: (props: ItemTplProps<T>) => JSX.Element;
+	itemTpl?: (props: ListboxItemTplProps<T>) => JSX.Element;
 	onSelect?: (selection: ListItemConfig<T>) => void;
 	onMouseOver?: (item: ListItemConfig<T>) => void;
 };
@@ -92,4 +92,4 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 const ListboxItemMemo = memo(ListboxItem) as typeof ListboxItem;
 
 export { ListboxItemMemo as ListboxItem };
-export type { ListboxItemProps };
+export type { ListboxItemProps, ListboxItemTplProps };

@@ -29,7 +29,7 @@
 
 .group:empty,
 .list:empty {
-    display: none;
+    visibility: hidden;
 }
 
 .groupTitle {

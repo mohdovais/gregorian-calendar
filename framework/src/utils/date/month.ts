@@ -35,6 +35,7 @@ function getDatesOfMonth(
 
 	const mm = leftPad(month + 1, 2);
 	const yyyy = leftPad(year, 4);
+	// rome-ignore lint/style/noNonNullAssertion: <explanation>
 	const firstDayOfMonth = dayOfDate(`${yyyy}-${mm}-01`)!;
 
 	const result: DateParts[] = [];

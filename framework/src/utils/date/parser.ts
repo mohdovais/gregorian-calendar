@@ -1,7 +1,6 @@
 import { DateParts, DateString } from "./common";
 import { ensureTwoDigits } from "./format";
 import { getMonthNames } from "./names";
-import { ensureDateStringOrUndefined } from "./validations";
 
 function parseISODateStringToTimestamp(
 	dateString?: string | null,
@@ -99,15 +98,18 @@ function _tryWithMonthNumber(groups: Record<string, string>) {
 
 function parseDate(str: string, locale?: string) {
 	if (dMyRe.test(str)) {
-		return _tryWithMonthName(dMyRe.exec(str)!.groups!, locale);
+		// rome-ignore lint/style/noNonNullAssertion: <explanation>
+		return _tryWithMonthName(dMyRe.exec(str)?.groups!, locale);
 	}
 
 	if (MdyRe.test(str)) {
+		// rome-ignore lint/style/noNonNullAssertion: <explanation>
 		return _tryWithMonthName(MdyRe.exec(str)!.groups!, locale);
 	}
 
 	if (ddmmyyyyRe.test(str)) {
-		const { date, month, year } = ddmmyyyyRe.exec(str)!.groups!;
+		// rome-ignore lint/style/noNonNullAssertion: <explanation>
+		const { date, month, year } = ddmmyyyyRe.exec(str)?.groups!;
 		return (
 			_tryWithMonthNumber({ date, month, year }) ||
 			_tryWithMonthNumber({ date: month, month: date, year })
@@ -115,7 +117,8 @@ function parseDate(str: string, locale?: string) {
 	}
 
 	if (yyyymmddRe.test(str)) {
-		return _tryWithMonthNumber(yyyymmddRe.exec(str)!.groups!);
+		// rome-ignore lint/style/noNonNullAssertion: <explanation>
+		return _tryWithMonthNumber(yyyymmddRe.exec(str)?.groups!);
 	}
 
 	return;

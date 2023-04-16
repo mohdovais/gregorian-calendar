@@ -15,11 +15,11 @@ function formatDate(date: Date, format: string, locale?: string) {
 			case "l":
 				return getWeekdayNames("long", locale)[date.getDay()];
 			case "N": {
-				var d = date.getDay();
+				const d = date.getDay();
 				return d === 0 ? 7 : d;
 			}
 			case "S": {
-				var d = date.getDate() % 10;
+				const d = date.getDate() % 10;
 				return d === 1 ? "st" : d === 2 ? "nd" : d === 3 ? "rd" : "th";
 			}
 			case "w":

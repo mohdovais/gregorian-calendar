@@ -1,5 +1,6 @@
 import { CalrityAngleRight } from "../icons/ClarityAngleRight";
-import { ListGroup, ListItem, Listbox } from "../listbox";
+import { ListGroup, ListItem, Listbox, ListboxProps } from "../listbox";
+import { ListboxItemTplProps } from "../listbox";
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import { hasKey } from "../utils/object";
@@ -9,6 +10,7 @@ import {
 	createContext,
 	forwardRef,
 	useCallback,
+	useContext,
 	useEffect,
 	useRef,
 	useState,
@@ -25,35 +27,24 @@ type MenuGroup<T> = Omit<ListGroup<T>, "items"> & {
 
 type MenuGroupOrItem<T> = MenuItem<T> | MenuGroup<T>;
 
-interface MenuProps<T> {
-	id?: string;
-	className?: string;
-	style?: React.CSSProperties;
-	show?: boolean;
-	ref?: React.Ref<HTMLUListElement>;
-
-	items: MenuGroupOrItem<T>[];
-	onSelect?: (option: T) => void;
+function preventEvent(event: React.KeyboardEvent<HTMLElement>) {
+	event.preventDefault();
+	event.stopPropagation();
 }
 
-type OptionTplProps<T> = {
-	item: MenuItem<T>;
-	disabled: boolean;
-	active: boolean;
-	hover: boolean;
-};
-
-function ItemTpl<T>(props: OptionTplProps<T>) {
-	const { item, disabled, active, hover } = props;
-	const node = item;
-	const hasMenu = hasKey(node, "menu");
+function itemTpl<T>(props: ListboxItemTplProps<T>) {
+	const { item, disabled, hover } = props;
 
 	const ref = useRef<HTMLLIElement>(null);
-	const [open, setOpen] = useState(false);
-	const ooo = hover || open;
+	const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+	const enabled = !disabled;
+	const hasMenu = enabled && hasKey(item, "menu");
+	const expand = hasMenu && (hover || keyboardOpen);
+	const onSelect = useContext(MenuSelectContext);
 
 	const { x, y, strategy, refs } = useFloating({
-		open: ooo,
+		open: expand,
 		placement: "right",
 		strategy: "fixed",
 	});
@@ -61,9 +52,8 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 	const itemKeyDownHandler = useCallback(
 		(event: React.KeyboardEvent<HTMLLIElement>) => {
 			if (event.key === "ArrowRight") {
-				event.preventDefault();
-				event.stopPropagation();
-				setOpen(true);
+				preventEvent(event);
+				setKeyboardOpen(true);
 			}
 		},
 		[],
@@ -72,9 +62,8 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 	const menuKeyDownHandler = useCallback(
 		(event: React.KeyboardEvent<HTMLUListElement>) => {
 			if (event.key === "ArrowLeft" || event.key === "Escape") {
-				event.preventDefault();
-				event.stopPropagation();
-				setOpen(false);
+				preventEvent(event);
+				setKeyboardOpen(false);
 				ref.current?.focus();
 			}
 		},
@@ -82,23 +71,24 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 	);
 
 	useEffect(() => {
-		if (open && refs.floating.current) {
+		if (keyboardOpen && refs.floating.current) {
 			refs.floating.current.focus();
 		}
-	}, [open, refs.floating.current]);
+	}, [keyboardOpen, refs.floating.current]);
 
 	return (
-		<li className="menu" onKeyDown={itemKeyDownHandler} ref={ref}>
+		<li onKeyDown={hasMenu ? itemKeyDownHandler : undefined} ref={ref}>
 			<div className={css.wrapper} ref={refs.setReference}>
-				<div className={css.text}>{node.label}</div>
+				<div className={css.text}>{item.label}</div>
 				{hasMenu ? (
 					<CalrityAngleRight />
-				) : hasKey(node, "keys") ? (
-					<div>{node.keys as React.ReactNode}</div>
+				) : hasKey(item, "keys") ? (
+					<div>{item.keys as React.ReactNode}</div>
 				) : null}
 			</div>
-			{hasMenu && ooo ? (
+			{expand ? (
 				<Listbox
+					ref={refs.setFloating}
 					role="menu"
 					itemRole="menuitem"
 					id={item.id + "-menu"}
@@ -109,49 +99,41 @@ function ItemTpl<T>(props: OptionTplProps<T>) {
 						top: y ?? 0,
 						left: x ?? 0,
 					}}
-					items={ensureArray(item.menu)}
-					itemTpl={ItemTpl}
-					onSelect={undefined}
-					show={ooo}
-					ref={refs.setFloating}
+					items={ensureArray(item.menu as MenuGroupOrItem<T>)}
+					itemTpl={itemTpl}
+					expanded={expand}
 					onKeyDown={menuKeyDownHandler}
+					onSelect={onSelect}
 				/>
 			) : null}
 		</li>
 	);
 }
 
-//const ItemTplMemo = memo(ItemTpl) as typeof ItemTpl;
-
 // rome-ignore lint/suspicious/noExplicitAny: Generic
-const MenuContext = createContext<((value: any) => void) | undefined>(
+const MenuSelectContext = createContext<((value: any) => void) | undefined>(
 	undefined,
 );
 
-function Menu<T>(props: MenuProps<T>, ref?: React.Ref<HTMLUListElement>) {
-	const { id, className, style, onSelect, items, show } = props;
+type MenuProps<T> = Omit<
+	ListboxProps<T, false>,
+	"multiple" | "role" | "itemRole" | "itemTpl"
+>;
 
-	const onActiveDescendantChange = useCallback(
-		(activeDescendant?: MenuItem<T>) => {
-			//console.log(activeDescendant);
-		},
-		[],
-	);
+function Menu<T>(props: MenuProps<T>, ref?: React.Ref<HTMLUListElement>) {
+	const { className, onSelect, ...listboxProps } = props;
 
 	return (
-		<Listbox
-			role="menu"
-			itemRole="menuitem"
-			id={id}
-			className={classname(css.menu, className)}
-			style={style}
-			items={items}
-			itemTpl={ItemTpl}
-			onSelect={onSelect}
-			show={show}
-			ref={ref}
-			onActiveDescendantChange={onActiveDescendantChange}
-		/>
+		<MenuSelectContext.Provider value={onSelect}>
+			<Listbox
+				{...listboxProps}
+				className={classname(css.menu, className)}
+				role="menu"
+				itemRole="menuitem"
+				itemTpl={itemTpl}
+				ref={ref}
+			/>
+		</MenuSelectContext.Provider>
 	);
 }
 

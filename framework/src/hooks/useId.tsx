@@ -12,7 +12,7 @@ function createSmallRandomId(prefix = "") {
 }
 
 function useId(prefix?: string) {
-	const ref = useState(() => createRandomId(prefix));
+	const ref = useState(() => createSmallRandomId(prefix));
 	return ref[0];
 }
 

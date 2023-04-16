@@ -1,11 +1,12 @@
 import { Button } from "../../framework/src/button";
 import { DateField } from "../../framework/src/datefield";
+import { Listbox } from "../../framework/src/listbox";
 import { MaskedField } from "../../framework/src/maskedfield";
 import { Menu } from "../../framework/src/menu";
-import { Listbox } from "../../framework/src/listbox";
+import { MenuButton } from "../../framework/src/menu-button";
 import { isValidDateString } from "../../framework/src/utils/date";
-import { useState } from "react";
 import menu from "../data/menu.json";
+import { useState } from "react";
 const sunday = [0, 6];
 const disabledDates = ["2023-01-26", "2023-08-15"];
 
@@ -39,28 +40,12 @@ function App() {
 				size={10}
 			/>
 			<Button type="submit">Submit</Button>
-			<button type="button">hello</button>
-			<Menu items={menu} onSelect={setV1} />
+			<MenuButton items={menu} onSelect={console.log}>
+				Menu
+			</MenuButton>
 			<br />
 		</form>
 	);
 }
 
 export { App };
-
-/*
- 
-			<Listbox items={menu} selection={v1} onSelect={setV1} />
-			<MenuButton
-				items={menu}
-				onSelect={(value, config) => console.log(value, config)}
-			>
-				File
-			</MenuButton>
-			<Listbox
-				multiple={true}
-				items={menu}
-				selection={multipleValues}
-				onSelect={setMultipleValues}
-			/>
- */

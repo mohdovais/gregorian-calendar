@@ -64,7 +64,7 @@ function MaskedField(props: MaskedFieldProps) {
 	const changeHandler = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			setState((state) => {
-				var newState = store(state, {
+				const newState = store(state, {
 					type: "input_v",
 					value: event.target.value,
 				});

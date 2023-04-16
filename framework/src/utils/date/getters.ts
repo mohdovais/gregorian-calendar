@@ -3,6 +3,7 @@ import type { DateParts } from "./common";
 import { convertToTDate } from "./parser";
 
 function getToday(): DateParts {
+	// rome-ignore lint/style/noNonNullAssertion: <explanation>
 	return convertToTDate(new Date())!;
 }
 

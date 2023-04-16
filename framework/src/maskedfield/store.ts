@@ -20,10 +20,10 @@ type InitializerArg = {
 };
 
 function _applyPattern(pattern: string, numeric: string) {
-	var vLength = numeric.length;
-	var pLength = pattern.length;
-	var i: number;
-	var result = pattern;
+	const vLength = numeric.length;
+	const pLength = pattern.length;
+	let i: number;
+	let result = pattern;
 
 	if (vLength === 0 || pLength === 0) {
 		return numeric;
@@ -44,10 +44,10 @@ function isNumericChar(str: string) {
 }
 
 function filterNumeric(str: string) {
-	var result = "";
-	var charCode: number;
-	var length = str.length;
-	for (var i = 0; i < length; i++) {
+	let result = "";
+	let charCode: number;
+	const length = str.length;
+	for (let i = 0; i < length; i++) {
 		charCode = str.charCodeAt(i);
 		if (charCode > 47 && charCode < 58) {
 			result = result + str.charAt(i);
@@ -99,7 +99,7 @@ function initializer(args: InitializerArg): InputState {
 function store(state: InputState, action: Action): InputState {
 	switch (action.type) {
 		case "input_v": {
-			var value = _applyPattern(state._pattern, filterNumeric(action.value));
+			const value = _applyPattern(state._pattern, filterNumeric(action.value));
 			return value === state._value
 				? state
 				: copy(state, {
