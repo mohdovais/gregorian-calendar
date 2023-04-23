@@ -36,7 +36,7 @@ interface ListboxCommonProps<T>
 	expanded?: boolean;
 	disabled?: boolean;
 	items: ListGroupOrItem<T>[];
-	itemTpl: ListboxItemProps<T>["itemTpl"];
+	itemTpl?: ListboxItemProps<T>["itemTpl"];
 	itemRole?: React.AriaRole;
 	itemClassName?: string;
 	groupClassName?: string;
@@ -175,5 +175,6 @@ export type {
 	ListGroup,
 	ListGroupOrItem,
 	ListboxProps,
+	ListboxConditionalProps,
 	ListboxItemTplProps,
 };

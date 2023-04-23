@@ -1,4 +1,3 @@
-import { usePosition } from "../hooks/usePosition";
 import { CalrityAngleRight } from "../icons/ClarityAngleRight";
 import { ListGroup, ListItem, Listbox, ListboxProps } from "../listbox";
 import { ListboxItemTplProps } from "../listbox";
@@ -6,6 +5,7 @@ import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
 import { hasKey } from "../utils/object";
 import css from "./Menu.module.css";
+import { useFloating } from "@floating-ui/react-dom";
 import {
 	createContext,
 	forwardRef,
@@ -33,37 +33,20 @@ function preventEvent(event: React.KeyboardEvent<HTMLElement>) {
 }
 
 function itemTpl<T>(props: ListboxItemTplProps<T>) {
-	return hasKey(props.item, "menu")
-		? itemWithMenuTpl(props)
-		: itemSimpleTpl(props);
-}
-
-function itemSimpleTpl<T>(props: ListboxItemTplProps<T>) {
-	const { item } = props;
-
-	return (
-		<div className={css.wrapper}>
-			<div className={css.text}>{item.label}</div>
-			{hasKey(item, "keys") ? <div>{item.keys as React.ReactNode}</div> : null}
-		</div>
-	);
-}
-
-function itemWithMenuTpl<T>(props: ListboxItemTplProps<T>) {
-	const { item, disabled } = props;
+	const { item, disabled, hover } = props;
 
 	const ref = useRef<HTMLLIElement>(null);
 	const [keyboardOpen, setKeyboardOpen] = useState(false);
 
 	const enabled = !disabled;
 	const hasMenu = enabled && hasKey(item, "menu");
-	const expanded = hasMenu && true; // (hover || keyboardOpen);
+	const expand = hasMenu && (hover || keyboardOpen);
 	const onSelect = useContext(MenuSelectContext);
 
-	const { refs, style } = usePosition({
-		expanded,
-		position: "fixed",
-		align: "right",
+	const { x, y, strategy, refs } = useFloating({
+		open: expand,
+		placement: "right",
+		strategy: "fixed",
 	});
 
 	const itemKeyDownHandler = useCallback(
@@ -88,30 +71,37 @@ function itemWithMenuTpl<T>(props: ListboxItemTplProps<T>) {
 	);
 
 	useEffect(() => {
-		if (keyboardOpen && refs.floating) {
-			refs.floating.focus();
+		if (keyboardOpen && refs.floating.current) {
+			refs.floating.current.focus();
 		}
-	}, [keyboardOpen, refs.floating]);
-
-	console.log(style);
+	}, [keyboardOpen, refs.floating.current]);
 
 	return (
 		<li onKeyDown={hasMenu ? itemKeyDownHandler : undefined} ref={ref}>
 			<div className={css.wrapper} ref={refs.setReference}>
 				<div className={css.text}>{item.label}</div>
-				<CalrityAngleRight />
+				{hasMenu ? (
+					<CalrityAngleRight />
+				) : hasKey(item, "keys") ? (
+					<div>{item.keys as React.ReactNode}</div>
+				) : null}
 			</div>
-			{expanded ? (
+			{expand ? (
 				<Listbox
 					ref={refs.setFloating}
 					role="menu"
 					itemRole="menuitem"
 					id={item.id + "-menu"}
 					className={css.menu}
-					style={style}
+					style={{
+						willChange: "opacity",
+						position: strategy,
+						top: y ?? 0,
+						left: x ?? 0,
+					}}
 					items={ensureArray(item.menu as MenuGroupOrItem<T>)}
 					itemTpl={itemTpl}
-					expanded={expanded}
+					expanded={expand}
 					onKeyDown={menuKeyDownHandler}
 					onSelect={onSelect}
 				/>

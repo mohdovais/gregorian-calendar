@@ -1,11 +1,9 @@
 import { Button } from "../../framework/src/button";
 import { DateField } from "../../framework/src/datefield";
-import { Listbox } from "../../framework/src/listbox";
 import { MaskedField } from "../../framework/src/maskedfield";
-import { Menu } from "../../framework/src/menu";
 import { MenuButton } from "../../framework/src/menu-button";
 import { isValidDateString } from "../../framework/src/utils/date";
-import menu from "../data/menu.json";
+import menu from "../data/menu2.json";
 import { useState } from "react";
 const sunday = [0, 6];
 const disabledDates = ["2023-01-26", "2023-08-15"];

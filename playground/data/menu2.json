@@ -1,0 +1,70 @@
+[
+    {
+        "disabled": true,
+        "items": [
+            {
+                "label": "as Icons",
+                "value": "icons",
+                "keys": "⌘ 1"
+            },
+            {
+                "label": "as List",
+                "value": "list",
+                "keys": "⌘ 2"
+            },
+            {
+                "label": "as Columns",
+                "value": "columns",
+                "keys": "⌘ 3"
+            },
+            {
+                "label": "as Gallery",
+                "value": "gallery",
+                "keys": "⌘ 4"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "label": "Use Stacks",
+                "value": "stacks",
+                "keys": "⌃ ⌘ 0"
+            },
+            {
+                "label": "Sort By",
+                "value": "sort",
+                "menu": [
+                    {
+                        "label": "as Icons",
+                        "value": "icons",
+                        "keys": "⌘ 1"
+                    },
+                    {
+                        "label": "as List",
+                        "value": "list",
+                        "keys": "⌘ 2"
+                    },
+                    {
+                        "label": "as Columns",
+                        "value": "columns",
+                        "keys": "⌘ 3"
+                    },
+                    {
+                        "label": "as Gallery",
+                        "value": "gallery",
+                        "keys": "⌘ 4"
+                    }
+                ]
+            },
+            {
+                "label": "Clean Up",
+                "value": "clean"
+            },
+            {
+                "label": "Clean Up By",
+                "value": "clean-by"
+            }
+        ]
+    }
+]

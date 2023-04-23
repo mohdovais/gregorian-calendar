@@ -1,3 +1,5 @@
+import { StockButton } from "../button";
+
 interface ComboboxProps<T> {
 	collapseOnSelect?: boolean;
 	delimiter?: string;
@@ -16,7 +18,15 @@ interface ComboboxProps<T> {
 function Combobox() {
 	return (
 		<div>
-			<div />
+			<div
+				role="combobox"
+				aria-expanded={true}
+				aria-haspopup="dialog"
+				aria-autocomplete="none"
+				aria-controls="1"
+				aria-activedescendant=""
+			/>
+			<StockButton aria-hidden={true} tabIndex={-1} />
 			<div />
 		</div>
 	);
