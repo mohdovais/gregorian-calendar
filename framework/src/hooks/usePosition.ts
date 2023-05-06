@@ -2,23 +2,28 @@ import { createDefferedFunction } from "../utils/function";
 import { PositionConfig, createPositionObserver } from "../utils/position";
 import { useEffect, useState } from "react";
 
-function usePosition(config: PositionConfig = {}) {
-	const { align, alignItem, flip, position } = config;
-	const [target, setTarget] = useState<HTMLElement | null>(null);
-	const [floating, setfloating] = useState<HTMLElement | null>(null);
+type UsePositionConfig = {
+	show?: boolean;
+	settings?: PositionConfig;
+};
+
+function usePosition<
+	TargetElement extends HTMLElement = HTMLElement,
+	FloatingElement extends HTMLElement = HTMLElement,
+>(config: UsePositionConfig = {}) {
+	const { show = false, settings = {} } = config;
+	const [target, setTarget] = useState<TargetElement | null>(null);
+	const [floating, setFloating] = useState<FloatingElement | null>(null);
 	const [style, setStyle] = useState<React.CSSProperties>({});
 
 	useEffect(() => {
 		const deferredSetStyle = createDefferedFunction(setStyle, 100);
-		return target == null || floating == null
+		return !show || target == null || floating == null
 			? undefined
 			: createPositionObserver({
-					align,
-					alignItem,
-					flip,
-					position,
 					target,
 					floating,
+					settings,
 					onChange: (css) => {
 						const style = floating.style;
 						const {
@@ -41,7 +46,16 @@ function usePosition(config: PositionConfig = {}) {
 						deferredSetStyle(css);
 					},
 			  });
-	}, [target, floating, align, alignItem, flip, position]);
+	}, [
+		target,
+		floating,
+		settings.align,
+		settings.alignItem,
+		settings.flip,
+		settings.position,
+		settings.gap,
+		show,
+	]);
 
 	return {
 		style,
@@ -49,10 +63,10 @@ function usePosition(config: PositionConfig = {}) {
 			reference: target,
 			setReference: setTarget,
 			floating,
-			setfloating,
+			setFloating,
 		},
 	};
 }
 
 export { usePosition };
-export type { PositionConfig };
+export type { UsePositionConfig };

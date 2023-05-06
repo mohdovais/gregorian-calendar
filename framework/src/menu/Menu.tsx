@@ -61,9 +61,8 @@ function itemWithMenuTpl<T>(props: ListboxItemTplProps<T>) {
 	const onSelect = useContext(MenuSelectContext);
 
 	const { refs, style } = usePosition({
-		expanded,
-		position: "fixed",
-		align: "right",
+		show: expanded,
+		settings: { position: "right" },
 	});
 
 	const itemKeyDownHandler = useCallback(

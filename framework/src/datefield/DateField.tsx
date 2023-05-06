@@ -1,7 +1,7 @@
 import { StockButton } from "../button";
 import { Calendar, CalendarProps } from "../calendar";
 import commonStyle from "../css/common.module.css";
-import { usePickerPosition } from "../hooks/usePickerPosition";
+import { usePosition } from "../hooks/usePosition";
 import { ClarityCalendarLine } from "../icons/ClarityCalendarLine";
 import { Input, InputProps } from "../input";
 import { ensureArray } from "../utils/array";
@@ -57,11 +57,11 @@ function DateField(props: DateFieldProps) {
 	const self = useRef({ value: value });
 	const hiddenInputRef = useRef<HTMLInputElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
-	const { floatStyle, refs } = usePickerPosition(isOpen);
+	const { style: floatingStyle, refs } = usePosition<HTMLInputElement>();
 
 	const triggerChange = useCallback(
 		(value: DateString | undefined) => {
-			const input = refs.reference.current as HTMLInputElement;
+			const input = refs.reference;
 			const hiddenInput = hiddenInputRef.current;
 			if (
 				input != null &&
@@ -90,7 +90,7 @@ function DateField(props: DateFieldProps) {
 	);
 
 	useEffect(() => {
-		const input = refs.reference.current as HTMLInputElement;
+		const input = refs.reference;
 		if (input != null) {
 			input.value = format(value, locale);
 			self.current = { value: value };
@@ -140,7 +140,7 @@ function DateField(props: DateFieldProps) {
 				<Calendar
 					ref={refs.setFloating}
 					className={commonStyle.window}
-					style={floatStyle}
+					style={floatingStyle}
 					dayNameFormat={dayNameFormat}
 					disabledDates={disabledDates}
 					disabledDays={disabledDays}

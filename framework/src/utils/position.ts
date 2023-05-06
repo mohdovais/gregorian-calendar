@@ -6,9 +6,10 @@ type PositionConfig = {
 	gap?: number;
 };
 
-type CreatePositionConfig = PositionConfig & {
+type CreatePositionConfig = {
 	target: HTMLElement;
 	floating: HTMLElement;
+	settings?: PositionConfig;
 	onChange: (css: ResultCSSProperties) => void;
 };
 
@@ -45,15 +46,7 @@ const getDimension = (el: HTMLElement): Dimension => ({
 });
 
 const createPositionObserver = (config: CreatePositionConfig) => {
-	const {
-		onChange,
-		target,
-		floating,
-		position = "bottom",
-		align = "start",
-		alignItem = "start",
-		flip = true,
-	} = config;
+	const { onChange, target, floating, settings } = config;
 	let isVisible = false;
 	let busy = false;
 	let lastStyle: ResultCSSProperties;
@@ -66,14 +59,7 @@ const createPositionObserver = (config: CreatePositionConfig) => {
 						willChange: "visibility",
 						visibility: "visible",
 					},
-					calculateFixedPosition(
-						targetRect,
-						floatingRect,
-						position,
-						align,
-						alignItem,
-						flip,
-					),
+					calculateFixedPosition(targetRect, floatingRect, settings),
 			  ) as ResultCSSProperties)
 			: defaultFixedCssStyle;
 
@@ -86,6 +72,7 @@ const createPositionObserver = (config: CreatePositionConfig) => {
 	let observer = new IntersectionObserver(
 		(entries) => {
 			const entry = entries[0];
+			console.log(entry);
 			isVisible = entry.isIntersecting;
 			calculate(entry.boundingClientRect, getDimension(floating));
 		},
@@ -117,18 +104,43 @@ const createPositionObserver = (config: CreatePositionConfig) => {
 
 function calculateFixedPosition(
 	targetRect: DOMRectReadOnly,
-	floatingRect: Dimension,
+	floatingDimension: Dimension,
+	settings: PositionConfig = {},
+) {
+	const {
+		align = "start",
+		alignItem = "start",
+		flip = true,
+		gap = 0,
+		position = "bottom",
+	} = settings;
+
+	return doCalculateFixedPosition(
+		targetRect,
+		floatingDimension,
+		position,
+		align,
+		alignItem,
+		flip,
+		gap,
+	);
+}
+
+function doCalculateFixedPosition(
+	targetRect: DOMRectReadOnly,
+	floatingDimension: Dimension,
 	position: Required<PositionConfig>["position"],
 	align: Required<PositionConfig>["align"],
 	alignItem: Required<PositionConfig>["alignItem"],
 	flip: Required<PositionConfig>["flip"],
+	gap: Required<PositionConfig>["gap"],
 ): Omit<ResultCSSProperties, "position" | "willChange" | "visibility"> {
 	const targetRectTop = targetRect.top;
 	const targetRectLeft = targetRect.left;
 	const targetRectBottom = targetRect.bottom;
 	const targetRectRight = targetRect.right;
-	const floatingRectWidth = floatingRect.width;
-	const floatingRectHeight = floatingRect.height;
+	const floatingRectWidth = floatingDimension.width;
+	const floatingRectHeight = floatingDimension.height;
 
 	const spaceBottom = window.innerHeight - targetRectBottom;
 	const spaceRight = window.innerWidth - targetRectRight;
@@ -163,76 +175,80 @@ function calculateFixedPosition(
 
 	switch (position) {
 		case "bottom": {
-			return flip &&
+			return flip === true &&
 				floatingRectHeight > spaceBottom &&
 				targetRectTop > spaceBottom
-				? calculateFixedPosition(
+				? doCalculateFixedPosition(
 						targetRect,
-						floatingRect,
+						floatingDimension,
 						"top",
 						align,
 						alignItem,
 						false,
+						gap,
 				  )
 				: {
 						left: targetRectLeft + deltaAlignX - deltaAlignItemX,
-						top: targetRectBottom,
+						top: targetRectBottom + gap,
 				  };
 		}
 		case "top": {
 			return flip &&
 				floatingRectHeight > targetRectTop &&
 				spaceBottom > targetRectTop
-				? calculateFixedPosition(
+				? doCalculateFixedPosition(
 						targetRect,
-						floatingRect,
+						floatingDimension,
 						"bottom",
 						align,
 						alignItem,
 						false,
+						gap,
 				  )
 				: {
 						left: targetRectLeft + deltaAlignX - deltaAlignItemX,
-						bottom: window.innerHeight - targetRectTop,
+						bottom: window.innerHeight - targetRectTop + gap,
 				  };
 		}
 		case "left": {
 			return flip &&
 				floatingRectWidth > targetRectLeft &&
 				spaceRight > targetRectLeft
-				? calculateFixedPosition(
+				? doCalculateFixedPosition(
 						targetRect,
-						floatingRect,
+						floatingDimension,
 						"right",
 						align,
 						alignItem,
 						false,
+						gap,
 				  )
 				: {
 						top: targetRectTop + deltaAlignY - deltaAlignItemY,
-						right: window.innerWidth - targetRectLeft,
+						right: window.innerWidth - targetRectLeft + gap,
 				  };
 		}
 		case "right": {
 			return flip &&
 				floatingRectWidth > spaceRight &&
 				targetRectLeft > spaceRight
-				? calculateFixedPosition(
+				? doCalculateFixedPosition(
 						targetRect,
-						floatingRect,
+						floatingDimension,
 						"left",
 						align,
 						alignItem,
 						false,
+						gap,
 				  )
 				: {
 						top: targetRectTop + deltaAlignY - deltaAlignItemY,
-						left: targetRectRight,
+						left: targetRectRight + gap,
 				  };
 		}
 	}
 }
 
-export { createPositionObserver };
+export { createPositionObserver, calculateFixedPosition };
 
 export type { PositionConfig };

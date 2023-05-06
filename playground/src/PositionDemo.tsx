@@ -1,6 +1,6 @@
 import { Button } from "../../framework/src/button";
 import {
-	PositionConfig,
+	UsePositionConfig,
 	usePosition,
 } from "../../framework/src/hooks/usePosition";
 import { useCallback, useState } from "react";
@@ -12,19 +12,25 @@ const style1: React.CSSProperties = {
 	overflow: "auto",
 };
 
-type State = Pick<Required<PositionConfig>, "position" | "align" | "alignItem">;
+type State = Omit<Required<UsePositionConfig>, "flip">;
 
 function PositionDemo() {
 	const [state, setState] = useState<State>({
 		position: "bottom",
 		align: "start",
 		alignItem: "start",
+		gap: 0,
+		show: false,
 	});
 	const onChange = useCallback(
 		(event: React.ChangeEvent<HTMLFieldSetElement>) => {
 			const input = event.target as unknown as HTMLInputElement;
+
 			setState((state) =>
-				Object.assign({}, state, { [input.name]: input.value }),
+				Object.assign({}, state, {
+					[input.name]:
+						input.name === "gap" ? parseInt(input.value, 10) : input.value,
+				}),
 			);
 		},
 		[],
@@ -180,6 +186,10 @@ function PositionDemo() {
 						<input type="radio" name="alignItem" value="end" /> end
 					</label>
 				</fieldset>
+				<fieldset onChange={onChange}>
+					<legend>Gap</legend>
+					<input type="range" name="gap" min={0} max={20} defaultValue={0} />
+				</fieldset>
 			</form>
 			<div style={style1}>
 				<p>
@@ -213,7 +223,7 @@ function PositionDemo() {
 				</p>
 				<Button ref={refs.setReference}>Hello, world!</Button>
 				<div
-					ref={refs.setfloating}
+					ref={refs.setFloating}
 					style={{
 						position: style.position,
 						visibility: style.visibility,
@@ -228,6 +238,7 @@ function PositionDemo() {
 						backgroundColor: "yellow",
 						padding: 10,
 					}}
+					hidden={!state.show}
 				>
 					Nulla justo mi, molestie quis suscipit id, rutrum sit amet elit. Morbi
 					varius, justo nec fringilla semper, velit sem condimentum justo, sed
