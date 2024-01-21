@@ -10,10 +10,12 @@ function ensureCallableFunction<T extends CallableFunction>(fn: T | undefined) {
 	return isFunction(fn) ? fn : (noop as T);
 }
 
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
 type ArgumentTypes<F extends Function> = F extends (...args: infer A) => unknown
 	? A
 	: never;
 
+// biome-ignore lint/complexity/noBannedTypes: <explanation>
 function createDefferedFunction<T extends Function>(fn: T, delay = 1) {
 	let t: number;
 

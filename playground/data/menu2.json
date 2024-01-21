@@ -1,6 +1,7 @@
 [
     {
         "disabled": true,
+        "label": "some",
         "items": [
             {
                 "label": "as Icons",

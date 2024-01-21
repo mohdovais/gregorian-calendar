@@ -1,9 +1,7 @@
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Button } from "../../framework/src/button";
-import {
-	UsePositionConfig,
-	usePosition,
-} from "../../framework/src/hooks/usePosition";
-import { useCallback, useState } from "react";
+import { usePosition } from "../../framework/src/hooks/usePosition";
+import { PositionConfig } from "../../framework/src/utils/position";
 
 const style1: React.CSSProperties = {
 	width: 600,
@@ -12,15 +10,12 @@ const style1: React.CSSProperties = {
 	overflow: "auto",
 };
 
-type State = Omit<Required<UsePositionConfig>, "flip">;
-
 function PositionDemo() {
-	const [state, setState] = useState<State>({
+	const [state, setState] = useState<PositionConfig>({
 		position: "bottom",
 		align: "start",
 		alignItem: "start",
 		gap: 0,
-		show: false,
 	});
 	const onChange = useCallback(
 		(event: React.ChangeEvent<HTMLFieldSetElement>) => {
@@ -35,7 +30,10 @@ function PositionDemo() {
 		},
 		[],
 	);
-	const { style, refs } = usePosition(state);
+
+	const { style, refs } = usePosition(true, state);
+
+	console.log(style);
 
 	return (
 		<div>
@@ -225,7 +223,7 @@ function PositionDemo() {
 				<div
 					ref={refs.setFloating}
 					style={{
-						position: style.position,
+						position: "fixed",
 						visibility: style.visibility,
 						top: style.top,
 						right: style.right,
@@ -238,7 +236,6 @@ function PositionDemo() {
 						backgroundColor: "yellow",
 						padding: 10,
 					}}
-					hidden={!state.show}
 				>
 					Nulla justo mi, molestie quis suscipit id, rutrum sit amet elit. Morbi
 					varius, justo nec fringilla semper, velit sem condimentum justo, sed

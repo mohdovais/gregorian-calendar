@@ -1,17 +1,17 @@
 import { classname } from "./classname";
 
 test("classname", () => {
-	expect(classname([null])).toBe("");
-	expect(classname([undefined])).toBe("");
-	expect(classname([false])).toBe("");
-	expect(classname([null, undefined, false])).toBe("");
+	expect(classname([null])).toBeUndefined();
+	expect(classname([undefined])).toBeUndefined();
+	expect(classname([false])).toBeUndefined();
+	expect(classname([null, undefined, false])).toBeUndefined();
 	expect(classname([true])).toBe("true");
 	expect(classname(["a", "b", "c"])).toBe("a b c");
 
-	expect(classname(null)).toBe("");
-	expect(classname(undefined)).toBe("");
-	expect(classname(false)).toBe("");
-	expect(classname(null, undefined, false)).toBe("");
+	expect(classname(null)).toBeUndefined();
+	expect(classname(undefined)).toBeUndefined();
+	expect(classname(false)).toBeUndefined();
+	expect(classname(null, undefined, false)).toBeUndefined();
 	expect(classname(true)).toBe("true");
 	expect(classname("a", "b", "c")).toBe("a b c");
 

@@ -1,9 +1,9 @@
 //@ts-check
-import { cssCopyPlugin } from "./rollup-plugin-copy-css.mjs";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import fs from "node:fs";
 import path from "node:path";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 import { swcPlugin } from "rollup-plugin-swc-core";
+import { cssCopyPlugin } from "./rollup-plugin-copy-css.mjs";
 
 const cssRegExp = /\.s?css$/i;
 const ignoreRegExp = /\.(test|d)\.ts$/i;
@@ -33,7 +33,7 @@ function getIndexFile(dir) {
 function getBuildFiles(root, deep = true) {
 	const files = [];
 
-	fs.readdirSync(root).forEach((child) => {
+	for(const child of fs.readdirSync(root)){
 		const file = path.join(root, child);
 		const lstat = fs.lstatSync(file);
 
@@ -51,8 +51,8 @@ function getBuildFiles(root, deep = true) {
 		) {
 			files.push(file);
 		}
-	});
-
+	}
+	
 	return files.flat();
 }
 
@@ -73,12 +73,12 @@ const config = soruces.flatMap((input) => {
 	const mjs = dist.replace(/\.tsx?/, ".mjs");
 
 	const subpath =
-		"./" + path.relative("./src", input).replace(/\/index.tsx?|\.tsx?$/i, "");
+		`./${path.relative("./src", input).replace(/\/index.tsx?|\.tsx?$/i, "")}`;
 
 	exports[subpath] = {
-		import: "./" + path.relative("./", mjs),
-		require: "./" + path.relative("./", cjs),
-		types: "./" + path.relative("./", mjs).replace(/\.[cm]?js$/i, ".d.ts"),
+		import: `./${path.relative("./", mjs)}`,
+		require: `./${path.relative("./", cjs)}`,
+		types: `./${path.relative("./", mjs).replace(/\.[cm]?js$/i, ".d.ts")}`,
 	};
 
 	const externalInternal = soruces.filter((x) => x !== input);

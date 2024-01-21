@@ -1,0 +1,17 @@
+.option {
+    cursor: pointer;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+}
+
+.option:hover {
+    background-color: aquamarine;
+}
+
+.active {
+    outline: 2px solid aqua;
+}
+
+.selected {
+    background-color: blueviolet;
+}

@@ -1,95 +1,51 @@
 import { classname } from "../utils/classname";
-import { isFunction, noop } from "../utils/function";
-import { copy } from "../utils/object";
-import css from "./Listbox.module.css";
-import { ListItemConfig, preventEvent } from "./utils";
-import { cloneElement, isValidElement, memo } from "react";
-
-type HTMLLIAttributes = React.LiHTMLAttributes<HTMLLIElement>;
-
-type ListboxItemTplProps<T> = {
-	item: ListItemConfig<T>;
-	selected: boolean;
-	multiple: boolean;
-	disabled: boolean;
-	hover: boolean;
-	active: boolean;
-};
+import style from "./ListboxItem.module.css";
 
 type ListboxItemProps<T> = {
-	id: string;
-	role: string;
-	disabled: boolean;
-	selected: boolean;
-	hover: boolean;
-	active: boolean;
-	multiple: boolean;
 	className?: string;
-	item: ListItemConfig<T>;
-	itemTpl?: (props: ListboxItemTplProps<T>) => JSX.Element;
-	onSelect?: (selection: ListItemConfig<T>) => void;
-	onMouseOver?: (item: ListItemConfig<T>) => void;
+	id?: string;
+	value: T;
+	active?: boolean;
+	selected?: boolean;
+	disabled?: boolean;
+	children?: string | React.ReactElement;
+	onClick?: ((value: T) => void) | ((value: T) => boolean);
 };
 
 function ListboxItem<T>(props: ListboxItemProps<T>) {
 	const {
-		id,
-		item,
-		hover,
 		active,
-		disabled,
-		selected,
-		multiple,
+		children,
 		className,
-		itemTpl,
-		role,
-		onSelect = noop,
-		onMouseOver = noop,
+		disabled,
+		id,
+		onClick,
+		selected,
+		value,
 	} = props;
 
-	const liProps: HTMLLIAttributes = {
-		id,
-		className: classname(
-			css.listitem,
-			disabled && css.disabled,
-			selected && css.selected,
-			active && css.active,
-			className,
-		),
-		role,
-		"aria-disabled": disabled || undefined,
-		"aria-selected": disabled ? undefined : selected,
-		tabIndex: disabled ? undefined : -1,
-		onClick: disabled
-			? undefined
-			: (event) => {
-					preventEvent(event);
-					onSelect(item);
-			  },
-		onFocus: preventEvent,
-		onMouseOver: () => onMouseOver(item),
-	};
-
-	const jsxElement = isFunction(itemTpl)
-		? itemTpl({ item, selected, multiple, disabled, active, hover })
-		: undefined;
-
-	if (
-		jsxElement !== undefined &&
-		isValidElement(jsxElement) &&
-		jsxElement.type === "li"
-	) {
-		// @TODO merge props
-		const { children, ...customProps } = jsxElement.props as HTMLLIAttributes;
-		return cloneElement(jsxElement, copy(customProps, liProps));
-	}
-
 	return (
-		<li {...liProps}>{jsxElement === undefined ? item.label : jsxElement}</li>
+		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+		<div
+			id={id}
+			className={classname(
+				className,
+				style.option,
+				active && style.active,
+				selected && style.selected,
+			)}
+			role="option"
+			aria-selected={selected || undefined}
+			aria-disabled={disabled}
+			aria-current={active || undefined}
+			onClick={() => {
+				typeof onClick === "function" && onClick(value);
+			}}
+		>
+			{children}
+		</div>
 	);
 }
 
-const ListboxItemMemo = memo(ListboxItem) as typeof ListboxItem;
-
-export { ListboxItemMemo as ListboxItem };
-export type { ListboxItemProps, ListboxItemTplProps };
+export { ListboxItem };
+export type { ListboxItemProps };

@@ -1,7 +1,8 @@
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { StockButton } from "../button";
 import { Calendar, CalendarProps } from "../calendar";
 import commonStyle from "../css/common.module.css";
-import { usePosition } from "../hooks/usePosition";
+import { Floating } from "../floating/Floating";
 import { ClarityCalendarLine } from "../icons/ClarityCalendarLine";
 import { Input, InputProps } from "../input";
 import { ensureArray } from "../utils/array";
@@ -18,7 +19,6 @@ import { format } from "../utils/date";
 import { noop } from "../utils/function";
 import { ensureNotNullOrUndefined } from "../utils/object";
 import style from "./DateField.module.css";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 interface DateFieldProps extends Omit<InputProps, "onChange"> {
 	value?: string;
@@ -53,15 +53,15 @@ function DateField(props: DateFieldProps) {
 	const min = ensureDateString(_min, MIN_DATE_STRING);
 	const max = ensureDateString(_max, MAX_DATE_STRING);
 	const value = ensureDateStringOrUndefined(_value);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	const self = useRef({ value: value });
 	const hiddenInputRef = useRef<HTMLInputElement | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
-	const { style: floatingStyle, refs } = usePosition<HTMLInputElement>();
 
 	const triggerChange = useCallback(
 		(value: DateString | undefined) => {
-			const input = refs.reference;
+			const input = inputRef.current;
 			const hiddenInput = hiddenInputRef.current;
 			if (
 				input != null &&
@@ -79,7 +79,7 @@ function DateField(props: DateFieldProps) {
 
 			setIsOpen(false);
 		},
-		[refs.reference, onChange, locale],
+		[onChange, locale],
 	);
 
 	const onBlur = useCallback(
@@ -90,23 +90,24 @@ function DateField(props: DateFieldProps) {
 	);
 
 	useEffect(() => {
-		const input = refs.reference;
-		if (input != null) {
-			input.value = format(value, locale);
-			self.current = { value: value };
-			if (value != null) {
-				let validity = "";
-				if (value < min) {
-					validity = `Minimum date allowed is ${format(min, locale)}`;
-				} else if (value > max) {
-					validity = `Maximun date allowed is ${format(max, locale)}`;
-				} else if (disabledDates.includes(value)) {
-					validity = `Date ${format(max, locale)} is not allowed`;
-				}
-				input.setCustomValidity(validity);
-			}
+		const input = inputRef.current;
+		if (input == null) {
+			return;
 		}
-	}, [value, locale, min, max, disabledDates]);
+		input.value = format(value, locale);
+		self.current = { value: value };
+		if (value != null) {
+			let validity = "";
+			if (value < min) {
+				validity = `Minimum date allowed is ${format(min, locale)}`;
+			} else if (value > max) {
+				validity = `Maximun date allowed is ${format(max, locale)}`;
+			} else if (disabledDates.includes(value)) {
+				validity = `Date ${format(max, locale)} is not allowed`;
+			}
+			input.setCustomValidity(validity);
+		}
+	}, [locale, min, max, disabledDates, value]);
 
 	return (
 		<span className={style.wrapper}>
@@ -124,7 +125,7 @@ function DateField(props: DateFieldProps) {
 				autoCapitalize="off"
 				autoCorrect="off"
 				autoComplete="off"
-				ref={refs.setReference}
+				ref={inputRef}
 				onBlur={onBlur}
 				min={min}
 				max={max}
@@ -132,26 +133,24 @@ function DateField(props: DateFieldProps) {
 			<StockButton
 				className={style.trigger}
 				active={isOpen}
-				onClick={() => setIsOpen((isOpen) => !isOpen)}
+				onClick={() => setIsOpen((x) => !x)}
 			>
 				<ClarityCalendarLine width={16} height={16} />
 			</StockButton>
-			{isOpen ? (
+			<Floating show={isOpen} refElement={inputRef.current} focusable={false}>
 				<Calendar
-					ref={refs.setFloating}
 					className={commonStyle.window}
-					style={floatingStyle}
 					dayNameFormat={dayNameFormat}
 					disabledDates={disabledDates}
 					disabledDays={disabledDays}
 					locale={locale}
 					max={max}
 					min={min}
-					onChange={triggerChange}
 					value={value}
 					weekStartDay={weekStartDay}
+					onChange={triggerChange}
 				/>
-			) : null}
+			</Floating>
 		</span>
 	);
 }

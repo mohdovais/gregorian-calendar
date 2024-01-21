@@ -1,96 +1,62 @@
+import { useState } from "react";
 import { Button, ButtonProps } from "../button";
-import { useId } from "../hooks/useId";
-import { Menu, MenuGroupOrItem } from "../menu";
+import { useEnsuredId } from "../hooks/useId";
+import { usePosition } from "../hooks/usePosition";
+import { headlessListbox } from "../listbox/Listbox.store";
 import { Portal } from "../portal";
-import { noop } from "../utils/function";
-import { autoPlacement, useFloating } from "@floating-ui/react-dom";
-import { useCallback, useEffect, useState } from "react";
+import css from "./MenuButton.module.css";
 
 interface MenuButtonProps<T> extends Omit<ButtonProps, "onSelect"> {
-	items: MenuGroupOrItem<T>[];
-	onBeforeSelect?: (option: T) => void | boolean;
+	label: string;
+	children?: React.ReactElement | React.ReactElement[];
+	onBeforeSelect?: (option: T) => boolean;
 	onSelect?: (option: T) => void;
 }
 
-type RequiredProp<T, U extends keyof MenuButtonProps<T>> = Required<
-	MenuButtonProps<T>
->[U];
-
 function MenuButton<T>(props: MenuButtonProps<T>) {
-	const {
-		items,
-		children,
-		onClick = noop as RequiredProp<T, "onClick">,
-		onSelect = noop as RequiredProp<T, "onSelect">,
-		onBeforeSelect = noop as RequiredProp<T, "onBeforeSelect">,
-		...btnProps
-	} = props;
-
+	const { className, id, label, children, onSelect, onClick, ...btnProps } =
+		props;
 	const [expanded, setExpanded] = useState(false);
-	const menuId = useId("menu-");
-	const { x, y, strategy, refs } = useFloating({
-		open: expanded,
-		strategy: "fixed",
-		middleware: [
-			autoPlacement({
-				crossAxis: true,
-				alignment: "end",
-			}),
-		],
-	});
-
-	useEffect(() => {
-		// @TODO: should be event not effect
-		if (expanded && refs.floating.current) {
-			refs.floating.current.focus();
-		}
-	}, [expanded, refs.floating.current]);
-
-	const collpase = useCallback(() => {
-		setExpanded(false);
-		//refs.reference.current?.focus();
-	}, []);
-
-	const selectHandler = useCallback(
-		(value: T) => {
-			if (onBeforeSelect(value) !== false) {
-				collpase();
-				onSelect(value);
-			}
-		},
-		[onBeforeSelect, onSelect],
+	const { style, refs } = usePosition(expanded);
+	const { activeId, items, eventListeners } = headlessListbox(
+		props.children,
+		null,
+		onSelect,
 	);
+
+	const listboxId = useEnsuredId("listbox-", id);
 
 	return (
 		<>
 			<Button
 				{...btnProps}
-				onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-					setExpanded(!expanded);
-					onClick(event);
-				}}
 				ref={refs.setReference}
 				active={expanded}
 				aria-haspopup={true}
-				aria-controls={menuId}
+				aria-controls={listboxId}
 				aria-expanded={expanded}
+				aria-activedescendant={activeId}
+				onKeyDown={expanded ? eventListeners.onKeyDown : undefined}
+				onClick={() => {
+					setExpanded((expanded) => !expanded);
+				}}
 			>
-				{children}
+				{label}
 			</Button>
 			<Portal>
-				<Menu
-					id={menuId}
-					expanded={expanded}
-					items={items}
-					onSelect={selectHandler}
-					style={{
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-					}}
-					ref={refs.setFloating}
-					onCollapse={collpase}
-				/>
+				<div ref={refs.setFloating} style={style}>
+					{expanded ? (
+						<div
+							id={listboxId}
+							className={css.menu}
+							role="listbox"
+							tabIndex={0}
+							aria-activedescendant={activeId}
+						>
+							{items}
+						</div>
+					) : null}
+				</div>
 			</Portal>
 		</>
 	);

@@ -1,0 +1,21 @@
+.wrapper {
+    display: flex;
+}
+
+.aside {
+    background-color: #f7f7f7;
+    border-right: 1px solid #eeeeee;
+    width: 300px;
+    min-height: 100vh;
+    padding: 2em;
+}
+
+.aside nav ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.main {
+    padding: 2em;
+}

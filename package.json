@@ -8,14 +8,14 @@
     "dev:pg": "npm run dev --workspace=playground",
     "dev:fw": "npm run dev --workspace=framework",
     "test": "npm run test --workspace=framework",
-    "format": "rome format --write framework",
-    "lint": "rome check framework"
-  },
-  "devDependencies": {
-    "rome": "^12.0.0"
+    "format": "biome format --write framework",
+    "lint": "biome check framework"
   },
   "workspaces": [
     "framework",
     "playground"
-  ]
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^1.4.1"
+  }
 }

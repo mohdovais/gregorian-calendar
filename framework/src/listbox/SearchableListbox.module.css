@@ -1,0 +1,14 @@
+.wrapper {
+    padding: 0.5em;
+    border-radius: 0.25rem;
+
+}
+
+.input_wrapper {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.input {
+    width: 100%
+}

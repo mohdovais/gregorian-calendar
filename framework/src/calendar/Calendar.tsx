@@ -1,3 +1,4 @@
+import { forwardRef, useReducer } from "react";
 import { Month, MonthProps } from "../month";
 import { MonthSelector } from "../month-selector";
 import { classname } from "../utils/classname";
@@ -15,7 +16,6 @@ import {
 	calendarInitializer,
 	calendarReducer,
 } from "./store";
-import { forwardRef, useReducer } from "react";
 
 type ReactDiv = React.DetailedHTMLProps<
 	React.HTMLAttributes<HTMLDivElement>,
@@ -112,7 +112,7 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 				dispatch={dispatch}
 				locale={locale}
 			/>
-			{view}
+			<div style={{ padding: 10 }}>{view}</div>
 		</div>
 	);
 }

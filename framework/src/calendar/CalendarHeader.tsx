@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { StockButton } from "../button";
 import { getMonthNames } from "../utils/date";
 import style from "./Calendar.module.css";
@@ -11,7 +12,6 @@ import {
 	CalendarAction,
 	CalendarView,
 } from "./store";
-import { memo } from "react";
 
 type CalendarHeaderProps = {
 	year: number;
@@ -28,8 +28,8 @@ function CalendarHeader(props: CalendarHeaderProps) {
 		view === CAL_VIEW_DATE_SELECTOR
 			? `${getMonthNames("long", locale)[month]} ${year}`
 			: view === CAL_VIEW_MONTH_SELECTOR
-			? year
-			: "Select";
+			  ? year
+			  : "Select";
 
 	return (
 		<div className={style.header}>

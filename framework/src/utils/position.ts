@@ -6,19 +6,8 @@ type PositionConfig = {
 	gap?: number;
 };
 
-type CreatePositionConfig = {
-	target: HTMLElement;
-	floating: HTMLElement;
-	settings?: PositionConfig;
-	onChange: (css: ResultCSSProperties) => void;
-};
-
-type RequiredCSSProperties = Required<React.CSSProperties>;
-
-type ResultCSSProperties = {
-	position: RequiredCSSProperties["position"];
-	visibility: RequiredCSSProperties["visibility"];
-	willChange: RequiredCSSProperties["willChange"];
+type ResultStyle = {
+	position: Exclude<React.CSSProperties["position"], undefined>;
 	top?: React.CSSProperties["top"];
 	right?: React.CSSProperties["right"];
 	bottom?: React.CSSProperties["bottom"];
@@ -30,10 +19,8 @@ type Dimension = {
 	height: number;
 };
 
-const defaultFixedCssStyle: ResultCSSProperties = Object.freeze({
+const defaultFixedCssStyle: ResultStyle = Object.freeze({
 	position: "fixed",
-	willChange: "visibility",
-	visibility: "hidden",
 	left: 0,
 	top: 0,
 });
@@ -45,22 +32,24 @@ const getDimension = (el: HTMLElement): Dimension => ({
 	height: el.offsetHeight,
 });
 
-const createPositionObserver = (config: CreatePositionConfig) => {
-	const { onChange, target, floating, settings } = config;
+const createPositionObserver = (
+	target: HTMLElement,
+	floating: HTMLElement,
+	onChange: (css: ResultStyle) => void,
+	settings?: PositionConfig,
+) => {
 	let isVisible = false;
 	let busy = false;
-	let lastStyle: ResultCSSProperties;
+	let lastStyle: ResultStyle;
 
 	const calculate = (targetRect: DOMRectReadOnly, floatingRect: Dimension) => {
 		const newStyle = isVisible
 			? (Object.assign(
 					{
 						position: "fixed",
-						willChange: "visibility",
-						visibility: "visible",
 					},
 					calculateFixedPosition(targetRect, floatingRect, settings),
-			  ) as ResultCSSProperties)
+			  ) as ResultStyle)
 			: defaultFixedCssStyle;
 
 		if (lastStyle !== newStyle) {
@@ -69,17 +58,7 @@ const createPositionObserver = (config: CreatePositionConfig) => {
 		}
 	};
 
-	let observer = new IntersectionObserver(
-		(entries) => {
-			const entry = entries[0];
-			console.log(entry);
-			isVisible = entry.isIntersecting;
-			calculate(entry.boundingClientRect, getDimension(floating));
-		},
-		{ threshold: 1 },
-	);
-
-	const onScroll = () => {
+	const doCalculate = () => {
 		if (isVisible && !busy) {
 			win.requestAnimationFrame(() => {
 				calculate(target.getBoundingClientRect(), getDimension(floating));
@@ -89,17 +68,27 @@ const createPositionObserver = (config: CreatePositionConfig) => {
 		}
 	};
 
-	observer.observe(target);
-	win.addEventListener("scroll", onScroll, true);
-	win.addEventListener("resize", onScroll, true);
+	const observer = new IntersectionObserver(
+		(entries) => {
+			const entry = entries[0];
+			isVisible = entry.isIntersecting;
+			calculate(entry.boundingClientRect, getDimension(floating));
+		},
+		{ threshold: 1 },
+	);
 
-	return () => {
+	const dispose = () => {
 		observer.disconnect();
-		win.removeEventListener("scroll", onScroll, true);
-		win.removeEventListener("resize", onScroll, true);
-		// rome-ignore lint/suspicious/noExplicitAny: setting observer to null for Garbage Collection
-		observer = null as any;
+		win.removeEventListener("scroll", doCalculate, true);
+		win.removeEventListener("resize", doCalculate, true);
 	};
+
+	observer.observe(target);
+	win.addEventListener("scroll", doCalculate, true);
+	win.addEventListener("resize", doCalculate, true);
+	doCalculate();
+
+	return dispose;
 };
 
 function calculateFixedPosition(
@@ -134,7 +123,7 @@ function doCalculateFixedPosition(
 	alignItem: Required<PositionConfig>["alignItem"],
 	flip: Required<PositionConfig>["flip"],
 	gap: Required<PositionConfig>["gap"],
-): Omit<ResultCSSProperties, "position" | "willChange" | "visibility"> {
+): Omit<ResultStyle, "position"> {
 	const targetRectTop = targetRect.top;
 	const targetRectLeft = targetRect.left;
 	const targetRectBottom = targetRect.bottom;
@@ -149,29 +138,29 @@ function doCalculateFixedPosition(
 		align === "start"
 			? 0
 			: align === "middle"
-			? targetRect.width / 2
-			: targetRect.width;
+			  ? targetRect.width / 2
+			  : targetRect.width;
 
 	const deltaAlignY =
 		align === "start"
 			? 0
 			: align === "middle"
-			? targetRect.height / 2
-			: targetRect.height;
+			  ? targetRect.height / 2
+			  : targetRect.height;
 
 	const deltaAlignItemX =
 		alignItem === "start"
 			? 0
 			: alignItem === "middle"
-			? floatingRectWidth / 2
-			: floatingRectWidth;
+			  ? floatingRectWidth / 2
+			  : floatingRectWidth;
 
 	const deltaAlignItemY =
 		alignItem === "start"
 			? 0
 			: alignItem === "middle"
-			? floatingRectHeight / 2
-			: floatingRectHeight;
+			  ? floatingRectHeight / 2
+			  : floatingRectHeight;
 
 	switch (position) {
 		case "bottom": {

@@ -1,3 +1,10 @@
+.field {
+    min-width: 200px;
+    text-align: left;
+    min-height: 32px;
+    vertical-align: middle;
+}
+
 .menu {
     display: inline-block;
     background-color: #f5f4f1;
@@ -6,19 +13,4 @@
         5px 5px 10px 0 rgba(0, 0, 0, 0.05),
         -5px 5px 10px 0 rgba(0, 0, 0, 0.05);
     color: #333;
-}
-
-.wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.wrapper * {
-    pointer-events: none;
-}
-
-.text {
-    flex: 1;
-    padding-right: 1rem;
-    white-space: nowrap;
 }

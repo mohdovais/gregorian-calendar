@@ -1,20 +1,8 @@
 {
-    "editor.defaultFormatter": "rome.rome",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports.rome": true
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "rome.rome"
-    },
-    "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
-    },
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "rome.rome"
-    },
-    "[javascript]": {
-        "editor.defaultFormatter": "rome.rome"
-    },
-    "typescript.tsdk": "node_modules/typescript/lib"
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"quickfix.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+	"typescript.tsdk": "node_modules/typescript/lib"
 }

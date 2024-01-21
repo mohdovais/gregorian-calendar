@@ -1,67 +1,44 @@
+import { useEffect, useState } from "react";
 import { createDefferedFunction } from "../utils/function";
 import { PositionConfig, createPositionObserver } from "../utils/position";
-import { useEffect, useState } from "react";
-
-type UsePositionConfig = {
-	show?: boolean;
-	settings?: PositionConfig;
-};
 
 function usePosition<
 	TargetElement extends HTMLElement = HTMLElement,
 	FloatingElement extends HTMLElement = HTMLElement,
->(config: UsePositionConfig = {}) {
-	const { show = false, settings = {} } = config;
-	const [target, setTarget] = useState<TargetElement | null>(null);
+>(show = false, settings?: PositionConfig) {
+	const [reference, setReference] = useState<TargetElement | null>(null);
 	const [floating, setFloating] = useState<FloatingElement | null>(null);
 	const [style, setStyle] = useState<React.CSSProperties>({});
 
 	useEffect(() => {
 		const deferredSetStyle = createDefferedFunction(setStyle, 100);
-		return !show || target == null || floating == null
+		return !show || reference == null || floating == null
 			? undefined
-			: createPositionObserver({
-					target,
+			: createPositionObserver(
+					reference,
 					floating,
-					settings,
-					onChange: (css) => {
+					(css) => {
 						const style = floating.style;
-						const {
-							position,
-							visibility,
-							willChange,
-							bottom,
-							left,
-							right,
-							top,
-						} = css;
-						style.position = position;
-						style.visibility = visibility;
-						style.willChange = willChange;
-						style.top = top == null ? "" : top + "px";
-						style.right = right == null ? "" : right + "px";
-						style.bottom = bottom == null ? "" : bottom + "px";
-						style.left = left == null ? "" : left + "px";
+						const { bottom, left, right, top } = css;
+						style.position = css.position;
+						style.visibility = show ? "visible" : "hidden";
+						style.willChange = "visibility";
+						style.top = top == null ? "" : `${top}px`;
+						style.right = right == null ? "" : `${right}px`;
+						style.bottom = bottom == null ? "" : `${bottom}px`;
+						style.left = left == null ? "" : `${left}px`;
 
 						deferredSetStyle(css);
 					},
-			  });
-	}, [
-		target,
-		floating,
-		settings.align,
-		settings.alignItem,
-		settings.flip,
-		settings.position,
-		settings.gap,
-		show,
-	]);
+					settings,
+			  );
+	}, [show, reference, floating, settings]);
 
 	return {
 		style,
 		refs: {
-			reference: target,
-			setReference: setTarget,
+			reference,
+			setReference,
 			floating,
 			setFloating,
 		},
@@ -69,4 +46,3 @@ function usePosition<
 }
 
 export { usePosition };
-export type { UsePositionConfig };
