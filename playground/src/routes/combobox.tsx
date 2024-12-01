@@ -1,16 +1,21 @@
-import { useLoaderData } from "react-router-dom";
-import { Combobox } from "../../../framework/src/combobox";
-import { Input } from "../../../framework/src/input";
-import { ListboxItem } from "../../../framework/src/listbox/ListboxItem";
+import { createRoute } from "@tanstack/react-router";
+import { Combobox } from "framework/combobox";
+import { ListboxItem } from "framework/listbox/ListboxItem";
+import { rootRoute } from "./root";
 
-function loader() {
-	return import("../../data/countries.json").then((module) => module.default);
-}
+type Country = { name: string; code: string };
 
-function ComboboxPage() {
-	const data = useLoaderData() as Awaited<ReturnType<typeof loader>>;
-	return (
-		<>
+const comboboxRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "combobox",
+	loader: async () => {
+		const response = await fetch("/data/countries.json");
+		return response.json() as Promise<Country[]>;
+	},
+	component: () => {
+		const data = comboboxRoute.useLoaderData();
+
+		return (
 			<Combobox>
 				{data.map((c) => (
 					<ListboxItem key={c.code} value={c.code}>
@@ -18,9 +23,8 @@ function ComboboxPage() {
 					</ListboxItem>
 				))}
 			</Combobox>
-			<Input />
-		</>
-	);
-}
+		);
+	},
+});
 
-export { ComboboxPage as Component, loader };
+export { comboboxRoute };

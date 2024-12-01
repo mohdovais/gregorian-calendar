@@ -1,6 +1,8 @@
-import { Listbox } from "../../../framework/src/listbox/Listbox";
-import { ListboxGroup } from "../../../framework/src/listbox/ListboxGroup";
-import { ListboxItem } from "../../../framework/src/listbox/ListboxItem";
+import { createRoute } from "@tanstack/react-router";
+import { Listbox } from "framework/listbox/Listbox";
+import { ListboxGroup } from "framework/listbox/ListboxGroup";
+import { ListboxItem } from "framework/listbox/ListboxItem";
+import { rootRoute } from "./root";
 
 function ListboxPage() {
 	return (
@@ -14,4 +16,10 @@ function ListboxPage() {
 	);
 }
 
-export { ListboxPage as Component };
+const listboxRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "listbox",
+	component: ListboxPage,
+});
+
+export { listboxRoute };

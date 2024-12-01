@@ -1,14 +1,17 @@
+import { createRoute } from "@tanstack/react-router";
+import { ListboxItem } from "framework/listbox/ListboxItem";
+import { SearchableListbox } from "framework/listbox/SearchableListbox";
 import { useDeferredValue, useMemo, useState } from "react";
-import { useLoaderData } from "react-router-dom";
-import { ListboxItem } from "../../../framework/src/listbox/ListboxItem";
-import { SearchableListbox } from "../../../framework/src/listbox/SearchableListbox";
+import { rootRoute } from "./root";
 
-function loader() {
-	return import("../../data/countries.json").then((module) => module.default);
-}
+type Country = { name: string; code: string };
 
-function SearchableListboxPage() {
-	const countries = useLoaderData() as Awaited<ReturnType<typeof loader>>;
+type SearchableListboxPageProps = {
+	data: Country[];
+};
+
+function SearchableListboxPage(props: SearchableListboxPageProps) {
+	const countries = props.data;
 	const [query, setQuery] = useState("");
 	const deferredQuery = useDeferredValue(query);
 	const filtered = useMemo(() => {
@@ -19,7 +22,7 @@ function SearchableListboxPage() {
 	}, [countries, deferredQuery]);
 
 	return (
-		<>
+		<div>
 			<h1>SearchableListbox</h1>
 			<SearchableListbox onSearch={setQuery}>
 				{filtered.map((country) => (
@@ -28,8 +31,21 @@ function SearchableListboxPage() {
 					</ListboxItem>
 				))}
 			</SearchableListbox>
-		</>
+		</div>
 	);
 }
 
-export { SearchableListboxPage as Component, loader };
+const searchableLisboxRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "searchable-listbox",
+	loader: async () => {
+		const response = await fetch("/data/countries.json");
+		return response.json() as Promise<Country[]>;
+	},
+	component: () => {
+		const data = searchableLisboxRoute.useLoaderData();
+		return <SearchableListboxPage data={data} />;
+	},
+});
+
+export { searchableLisboxRoute };

@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { StockButton } from "../button";
 import { Calendar, CalendarProps } from "../calendar";
 import commonStyle from "../css/common.module.css";
-import { Floating } from "../floating/Floating";
 import { ClarityCalendarLine } from "../icons/ClarityCalendarLine";
 import { Input, InputProps } from "../input";
 import { ensureArray } from "../utils/array";
@@ -137,20 +136,18 @@ function DateField(props: DateFieldProps) {
 			>
 				<ClarityCalendarLine width={16} height={16} />
 			</StockButton>
-			<Floating show={isOpen} refElement={inputRef.current} focusable={false}>
-				<Calendar
-					className={commonStyle.window}
-					dayNameFormat={dayNameFormat}
-					disabledDates={disabledDates}
-					disabledDays={disabledDays}
-					locale={locale}
-					max={max}
-					min={min}
-					value={value}
-					weekStartDay={weekStartDay}
-					onChange={triggerChange}
-				/>
-			</Floating>
+			<Calendar
+				className={commonStyle.window}
+				dayNameFormat={dayNameFormat}
+				disabledDates={disabledDates}
+				disabledDays={disabledDays}
+				locale={locale}
+				max={max}
+				min={min}
+				value={value}
+				weekStartDay={weekStartDay}
+				onChange={triggerChange}
+			/>
 		</span>
 	);
 }

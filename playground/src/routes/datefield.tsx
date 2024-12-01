@@ -1,5 +1,7 @@
+import { createRoute } from "@tanstack/react-router";
+import { DateField } from "framework/datefield/DateField";
 import { useState } from "react";
-import { DateField } from "../../../framework/src/datefield/DateField";
+import { rootRoute } from "./root";
 
 const weekends = [0, 6];
 const disabledDates = ["2023-12-25", "2023-12-26"];
@@ -20,4 +22,10 @@ function DateFieldPage() {
 	);
 }
 
-export { DateFieldPage as Component };
+const dateFieldRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "datefield",
+	component: DateFieldPage,
+});
+
+export { dateFieldRoute };

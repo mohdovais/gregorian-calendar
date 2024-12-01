@@ -1,32 +1,6 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import css from "./root.module.css";
-
-const links = [
-	{
-		to: "datefiled",
-		label: "DateFiled",
-	},
-	{
-		to: "maskedfield",
-		label: "MaskedField",
-	},
-	{
-		to: "listbox",
-		label: "Listbox",
-	},
-	{
-		to: "searchable-listbox",
-		label: "Searchable Listbox",
-	},
-	{
-		to: "menu-button",
-		label: "MenuButton",
-	},
-	{
-		to: "combobox",
-		label: "Combobox",
-	},
-];
 
 function Root() {
 	return (
@@ -35,19 +9,25 @@ function Root() {
 				<h1>Some Framework</h1>
 				<nav>
 					<ul>
-						{links.map((link) => (
-							<li key={link.to}>
-								<Link to={link.to}>{link.label}</Link>
+						{rootRoute.children?.map((route) => (
+							<li key={route.path}>
+								<Link to={route.fullPath}>{route.path}</Link>
 							</li>
 						))}
 					</ul>
 				</nav>
 			</aside>
 			<main className={css.main}>
-				<Outlet />
+				<ErrorBoundary>
+					<Outlet />
+				</ErrorBoundary>
 			</main>
 		</div>
 	);
 }
 
-export { Root };
+const rootRoute = createRootRoute({
+	component: Root,
+});
+
+export { rootRoute };

@@ -1,6 +1,8 @@
+import { createRoute } from "@tanstack/react-router";
+import { MaskedField } from "framework/maskedfield/MaskedField";
+import { isValidDateString } from "framework/utils/date";
 import { useState } from "react";
-import { MaskedField } from "../../../framework/src/maskedfield/MaskedField";
-import { isValidDateString } from "../../../framework/src/utils/date";
+import { rootRoute } from "./root";
 
 const customValidity = (str: string) => {
 	return str === "" ? "" : isValidDateString(str) ? "" : "incorrect date";
@@ -21,4 +23,10 @@ function MaskedFieldPage() {
 	);
 }
 
-export { MaskedFieldPage as Component };
+const maskedFieldRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "masked-field",
+	component: MaskedFieldPage,
+});
+
+export { maskedFieldRoute };
