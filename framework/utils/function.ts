@@ -16,7 +16,7 @@ type ArgumentTypes<F extends Function> = F extends (...args: infer A) => unknown
 	: never;
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation>
-function createDefferedFunction<T extends Function>(fn: T, delay = 1) {
+function createDefferedFunction<T extends Function>(fn: T, delay = 100) {
 	let t: number;
 
 	return (...args: ArgumentTypes<T>) => {
