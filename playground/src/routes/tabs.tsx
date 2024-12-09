@@ -131,6 +131,13 @@ const tabsRoute = createRoute({
 
 		return (
 			<div>
+				<h2>a</h2>
+				<Tabs
+					items={tabs}
+					active={"step-3"}
+					disabled={["step-4", "step-5", "step-6", "step-7"]}
+				/>
+				<h2>Clickable</h2>
 				<Tabs
 					style={{ position: "sticky", top: 0 }}
 					items={tabs}

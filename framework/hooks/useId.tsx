@@ -1,7 +1,10 @@
 import { useState } from "react";
 
 function createRandomId(prefix = "") {
-	return prefix + (Date.now() + ((Math.random() * 1e5) | 0)).toString(32);
+	return prefix +
+		(performance.now() | 0).toString(32) +
+		((Math.random() * 1e5) | 0).toString(32) +
+		((Math.random() * 1e5) | 0).toString(32);
 }
 
 function createSmallRandomId(prefix = "") {
@@ -21,4 +24,4 @@ function useEnsuredId(prefix?: string, defaultId?: string) {
 	return typeof defaultId === "string" ? defaultId : randomId;
 }
 
-export { useId, createRandomId, createSmallRandomId, useEnsuredId };
+export { createRandomId, createSmallRandomId, useEnsuredId, useId };
