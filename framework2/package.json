@@ -1,0 +1,14 @@
+{
+    "name": "framework2",
+    "version": "0.0.1",
+    "description": "",
+    "scripts": {
+        "test": "vitest"
+    },
+    "author": "",
+    "license": "ISC",
+    "peerDependencies": {
+        "react": "*",
+        "react-dom": "*"
+    }
+}

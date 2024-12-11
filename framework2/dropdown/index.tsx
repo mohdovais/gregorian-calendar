@@ -1,28 +1,22 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { ResultStyle, usePosition } from "../hooks/usePosition";
 import { Portal } from "../portal";
 import { ensureArray } from "../utils/array";
 import { classname } from "../utils/classname";
-import { Listbox, ListboxProps } from "../listbox2";
-import {
-	ensureItemsWithId,
-	getActionFromKey,
-	getFirstSelectedIndex,
-	getUpdatedIndex,
-	scrollSelectedIntoView,
-	SelectAction_Close,
-	SelectAction_CloseSelect,
-	SelectAction_First,
-	SelectAction_Last,
-	SelectAction_Next,
-	SelectAction_Open,
-	SelectAction_PageDown,
-	SelectAction_PageUp,
-	SelectAction_Previous,
-	SelectAction_Type,
-} from "./dropdown.helpers";
+import { Listbox, ListboxProps } from "../listbox";
 import css from "./dropdown.module.css";
 import { isFunction } from "../utils/function";
+import { Search } from "../search";
+import {
+	DROPDOWN_ACTION_TYPE_Close,
+	DROPDOWN_ACTION_TYPE_Open,
+	DROPDOWN_ACTION_TYPE_UpdateItems,
+	DropdownAction,
+	DropdownState,
+	dropdownStore,
+	getActionFromKeyboardEvent,
+	initDropdownState,
+} from "./dropdown.store";
 
 const positionSettings = {
 	transform: (css: ResultStyle, target: HTMLElement) => {
@@ -66,6 +60,8 @@ interface DropdownProps<T> extends ListboxProps<T> {
 	required?: boolean;
 	readonly?: boolean;
 	displayComponent?: React.Component<DisplayComponentProps>;
+	searchPlaceholder?: string;
+	onSearch?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 function Dropdown<T>(props: DropdownProps<T>) {
@@ -82,19 +78,37 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		required,
 		style,
 		value,
+		searchPlaceholder = "Search",
+		onSearch,
 	} = props;
 
-	const [expanded, setExpanded] = useState(false);
-	const listboxId = useId();
-	const labelId = useId();
-	const position = usePosition(expanded, positionSettings);
-	const { items, flatItems } = useMemo(() => ensureItemsWithId(props.items), [
-		props.items,
-	]);
-	const [activeIndex, setActiveIndex] = useState(-1);
+	const [state, dispatch] = useReducer<
+		DropdownState<T>,
+		null,
+		[action: DropdownAction<T>]
+	>(
+		dropdownStore,
+		null,
+		initDropdownState,
+	);
 
+	const {
+		activeIndex,
+		expanded,
+		flatItems,
+		items,
+		labelId,
+		listboxId,
+		searchId,
+	} = state;
+
+	if (state.event != null) {
+		state.event();
+		delete state.event;
+	}
+
+	const position = usePosition(expanded, positionSettings);
 	const values = ensureArray(props.value);
-	const selectedIndex = getFirstSelectedIndex(flatItems, values);
 
 	const onBlur = (event: React.FocusEvent<HTMLElement>) => {
 		const target = event.relatedTarget;
@@ -108,57 +122,29 @@ function Dropdown<T>(props: DropdownProps<T>) {
 	};
 
 	const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-		const action = getActionFromKey(event, expanded);
+		const action = getActionFromKeyboardEvent(
+			event,
+			expanded,
+			values,
+			onChange,
+		);
 
-		switch (action) {
-			case SelectAction_Last:
-			case SelectAction_First:
-				setExpanded(true);
-			// intentional fallthrough
-			case SelectAction_Next:
-			case SelectAction_Previous:
-			case SelectAction_PageUp:
-			case SelectAction_PageDown:
-				event.preventDefault();
-				setActiveIndex((activeIndex) =>
-					getUpdatedIndex(activeIndex, flatItems.length - 1, action)
-				);
-				break;
-			case SelectAction_CloseSelect:
-				const v = flatItems[activeIndex].value;
-				if (isFunction(onChange) && v != null) {
-					onChange(v);
-				}
-			// intentional fallthrough
-			case SelectAction_Close:
-				event.preventDefault();
-				return setExpanded(false);
-			case SelectAction_Type:
-				// tbd return this.onComboType(key);
-			case SelectAction_Open:
-				event.preventDefault();
-				return setExpanded(true);
-		}
+		dispatch(action);
 	};
 
 	useEffect(() => {
-		const root = position.refs.floating;
-		if (expanded && activeIndex !== -1 && root != null) {
-			const id = "#" + flatItems[activeIndex].id;
-			const activeEl = root.querySelector(id);
+		dispatch({
+			type: DROPDOWN_ACTION_TYPE_UpdateItems,
+			items: props.items,
+		});
+	}, [props.items]);
 
-			if (activeEl != null) {
-				setTimeout(
-					() =>
-						activeEl.scrollIntoView({
-							behavior: "smooth",
-							block: "center",
-						}),
-					100,
-				);
-			}
+	useEffect(() => {
+		if (state.effect != null) {
+			state.effect();
+			delete state.effect;
 		}
-	}, [activeIndex, expanded, flatItems]);
+	}, [state.effect]);
 
 	return (
 		<div
@@ -195,7 +181,13 @@ function Dropdown<T>(props: DropdownProps<T>) {
 				aria-activedescendant={expanded
 					? (flatItems[activeIndex]?.id)
 					: undefined}
-				onClick={() => setExpanded((x) => !x)}
+				onClick={() => {
+					if (expanded) {
+						dispatch({ type: DROPDOWN_ACTION_TYPE_Close });
+					} else {
+						dispatch({ type: DROPDOWN_ACTION_TYPE_Open, values });
+					}
+				}}
 			>
 				<span>{values.join(",")}</span>
 			</button>
@@ -210,7 +202,15 @@ function Dropdown<T>(props: DropdownProps<T>) {
 							ref={position.refs.setFloating}
 							onBlur={onBlur}
 						>
-							<input type="search" />
+							{isFunction(onSearch)
+								? (
+									<Search
+										id={searchId}
+										placeholder={searchPlaceholder}
+										onChange={onSearch}
+									/>
+								)
+								: null}
 							<div className={css.scroller}>
 								<Listbox
 									items={items}
@@ -218,7 +218,15 @@ function Dropdown<T>(props: DropdownProps<T>) {
 									activeItemId={flatItems[activeIndex]?.id}
 									multiple={multiple}
 									value={value}
-									onChange={onChange}
+									onChange={(value) => {
+										if (isFunction(onChange)) {
+											dispatch({
+												type:
+													DROPDOWN_ACTION_TYPE_Close,
+											});
+											onChange(value);
+										}
+									}}
 								/>
 							</div>
 						</div>

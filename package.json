@@ -13,6 +13,7 @@
   },
   "workspaces": [
     "framework",
+    "framework2",
     "playground"
   ],
   "devDependencies": {
