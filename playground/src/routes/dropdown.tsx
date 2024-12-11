@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { Dropdown } from "framework/dropdown";
+import { Dropdown } from "framework2/dropdown";
 import { rootRoute } from "./root";
 import { useState } from "react";
 
@@ -20,10 +20,13 @@ const dropdownRoute = createRoute({
                 label="Country"
                 required
                 value={value}
-                items={data.map((country) => ({
-                    value: country.code,
-                    label: country.name,
-                }))}
+                items={[{
+                    label: "All",
+                    children: data.map((country) => ({
+                        value: country.code,
+                        label: country.name,
+                    })),
+                }]}
                 onChange={setValue}
             />
         );

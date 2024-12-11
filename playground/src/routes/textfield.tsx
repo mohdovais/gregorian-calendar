@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { TextField } from "framework/textfield";
+import { TextField } from "framework2/textfield";
 import { rootRoute } from "./root";
 
 function TextFieldPage() {
@@ -7,8 +7,16 @@ function TextFieldPage() {
 		<div style={{ display: "flex", gap: "1em", flexDirection: "column" }}>
 			<div style={{ display: "flex", gap: "1em" }}>
 				<TextField label="Username" defaultValue="Username" />
-				<TextField label="Username" defaultValue="read only field" readOnly />
-				<TextField label="Username" defaultValue="disabled field" disabled />
+				<TextField
+					label="Username"
+					defaultValue="read only field"
+					readOnly
+				/>
+				<TextField
+					label="Username"
+					defaultValue="disabled field"
+					disabled
+				/>
 			</div>
 			<div>
 				<TextField label="Username" style={{ width: "100%" }} />

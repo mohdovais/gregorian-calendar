@@ -22,7 +22,8 @@
     },
     "include": [
         "src",
-        "../framework/src"
+        "../framework",
+        "../framework2"
     ],
     "references": [
         {
