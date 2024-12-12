@@ -28,22 +28,30 @@ type ListboxProps<T> = {
 	style?: React.CSSProperties;
 	multiple?: boolean;
 	items: ListboxItemType<T>[];
+	itemTpl?: (value: unknown) => React.ReactElement | string;
 	value?: T | T[];
 	disabled?: boolean;
 	activeItemId?: string;
+	optionClassName?: string;
+	groupClassName?: string;
 	onChange?: (value: T) => void;
 };
 
+const defaultItemTpl = (value: unknown) => String(value);
+
 function Listbox<T>(props: ListboxProps<T>) {
 	const {
-		items,
-		className,
-		disabled = false,
 		id,
-		multiple = false,
-		onChange,
+		className,
+		optionClassName,
+		groupClassName,
 		style,
+		disabled = false,
+		multiple = false,
+		items,
 		value,
+		onChange,
+		itemTpl = defaultItemTpl,
 		activeItemId,
 	} = props;
 
@@ -60,9 +68,12 @@ function Listbox<T>(props: ListboxProps<T>) {
 		>
 			{renderItems(
 				items,
-				ensureArray(effectiveValue),
+				itemTpl,
+				effectiveValue,
 				disabled,
 				activeItemId,
+				optionClassName,
+				groupClassName,
 				onChange,
 			)}
 		</div>
@@ -77,9 +88,12 @@ function isGroupType<T>(
 
 function renderItems<T>(
 	items: ListboxProps<T>["items"],
+	itemTpl: Exclude<ListboxProps<T>["itemTpl"], undefined>,
 	selected: T[],
 	parentDisabled: boolean,
 	activeItemId?: string,
+	optionClassName?: string,
+	groupClassName?: string,
 	onClick?: ListboxProps<T>["onChange"],
 ) {
 	return ensureArray(items).map((item) => {
@@ -87,12 +101,20 @@ function renderItems<T>(
 		const isDisabled = parentDisabled || disabled;
 		return isGroupType(item)
 			? (
-				<ListboxGroup key={id} id={id} label={label}>
+				<ListboxGroup
+					key={id}
+					id={id}
+					className={groupClassName}
+					label={label}
+				>
 					{renderItems(
 						item.children,
+						itemTpl,
 						selected,
 						isDisabled,
 						activeItemId,
+						optionClassName,
+						groupClassName,
 						onClick,
 					)}
 				</ListboxGroup>
@@ -101,13 +123,14 @@ function renderItems<T>(
 				<ListboxItem
 					key={id}
 					id={id}
+					className={optionClassName}
 					value={item.value}
 					disabled={isDisabled}
 					active={activeItemId === id}
 					selected={selected.includes(item.value)}
 					onClick={onClick}
 				>
-					{label}
+					{itemTpl(label)}
 				</ListboxItem>
 			);
 	});

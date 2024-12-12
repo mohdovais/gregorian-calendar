@@ -18,10 +18,9 @@ const DROPDOWN_ACTION_TYPE_Open = 6;
 const DROPDOWN_ACTION_TYPE_PageDown = 7;
 const DROPDOWN_ACTION_TYPE_PageUp = 8;
 const DROPDOWN_ACTION_TYPE_SelectPrevious = 9;
-const DROPDOWN_ACTION_TYPE_Select = 10;
-const DROPDOWN_ACTION_TYPE_Type = 11;
-const DROPDOWN_ACTION_TYPE_UpdateItems = 12;
-const DROPDOWN_ACTION_TYPE_Toggle = 13;
+const DROPDOWN_ACTION_TYPE_Type = 10;
+const DROPDOWN_ACTION_TYPE_UpdateItems = 11;
+const DROPDOWN_ACTION_TYPE_Search = 12;
 
 type DropdownState<T> = {
     expanded: boolean;
@@ -33,23 +32,10 @@ type DropdownState<T> = {
     flatItems: ListboxOptionType<T>[];
     effect?: CallableFunction;
     event?: CallableFunction;
+    focusSearch?: boolean;
+    focusDropdown?: boolean;
+    search: string;
 };
-
-type DropdownActionType =
-    | typeof DROPDOWN_ACTION_TYPE_NONE
-    | typeof DROPDOWN_ACTION_TYPE_Close
-    | typeof DROPDOWN_ACTION_TYPE_CloseSelect
-    | typeof DROPDOWN_ACTION_TYPE_SelectFirst
-    | typeof DROPDOWN_ACTION_TYPE_SelectLast
-    | typeof DROPDOWN_ACTION_TYPE_SelectNext
-    | typeof DROPDOWN_ACTION_TYPE_Open
-    | typeof DROPDOWN_ACTION_TYPE_PageDown
-    | typeof DROPDOWN_ACTION_TYPE_PageUp
-    | typeof DROPDOWN_ACTION_TYPE_SelectPrevious
-    | typeof DROPDOWN_ACTION_TYPE_Select
-    | typeof DROPDOWN_ACTION_TYPE_Type
-    | typeof DROPDOWN_ACTION_TYPE_UpdateItems
-    | typeof DROPDOWN_ACTION_TYPE_Toggle;
 
 type DropdownAction_Close = {
     type: typeof DROPDOWN_ACTION_TYPE_Close;
@@ -89,10 +75,6 @@ type DropdownAction_PageUp = {
     type: typeof DROPDOWN_ACTION_TYPE_PageUp;
 };
 
-type DropdownAction_Select = {
-    type: typeof DROPDOWN_ACTION_TYPE_Select;
-};
-
 type DropdownAction_Type = {
     type: typeof DROPDOWN_ACTION_TYPE_Type;
 };
@@ -100,6 +82,11 @@ type DropdownAction_Type = {
 type DropdownAction_UpdateItems<T> = {
     type: typeof DROPDOWN_ACTION_TYPE_UpdateItems;
     items: ListboxItemType<T>[];
+};
+
+type DropdownAction_Search = {
+    type: typeof DROPDOWN_ACTION_TYPE_Search;
+    search: string;
 };
 
 type DropdownAction_None = {
@@ -116,9 +103,9 @@ type DropdownAction<T> =
     | DropdownAction_Open<T>
     | DropdownAction_PageDown
     | DropdownAction_PageUp
-    | DropdownAction_Select
     | DropdownAction_Type
     | DropdownAction_UpdateItems<T>
+    | DropdownAction_Search
     | DropdownAction_None;
 
 // all keys that will do the default open action
@@ -275,6 +262,7 @@ function initDropdownState<T>(): DropdownState<T> {
         labelId: createRandomId("label-"),
         listboxId: createRandomId("listbox-"),
         searchId: createRandomId("search-"),
+        search: "",
     };
 }
 
@@ -303,12 +291,19 @@ function dropdownStore<T>(
 ): DropdownState<T> {
     switch (action.type) {
         case DROPDOWN_ACTION_TYPE_Close:
-            return copy(state, { activeIndex: -1, expanded: false });
+            return copy(state, {
+                activeIndex: -1,
+                expanded: false,
+                focusDropdown: true,
+                search: "",
+            });
 
         case DROPDOWN_ACTION_TYPE_CloseSelect:
             return copy(state, {
                 activeIndex: -1,
                 expanded: false,
+                focusDropdown: true,
+                search: "",
                 event: () => {
                     if (isFunction(action.onChange)) {
                         action.onChange(
@@ -326,6 +321,7 @@ function dropdownStore<T>(
             return copy(state, {
                 activeIndex,
                 expanded: true,
+                focusSearch: true,
                 effect: () => {
                     const option = state.flatItems[activeIndex];
                     if (option != null && option.id != null) {
@@ -371,9 +367,6 @@ function dropdownStore<T>(
                 ),
             });
         }
-
-        case DROPDOWN_ACTION_TYPE_Select:
-            return state; //@TODO
 
         case DROPDOWN_ACTION_TYPE_SelectFirst:
             return copy(state, {
@@ -430,6 +423,9 @@ function dropdownStore<T>(
                 activeIndex: 0,
             });
         }
+
+        case DROPDOWN_ACTION_TYPE_Search:
+            return copy(state, { search: action.search });
     }
 
     return state;
@@ -437,7 +433,9 @@ function dropdownStore<T>(
 
 export {
     DROPDOWN_ACTION_TYPE_Close,
+    DROPDOWN_ACTION_TYPE_CloseSelect,
     DROPDOWN_ACTION_TYPE_Open,
+    DROPDOWN_ACTION_TYPE_Search,
     DROPDOWN_ACTION_TYPE_UpdateItems,
     dropdownStore,
     getActionFromKeyboardEvent,

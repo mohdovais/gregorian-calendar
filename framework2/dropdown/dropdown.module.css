@@ -59,6 +59,10 @@
     text-align: left;
 }
 
+.input.has_search {
+    border-color: transparent;
+}
+
 .collapsed .input:hover {
     border-color: #1c1c1c;
 }
@@ -126,6 +130,15 @@
 
 .scroller {
     overflow-y: auto;
+    scroll-snap-type: y mandatory;
+}
+
+.option {
+    scroll-snap-align: start;
+}
+
+.search {
+    margin-bottom: 12px;
 }
 
 @keyframes scaleZ {

@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useDeferredValue, useEffect, useReducer, useRef } from "react";
 import { ResultStyle, usePosition } from "../hooks/usePosition";
 import { Portal } from "../portal";
 import { ensureArray } from "../utils/array";
@@ -10,6 +10,7 @@ import { Search } from "../search";
 import {
 	DROPDOWN_ACTION_TYPE_Close,
 	DROPDOWN_ACTION_TYPE_Open,
+	DROPDOWN_ACTION_TYPE_Search,
 	DROPDOWN_ACTION_TYPE_UpdateItems,
 	DropdownAction,
 	DropdownState,
@@ -52,25 +53,42 @@ const icon = (
 	</svg>
 );
 
-type DisplayComponentProps = {};
+const deafultEmptySearchMessage = (
+	<div>
+		<div>
+			Your search did not match any items.
+		</div>
+		<ul>
+			<li>
+				Make sure that all words are spelled correctly.
+			</li>
+			<li>Try different keywords.</li>
+		</ul>
+	</div>
+);
 
 interface DropdownProps<T> extends ListboxProps<T> {
 	name?: string;
 	label: string;
 	required?: boolean;
 	readonly?: boolean;
-	displayComponent?: React.Component<DisplayComponentProps>;
+	displayTpl?: (selection: T[]) => React.ReactElement | string;
+	optionTpl?: (value: T) => React.ReactElement | string;
 	searchPlaceholder?: string;
-	onSearch?: React.ChangeEventHandler<HTMLInputElement>;
+	searchEmptyMessage?: React.ReactElement | string;
+	onSearch?: (search: string) => void;
 }
+
+const defaultDisplayTpl = (selection: unknown[]) => selection.join(", ");
 
 function Dropdown<T>(props: DropdownProps<T>) {
 	const {
 		label,
+		id,
 		className,
 		disabled,
-		displayComponent,
-		id,
+		displayTpl = defaultDisplayTpl,
+		optionTpl,
 		multiple = false,
 		name,
 		onChange,
@@ -78,9 +96,13 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		required,
 		style,
 		value,
+		searchEmptyMessage = deafultEmptySearchMessage,
 		searchPlaceholder = "Search",
 		onSearch,
 	} = props;
+
+	const hasSearch = isFunction(onSearch);
+	const searchRef = useRef<HTMLInputElement>(null);
 
 	const [state, dispatch] = useReducer<
 		DropdownState<T>,
@@ -102,11 +124,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		searchId,
 	} = state;
 
-	if (state.event != null) {
-		state.event();
-		delete state.event;
-	}
-
+	const search = useDeferredValue(state.search);
 	const position = usePosition(expanded, positionSettings);
 	const values = ensureArray(props.value);
 
@@ -140,11 +158,44 @@ function Dropdown<T>(props: DropdownProps<T>) {
 	}, [props.items]);
 
 	useEffect(() => {
+		if (expanded && hasSearch) {
+			onSearch(search);
+		}
+	}, [expanded, hasSearch, search]);
+
+	/* MAGIC */
+	useEffect(() => {
+		if (state.event != null) {
+			state.event();
+			delete state.event;
+		}
+
 		if (state.effect != null) {
 			state.effect();
 			delete state.effect;
 		}
-	}, [state.effect]);
+
+		if (state.focusDropdown) {
+			position.refs.reference?.focus({
+				preventScroll: true,
+			});
+			delete state.focusDropdown;
+		}
+
+		if (state.focusSearch) {
+			searchRef.current?.focus({
+				preventScroll: true,
+				// @ts-expect-error
+				focusVisible: true,
+			});
+			delete state.focusSearch;
+		}
+	}, [
+		position.refs.reference,
+		state.effect,
+		state.focusDropdown,
+		state.event,
+	]);
 
 	return (
 		<div
@@ -155,7 +206,6 @@ function Dropdown<T>(props: DropdownProps<T>) {
 				className,
 			)}
 			style={style}
-			ref={position.refs.setReference}
 			onBlur={onBlur}
 			onKeyDown={onKeyDown}
 		>
@@ -173,6 +223,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 					required && css.required,
 					readonly && css.readonly,
 					disabled && css.disabled,
+					expanded && hasSearch && css.has_search,
 				)}
 				role="combobox"
 				aria-labelledby={labelId}
@@ -188,8 +239,9 @@ function Dropdown<T>(props: DropdownProps<T>) {
 						dispatch({ type: DROPDOWN_ACTION_TYPE_Open, values });
 					}
 				}}
+				ref={position.refs.setReference}
 			>
-				<span>{values.join(",")}</span>
+				<span>{displayTpl(values)}</span>
 			</button>
 			<label id={labelId} className={css.label}>{label}</label>
 			{icon}
@@ -202,19 +254,31 @@ function Dropdown<T>(props: DropdownProps<T>) {
 							ref={position.refs.setFloating}
 							onBlur={onBlur}
 						>
-							{isFunction(onSearch)
+							{hasSearch
 								? (
 									<Search
 										id={searchId}
+										className={css.search}
 										placeholder={searchPlaceholder}
-										onChange={onSearch}
+										onChange={(event) =>
+											dispatch({
+												type:
+													DROPDOWN_ACTION_TYPE_Search,
+												search: event.target.value
+													.trim(),
+											})}
+										ref={searchRef}
 									/>
 								)
+								: null}
+							{hasSearch && search !== "" && items.length === 0
+								? searchEmptyMessage
 								: null}
 							<div className={css.scroller}>
 								<Listbox
 									items={items}
 									id={listboxId}
+									optionClassName={css.option}
 									activeItemId={flatItems[activeIndex]?.id}
 									multiple={multiple}
 									value={value}

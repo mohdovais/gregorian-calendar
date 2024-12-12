@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { classname } from "../utils/classname";
 import { isFunction } from "../utils/function";
 import css from "./Listbox.module.css";
@@ -39,7 +38,7 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 			aria-selected={selected || undefined}
 			aria-disabled={disabled || undefined}
 			aria-current={active || undefined}
-			onClick={isFunction(onClick)
+			onClick={!disabled && isFunction(onClick)
 				? () => {
 					onClick(value);
 				}
