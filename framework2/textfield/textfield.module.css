@@ -61,6 +61,10 @@ input.input {
     color: transparent;
 }
 
+.has_placeholder .input:focus::placeholder {
+    color: #ccc;
+}
+
 .field.required .label:after,
 .input:required ~ .label:after {
     content: "*";
