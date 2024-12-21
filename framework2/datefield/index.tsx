@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { TextField, TextFieldProps } from "../textfield";
-import { classname } from "../utils/classname";
+import { TextField } from "../textfield";
 import {
     DateString,
     formatDate,
@@ -40,6 +39,7 @@ function DateField(props: DateFieldProps) {
         label,
         dateFormat = "d/m/Y",
         locale = "en-GB",
+        placeholder = dateFormat,
         onChange,
         ...restProps
     } = props;
@@ -62,35 +62,34 @@ function DateField(props: DateFieldProps) {
     );
 
     return (
-        <div>
-            <TextField
-                {...restProps}
-                type="text"
-                autoCapitalize="off"
-                autoCorrect="off"
-                autoComplete="off"
-                label={label}
-                placeholder={dateFormat}
-                defaultValue={formatDate(new Date(value), dateFormat)}
-                onChange={inputChangeHandler}
-                __children={
-                    <>
-                        <input
-                            type="hidden"
-                            form={form}
-                            name={name}
-                            value={value}
-                        />
-                        <button type="button" className={css.trigger}>
-                            📅
-                        </button>
-                        <Portal>
-                            <div>sss</div>
-                        </Portal>
-                    </>
-                }
-            />
-        </div>
+        <TextField
+            {...restProps}
+            key={value}
+            type="text"
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            label={label}
+            placeholder={placeholder}
+            defaultValue={formatDate(new Date(value), dateFormat)}
+            onChange={inputChangeHandler}
+            __children={
+                <>
+                    <input
+                        type="hidden"
+                        form={form}
+                        name={name}
+                        value={value}
+                    />
+                    <button type="button" className={css.trigger}>
+                        📅
+                    </button>
+                    <Portal>
+                        <div>sss</div>
+                    </Portal>
+                </>
+            }
+        />
     );
 }
 

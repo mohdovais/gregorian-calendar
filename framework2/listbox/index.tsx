@@ -28,7 +28,7 @@ type ListboxProps<T> = {
 	style?: React.CSSProperties;
 	multiple?: boolean;
 	items: ListboxItemType<T>[];
-	itemTpl?: (value: unknown) => React.ReactElement | string;
+	itemTpl?: (value: T) => React.ReactElement | string;
 	value?: T | T[];
 	disabled?: boolean;
 	activeItemId?: string;

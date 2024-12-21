@@ -55,9 +55,7 @@ const icon = (
 
 const deafultEmptySearchMessage = (
 	<div>
-		<div>
-			Your search did not match any items.
-		</div>
+		Your search did not match any items.
 		<ul>
 			<li>
 				Make sure that all words are spelled correctly.
@@ -282,6 +280,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 									activeItemId={flatItems[activeIndex]?.id}
 									multiple={multiple}
 									value={value}
+									itemTpl={optionTpl}
 									onChange={(value) => {
 										if (isFunction(onChange)) {
 											dispatch({

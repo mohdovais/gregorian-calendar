@@ -47,7 +47,6 @@
 
 .input:user-invalid {
     border-color: #900;
-    background-color: beige;
 }
 
 .input:user-invalid:focus {

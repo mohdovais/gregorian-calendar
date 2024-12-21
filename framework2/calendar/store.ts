@@ -1,9 +1,4 @@
-import {
-	DateParts,
-	getToday,
-	increaseMonth,
-	parseISODateStringToTDate,
-} from "../utils/date";
+import { bound } from "../utils/number";
 import { copy } from "../utils/object";
 
 const CAL_VIEW_DATE_SELECTOR = "month";
@@ -52,17 +47,23 @@ type CalendarAction =
 	| ActionSelectMonth
 	| ActionSelectDate;
 
-function calendarInitializer(initializerArg: InitializerArg): CalendarState {
-	let parsedDate = parseISODateStringToTDate(initializerArg.value);
+function increaseMonth(year: number, month: number, encrement = 1) {
+	month = bound(month, 0, 11);
+	const total = (year | 0) * 12 + (month | 0) + (encrement | 0);
+	return { year: (total / 12) | 0, month: total % 12 };
+}
 
-	if (parsedDate == null) {
-		parsedDate = getToday();
+function calendarInitializer(initializerArg: InitializerArg): CalendarState {
+	let parsedDate = new Date(initializerArg.value || "");
+
+	if (isNaN(parsedDate.getTime())) {
+		parsedDate = new Date();
 	}
 
 	return {
 		viewType: CAL_VIEW_DATE_SELECTOR,
-		currentYear: parsedDate.year,
-		currentMonth: parsedDate.month,
+		currentYear: parsedDate.getFullYear(),
+		currentMonth: parsedDate.getMonth(),
 	};
 }
 
@@ -74,7 +75,11 @@ function calendarReducer(
 	switch (action.type) {
 		case ACTION_TYPE_NEXT: {
 			if (state.viewType === CAL_VIEW_DATE_SELECTOR) {
-				const { month, year } = increaseMonth(currentYear, currentMonth, 1);
+				const { month, year } = increaseMonth(
+					currentYear,
+					currentMonth,
+					1,
+				);
 				return copy(state, {
 					currentMonth: month,
 					currentYear: year,
@@ -90,7 +95,11 @@ function calendarReducer(
 		}
 		case ACTION_TYPE_PREV: {
 			if (state.viewType === CAL_VIEW_DATE_SELECTOR) {
-				const { month, year } = increaseMonth(currentYear, currentMonth, -1);
+				const { month, year } = increaseMonth(
+					currentYear,
+					currentMonth,
+					-1,
+				);
 				return copy(state, {
 					currentMonth: month,
 					currentYear: year,
@@ -109,12 +118,11 @@ function calendarReducer(
 		case ACTION_TYPE_CHANGE_VIEW: {
 			const { viewType } = state;
 			return copy(state, {
-				viewType:
-					viewType === CAL_VIEW_DATE_SELECTOR
-						? CAL_VIEW_MONTH_SELECTOR
-						: viewType === CAL_VIEW_MONTH_SELECTOR
-						? CAL_VIEW_YEAR_SELECTOR
-						: viewType,
+				viewType: viewType === CAL_VIEW_DATE_SELECTOR
+					? CAL_VIEW_MONTH_SELECTOR
+					: viewType === CAL_VIEW_MONTH_SELECTOR
+					? CAL_VIEW_YEAR_SELECTOR
+					: viewType,
 			});
 		}
 
@@ -140,17 +148,17 @@ function calendarReducer(
 }
 
 export {
-	calendarReducer,
-	calendarInitializer,
+	ACTION_TYPE_CHANGE_VIEW,
 	ACTION_TYPE_NEXT,
 	ACTION_TYPE_PREV,
-	ACTION_TYPE_CHANGE_VIEW,
 	ACTION_TYPE_SELECT_DATE,
 	ACTION_TYPE_SELECT_MONTH,
 	ACTION_TYPE_SELECT_YEAR,
 	CAL_VIEW_DATE_SELECTOR,
 	CAL_VIEW_MONTH_SELECTOR,
 	CAL_VIEW_YEAR_SELECTOR,
+	calendarInitializer,
+	calendarReducer,
 };
 
 export type { CalendarAction, CalendarState, CalendarView };

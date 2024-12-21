@@ -1,7 +1,15 @@
-import { StockButton } from "../button";
+import { BaseButton } from "../button/base-button";
 import { classname } from "../utils/classname";
-import { getDecade } from "../utils/date";
-import style from "./YearSelector.module.css";
+import style from "./year-selector.module.css";
+
+function getDecade(year: number) {
+	const start = Math.max(0, Math.floor(year / 10) * 10) | 0;
+	const years: number[] = [];
+	for (let i = 0; i < 12; i++) {
+		years.push(start + i);
+	}
+	return years;
+}
 
 type YearSelectorProps = {
 	decade?: number;
@@ -18,7 +26,7 @@ function YearSelector(props: YearSelectorProps) {
 
 	return (
 		<div className={style.wrapper}>
-			{getDecade(decade, 5).map((year) => {
+			{getDecade(decade).map((year) => {
 				const className = classname(
 					year === value && style.selected,
 					year === currentYear && style.current,
@@ -27,14 +35,14 @@ function YearSelector(props: YearSelectorProps) {
 				const disabled = year < min || year > max;
 
 				return (
-					<StockButton
+					<BaseButton
 						key={year}
 						className={classname(style.btn, className)}
 						disabled={disabled}
 						onClick={disabled ? undefined : () => onSelect(year)}
 					>
 						{year}
-					</StockButton>
+					</BaseButton>
 				);
 			})}
 		</div>

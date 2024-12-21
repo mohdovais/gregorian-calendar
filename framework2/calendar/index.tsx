@@ -1,6 +1,6 @@
-import { forwardRef, useReducer } from "react";
+import { useReducer } from "react";
 import { Month, MonthProps } from "../month";
-import { MonthSelector } from "../month-selector";
+import { MonthSelector } from "../month/month-selector";
 import { classname } from "../utils/classname";
 import { DateString } from "../utils/date";
 import { noop } from "../utils/function";
@@ -34,7 +34,7 @@ interface CalendarProps extends Omit<ReactDiv, "onChange"> {
 	onChange?: (date: DateString) => void;
 }
 
-function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
+function Calendar(props: CalendarProps) {
 	const {
 		className,
 		locale,
@@ -103,7 +103,6 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 			{...divProps}
 			className={classname(style.wrapper, className)}
 			data-name="calendar"
-			ref={ref}
 		>
 			<CalendarHeader
 				year={currentYear}
@@ -117,7 +116,5 @@ function Calendar(props: CalendarProps, ref?: React.Ref<HTMLDivElement>) {
 	);
 }
 
-const forwardedRefCalendar = forwardRef(Calendar) as typeof Calendar;
-
-export { forwardedRefCalendar as Calendar };
+export { Calendar };
 export type { CalendarProps };

@@ -51,6 +51,13 @@ function isDateString(date: string | undefined | null): date is DateString {
         !isNaN(Date.parse(date));
 }
 
+function ensureDateString<T>(
+    possibleDateString: string | undefined | null,
+    defaultValue: T,
+) {
+    return isDateString(possibleDateString) ? possibleDateString : defaultValue;
+}
+
 // https://www.php.net/manual/en/datetime.format.php
 
 function formatDate(
@@ -167,6 +174,8 @@ function formatDate(
 }
 
 export {
+    DAYS_IN_MONTH,
+    ensureDateString,
     formatDate,
     getMonthNames,
     getWeekdayNames,
