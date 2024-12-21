@@ -1,50 +1,66 @@
 import { useId } from "react";
-import css from "./textfield.module.css";
+import { Input } from "../input";
 
-interface TextFieldProps
-	extends React.DetailedHTMLProps<
+import css from "./textfield.module.css";
+import { classNames } from "../utils/string";
+
+interface TextFieldProps extends
+	React.DetailedHTMLProps<
 		React.InputHTMLAttributes<HTMLInputElement>,
 		HTMLInputElement
 	> {
 	label: string;
 	essential?: boolean;
+	inputId?: string;
+	inputClassName?: string;
 	inputStyle?: React.CSSProperties;
+	__children?: React.ReactNode;
 }
 
 function TextField(props: TextFieldProps) {
+	const randomId = useId();
+
 	const {
-		id = useId(),
-		className = "",
-		label,
+		id = randomId,
+		className,
 		style,
+		label,
+		placeholder = "ph",
+		inputId = id + "-input",
+		inputClassName,
 		inputStyle,
 		type = "text",
 		essential = false,
+		__children,
 		...restProps
 	} = props;
-	const inputId = id + "-input";
 
 	return (
 		<div
 			id={id}
-			className={
-				css.field + " " + className + " " + (essential ? css.required : "")
-			}
+			className={classNames(
+				css.field,
+				props.placeholder != null && css.has_placeholder,
+				essential ? css.required : "",
+				className,
+			)}
 			style={style}
 		>
-			<input
-				type={type}
-				placeholder={label}
-				id={inputId}
-				className={css.input}
-				style={inputStyle}
+			<Input
 				{...restProps}
+				type={type}
+				id={inputId}
+				className={classNames(css.input, inputClassName)}
+				style={inputStyle}
+				placeholder={placeholder}
 			/>
 			<label htmlFor={inputId} className={css.label}>
 				{label}
 			</label>
+			{__children}
 		</div>
 	);
 }
 
 export { TextField };
+export type { TextFieldProps };

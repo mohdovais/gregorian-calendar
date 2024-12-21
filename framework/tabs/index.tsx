@@ -1,8 +1,9 @@
 import { useRef } from "react";
 import { ensureArray } from "../utils/array";
-import { classname } from "../utils/classname";
+
 import { isFunction } from "../utils/function";
 import css from "./tabs.module.css";
+import { classNames } from "../utils/string";
 
 type TabItem<T> = {
     label: React.ReactElement | string;
@@ -50,7 +51,7 @@ function Tabs<T extends string | number>(props: TabsProps<T>) {
             }
         }
 
-        const cn = classname(
+        const cn = classNames(
             css.tab,
             isDisabled && css.disabled,
             isSelected && css.active,
@@ -76,7 +77,7 @@ function Tabs<T extends string | number>(props: TabsProps<T>) {
     return (
         <ul
             id={id}
-            className={classname(
+            className={classNames(
                 css.tabs,
                 className,
             )}

@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { TextField } from "framework2/textfield";
+import { TextField } from "framework/textfield";
 import { rootRoute } from "./root";
 
 function TextFieldPage() {

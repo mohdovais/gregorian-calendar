@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { Tabs } from "framework2/tabs";
+import { Tabs } from "framework/tabs";
 import { rootRoute } from "./root";
 import { useEffect, useId, useState } from "react";
 

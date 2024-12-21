@@ -1,28 +1,24 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useReducer, useRef } from "react";
 import { ResultStyle, usePosition } from "../hooks/usePosition";
 import { Portal } from "../portal";
 import { ensureArray } from "../utils/array";
-import { classname } from "../utils/classname";
-import { Listbox, ListboxProps } from "../listbox2";
-import {
-	ensureItemsWithId,
-	getActionFromKey,
-	getFirstSelectedIndex,
-	getUpdatedIndex,
-	scrollSelectedIntoView,
-	SelectAction_Close,
-	SelectAction_CloseSelect,
-	SelectAction_First,
-	SelectAction_Last,
-	SelectAction_Next,
-	SelectAction_Open,
-	SelectAction_PageDown,
-	SelectAction_PageUp,
-	SelectAction_Previous,
-	SelectAction_Type,
-} from "./dropdown.helpers";
-import css from "./dropdown.module.css";
+import { Listbox, ListboxProps } from "../listbox";
 import { isFunction } from "../utils/function";
+import { Search } from "../search";
+import {
+	DROPDOWN_ACTION_TYPE_Close,
+	DROPDOWN_ACTION_TYPE_Open,
+	DROPDOWN_ACTION_TYPE_Search,
+	DROPDOWN_ACTION_TYPE_UpdateItems,
+	DropdownAction,
+	DropdownState,
+	dropdownStore,
+	getActionFromKeyboardEvent,
+	initDropdownState,
+} from "./dropdown.store";
+
+import css from "./dropdown.module.css";
+import { classNames } from "../utils/string";
 
 const positionSettings = {
 	transform: (css: ResultStyle, target: HTMLElement) => {
@@ -58,23 +54,40 @@ const icon = (
 	</svg>
 );
 
-type DisplayComponentProps = {};
+const deafultEmptySearchMessage = (
+	<div>
+		Your search did not match any items.
+		<ul>
+			<li>
+				Make sure that all words are spelled correctly.
+			</li>
+			<li>Try different keywords.</li>
+		</ul>
+	</div>
+);
 
 interface DropdownProps<T> extends ListboxProps<T> {
 	name?: string;
 	label: string;
 	required?: boolean;
 	readonly?: boolean;
-	displayComponent?: React.Component<DisplayComponentProps>;
+	displayTpl?: (selection: T[]) => React.ReactElement | string;
+	optionTpl?: (value: T) => React.ReactElement | string;
+	searchPlaceholder?: string;
+	searchEmptyMessage?: React.ReactElement | string;
+	onSearch?: (search: string) => void;
 }
+
+const defaultDisplayTpl = (selection: unknown[]) => selection.join(", ");
 
 function Dropdown<T>(props: DropdownProps<T>) {
 	const {
 		label,
+		id,
 		className,
 		disabled,
-		displayComponent,
-		id,
+		displayTpl = defaultDisplayTpl,
+		optionTpl,
 		multiple = false,
 		name,
 		onChange,
@@ -82,19 +95,37 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		required,
 		style,
 		value,
+		searchEmptyMessage = deafultEmptySearchMessage,
+		searchPlaceholder = "Search",
+		onSearch,
 	} = props;
 
-	const [expanded, setExpanded] = useState(false);
-	const listboxId = useId();
-	const labelId = useId();
-	const position = usePosition(expanded, positionSettings);
-	const { items, flatItems } = useMemo(() => ensureItemsWithId(props.items), [
-		props.items,
-	]);
-	const [activeIndex, setActiveIndex] = useState(-1);
+	const hasSearch = isFunction(onSearch);
+	const searchRef = useRef<HTMLInputElement>(null);
 
+	const [state, dispatch] = useReducer<
+		DropdownState<T>,
+		null,
+		[action: DropdownAction<T>]
+	>(
+		dropdownStore,
+		null,
+		initDropdownState,
+	);
+
+	const {
+		activeIndex,
+		expanded,
+		flatItems,
+		items,
+		labelId,
+		listboxId,
+		searchId,
+	} = state;
+
+	const search = useDeferredValue(state.search);
+	const position = usePosition(expanded, positionSettings);
 	const values = ensureArray(props.value);
-	const selectedIndex = getFirstSelectedIndex(flatItems, values);
 
 	const onBlur = (event: React.FocusEvent<HTMLElement>) => {
 		const target = event.relatedTarget;
@@ -108,68 +139,72 @@ function Dropdown<T>(props: DropdownProps<T>) {
 	};
 
 	const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-		const action = getActionFromKey(event, expanded);
+		const action = getActionFromKeyboardEvent(
+			event,
+			expanded,
+			values,
+			onChange,
+		);
 
-		switch (action) {
-			case SelectAction_Last:
-			case SelectAction_First:
-				setExpanded(true);
-			// intentional fallthrough
-			case SelectAction_Next:
-			case SelectAction_Previous:
-			case SelectAction_PageUp:
-			case SelectAction_PageDown:
-				event.preventDefault();
-				setActiveIndex((activeIndex) =>
-					getUpdatedIndex(activeIndex, flatItems.length - 1, action)
-				);
-				break;
-			case SelectAction_CloseSelect:
-				const v = flatItems[activeIndex].value;
-				if (isFunction(onChange) && v != null) {
-					onChange(v);
-				}
-			// intentional fallthrough
-			case SelectAction_Close:
-				event.preventDefault();
-				return setExpanded(false);
-			case SelectAction_Type:
-				// tbd return this.onComboType(key);
-			case SelectAction_Open:
-				event.preventDefault();
-				return setExpanded(true);
-		}
+		dispatch(action);
 	};
 
 	useEffect(() => {
-		const root = position.refs.floating;
-		if (expanded && activeIndex !== -1 && root != null) {
-			const id = "#" + flatItems[activeIndex].id;
-			const activeEl = root.querySelector(id);
+		dispatch({
+			type: DROPDOWN_ACTION_TYPE_UpdateItems,
+			items: props.items,
+		});
+	}, [props.items]);
 
-			if (activeEl != null) {
-				setTimeout(
-					() =>
-						activeEl.scrollIntoView({
-							behavior: "smooth",
-							block: "center",
-						}),
-					100,
-				);
-			}
+	useEffect(() => {
+		if (expanded && hasSearch) {
+			onSearch(search);
 		}
-	}, [activeIndex, expanded, flatItems]);
+	}, [expanded, hasSearch, search]);
+
+	/* MAGIC */
+	useEffect(() => {
+		if (state.event != null) {
+			state.event();
+			delete state.event;
+		}
+
+		if (state.effect != null) {
+			state.effect();
+			delete state.effect;
+		}
+
+		if (state.focusDropdown) {
+			position.refs.reference?.focus({
+				preventScroll: true,
+			});
+			delete state.focusDropdown;
+		}
+
+		if (state.focusSearch) {
+			searchRef.current?.focus({
+				preventScroll: true,
+				// @ts-expect-error
+				focusVisible: true,
+			});
+			delete state.focusSearch;
+		}
+	}, [
+		position.refs.reference,
+		state.effect,
+		state.focusDropdown,
+		state.event,
+	]);
 
 	return (
 		<div
 			id={id}
-			className={classname(
+			className={classNames(
 				css.wrapper,
 				expanded ? css.expanded : css.collapsed,
 				className,
 			)}
 			style={style}
-			ref={position.refs.setReference}
 			onBlur={onBlur}
 			onKeyDown={onKeyDown}
 		>
@@ -181,12 +216,13 @@ function Dropdown<T>(props: DropdownProps<T>) {
 			/>
 			<button
 				type="button"
-				className={classname(
+				className={classNames(
 					css.input,
 					values.length > 0 && css.has_value,
 					required && css.required,
 					readonly && css.readonly,
 					disabled && css.disabled,
+					expanded && hasSearch && css.has_search,
 				)}
 				role="combobox"
 				aria-labelledby={labelId}
@@ -195,9 +231,16 @@ function Dropdown<T>(props: DropdownProps<T>) {
 				aria-activedescendant={expanded
 					? (flatItems[activeIndex]?.id)
 					: undefined}
-				onClick={() => setExpanded((x) => !x)}
+				onClick={() => {
+					if (expanded) {
+						dispatch({ type: DROPDOWN_ACTION_TYPE_Close });
+					} else {
+						dispatch({ type: DROPDOWN_ACTION_TYPE_Open, values });
+					}
+				}}
+				ref={position.refs.setReference}
 			>
-				<span>{values.join(",")}</span>
+				<span>{displayTpl(values)}</span>
 			</button>
 			<label id={labelId} className={css.label}>{label}</label>
 			{icon}
@@ -210,15 +253,44 @@ function Dropdown<T>(props: DropdownProps<T>) {
 							ref={position.refs.setFloating}
 							onBlur={onBlur}
 						>
-							<input type="search" />
+							{hasSearch
+								? (
+									<Search
+										id={searchId}
+										className={css.search}
+										placeholder={searchPlaceholder}
+										onChange={(event) =>
+											dispatch({
+												type:
+													DROPDOWN_ACTION_TYPE_Search,
+												search: event.target.value
+													.trim(),
+											})}
+										ref={searchRef}
+									/>
+								)
+								: null}
+							{hasSearch && search !== "" && items.length === 0
+								? searchEmptyMessage
+								: null}
 							<div className={css.scroller}>
 								<Listbox
 									items={items}
 									id={listboxId}
+									optionClassName={css.option}
 									activeItemId={flatItems[activeIndex]?.id}
 									multiple={multiple}
 									value={value}
-									onChange={onChange}
+									itemTpl={optionTpl}
+									onChange={(value) => {
+										if (isFunction(onChange)) {
+											dispatch({
+												type:
+													DROPDOWN_ACTION_TYPE_Close,
+											});
+											onChange(value);
+										}
+									}}
 								/>
 							</div>
 						</div>

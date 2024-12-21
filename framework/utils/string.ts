@@ -1,9 +1,18 @@
-function leftPad(item: string | number, length: number, pad = "0") {
-	let x = String(item);
-	while (x.length < length) {
-		x = pad + x;
-	}
-	return x;
+function escapeRegExpString(string: string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
-export { leftPad };
+type PossibleClassName = string | boolean | null | undefined;
+
+function classNames(...names: PossibleClassName[]) {
+	const result: string[] = [];
+	for (let i = 0; i < names.length; i++) {
+		const name = names[i];
+		if (typeof name === "string") {
+			result.push(name);
+		}
+	}
+	return result.length > 0 ? result.join(" ") : undefined;
+}
+
+export { classNames, escapeRegExpString };

@@ -1,8 +1,8 @@
 import { createRoute } from "@tanstack/react-router";
-import { DateField } from "framework2/datefield";
+import { DateField } from "framework/datefield";
 import { useState } from "react";
 import { rootRoute } from "./root";
-import { Calendar } from "framework2/calendar";
+import { Calendar } from "framework/calendar";
 
 const weekends = [0, 6];
 const disabledDates = ["2024-12-25", "2024-12-26"];

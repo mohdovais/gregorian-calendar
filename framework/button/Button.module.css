@@ -9,6 +9,7 @@
     width: 16px;
     height: 16px;
     margin-right: 5px;
+    pointer-events: none;
 }
 
 .icon:empty {
@@ -30,15 +31,15 @@
 }
 
 .solid.primary {
-    background-color: blue
+    background-color: blue;
 }
 
 .solid.danger {
-    background-color: red
+    background-color: red;
 }
 
 .solid.info {
-    background-color: skyblue
+    background-color: skyblue;
 }
 
 .solid.success {
@@ -46,9 +47,8 @@
 }
 
 .solid.warning {
-    background-color: orange
+    background-color: orange;
 }
-
 
 .outlined.neutral {
     border-color: grey;
@@ -57,27 +57,27 @@
 
 .outlined.primary {
     border-color: blue;
-    color: blue
+    color: blue;
 }
 
 .outlined.danger {
     border-color: red;
-    color: red
+    color: red;
 }
 
 .outlined.info {
     border-color: skyblue;
-    color: skyblue
+    color: skyblue;
 }
 
 .outlined.success {
     border-color: green;
-    color: green
+    color: green;
 }
 
 .outlined.warning {
     border-color: orange;
-    color: orange
+    color: orange;
 }
 
 .link {
@@ -92,25 +92,25 @@
 
 .link.primary,
 .ghost.primary {
-    color: blue
+    color: blue;
 }
 
 .link.danger,
 .ghost.danger {
-    color: red
+    color: red;
 }
 
 .link.info,
 .ghost.info {
-    color: skyblue
+    color: skyblue;
 }
 
 .link.success,
 .ghost.success {
-    color: green
+    color: green;
 }
 
 .link.warning,
 .ghost.warning {
-    color: orange
+    color: orange;
 }

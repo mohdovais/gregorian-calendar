@@ -5,7 +5,7 @@
     "scripts": {
         "test": "vitest"
     },
-    "author": "",
+    "author": "Mohd Ovais",
     "license": "ISC",
     "peerDependencies": {
         "react": "^19.0.0",

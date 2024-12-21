@@ -12,7 +12,9 @@ function usePosition<
 >(show = false, settings?: PositionConfig) {
 	const [reference, setReference] = useState<TargetElement | null>(null);
 	const [floating, setFloating] = useState<FloatingElement | null>(null);
-	const [style, setStyle] = useState<ResultStyle>({});
+	const [style, setStyle] = useState<ResultStyle>(
+		{} as unknown as ResultStyle,
+	);
 
 	useEffect(() => {
 		if (show && reference != null && floating != null) {
@@ -39,7 +41,7 @@ function usePosition<
 			);
 		}
 
-		setStyle({});
+		setStyle({} as unknown as ResultStyle);
 	}, [show, reference, floating, settings]);
 
 	return {

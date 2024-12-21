@@ -1,5 +1,6 @@
-import { classname } from "../utils/classname";
-import style from "./ListboxItem.module.css";
+import { isFunction } from "../utils/function";
+import { classNames } from "../utils/string";
+import css from "./Listbox.module.css";
 
 type ListboxItemProps<T> = {
 	className?: string;
@@ -9,7 +10,7 @@ type ListboxItemProps<T> = {
 	selected?: boolean;
 	disabled?: boolean;
 	children?: string | React.ReactElement;
-	onClick?: ((value: T) => void) | ((value: T) => boolean);
+	onClick?: (value: T) => void;
 };
 
 function ListboxItem<T>(props: ListboxItemProps<T>) {
@@ -19,27 +20,29 @@ function ListboxItem<T>(props: ListboxItemProps<T>) {
 		className,
 		disabled,
 		id,
-		onClick,
 		selected,
 		value,
+		onClick,
 	} = props;
 
 	return (
 		<div
 			id={id}
-			className={classname(
+			className={classNames(
+				css.option,
+				active && css.active,
+				selected && css.selected,
 				className,
-				style.option,
-				active && style.active,
-				selected && style.selected,
 			)}
 			role="option"
 			aria-selected={selected || undefined}
-			aria-disabled={disabled}
+			aria-disabled={disabled || undefined}
 			aria-current={active || undefined}
-			onClick={() => {
-				typeof onClick === "function" && onClick(value);
-			}}
+			onClick={!disabled && isFunction(onClick)
+				? () => {
+					onClick(value);
+				}
+				: undefined}
 		>
 			{children}
 		</div>

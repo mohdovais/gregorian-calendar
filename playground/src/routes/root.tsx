@@ -1,15 +1,21 @@
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	Link,
+	Outlet,
+	useRouter,
+} from "@tanstack/react-router";
 import { ErrorBoundary } from "../ErrorBoundary";
 import css from "./root.module.css";
 
 function Root() {
+	const router = useRouter();
 	return (
 		<div className={css.wrapper}>
 			<aside className={css.aside}>
 				<h1>Some Framework</h1>
 				<nav>
 					<ul>
-						{rootRoute.children?.map((route) => (
+						{router.routeTree.children?.map((route) => (
 							<li key={route.path}>
 								<Link to={route.fullPath}>{route.path}</Link>
 							</li>

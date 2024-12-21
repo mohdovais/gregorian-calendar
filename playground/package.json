@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@tanstack/react-router": "^1.91.3",
-        "framework2": "file:../framework2",
+        "framework": "file:../framework",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },

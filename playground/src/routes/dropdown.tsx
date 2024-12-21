@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { Dropdown } from "framework2/dropdown";
+import { Dropdown } from "framework/dropdown";
 import { rootRoute } from "./root";
 import { useDeferredValue, useMemo, useState } from "react";
 
@@ -34,7 +34,7 @@ function searchUsers(query: string, signal: AbortSignal): Promise<User[]> {
 let lastAbort: (reason?: string) => void = () => {};
 type OptionType = {
     value: number;
-    label: string;
+    label: string | React.ReactElement;
 };
 
 const dropdownRoute = createRoute({
@@ -72,7 +72,14 @@ const dropdownRoute = createRoute({
                         searchUsers(query, controller.signal).then((data) =>
                             setData(data.map((x) => ({
                                 value: x.id,
-                                label: `${x.firstName} ${x.lastName}`,
+                                label: (
+                                    <div>
+                                        <div>
+                                            {`${x.firstName} ${x.lastName}`}
+                                        </div>
+                                        <div>{x.email}</div>
+                                    </div>
+                                ),
                             })))
                         );
                         lastAbort = controller.abort.bind(controller);

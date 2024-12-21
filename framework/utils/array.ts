@@ -1,15 +1,5 @@
-const emptyArray = Object.freeze([]);
-
-function ensureArray<T>(value: T | T[] | null | undefined, copy = false): T[] {
-	return value == null
-		? copy
-			? []
-			: (emptyArray as unknown as T[])
-		: Array.isArray(value)
-		? copy
-			? value.slice()
-			: value
-		: [value];
+function ensureArray<T>(value: T | T[] | null | undefined): T[] {
+	return value == null ? [] : Array.isArray(value) ? value : [value];
 }
 
 function getPreviousItem<T>(
@@ -42,4 +32,4 @@ function getNextItem<T>(array: T[], item: T, cyclic = false): T | undefined {
 		: array[0];
 }
 
-export { ensureArray, getPreviousItem, getNextItem };
+export { ensureArray, getNextItem, getPreviousItem };

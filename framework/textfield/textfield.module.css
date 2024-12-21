@@ -3,6 +3,7 @@
     --font-size: 16px;
     --padding-x: 12px;
     --padding-y: 8px;
+
     display: inline-block;
     font-size: var(--font-size);
     position: relative;
@@ -34,30 +35,19 @@
     max-width: calc(100% - calc(var(--padding-x) * 2));
 }
 
-.input {
+input.input {
     display: block;
     font: inherit;
     color: currentColor;
-    caret-color: red;
-    background: none;
-    border: 1px solid rgb(170, 170, 170);
-    box-sizing: border-box;
     height: var(--height);
     min-width: 0;
     width: 100%;
-    animation-duration: 10ms;
-    margin: 0;
-    padding: calc(var(--height) - var(--font-size) - var(--padding-y) - 2px)
-        var(--padding-x) var(--padding-y) var(--padding-x);
-    border-radius: 2px;
-}
-
-.input:hover {
-    outline-color: #000;
-}
-
-.input:focus {
-    outline: 2px solid #000;
+    padding-top: calc(
+        var(--height) - var(--font-size) - var(--padding-y) - 2px
+    );
+    padding-left: var(--padding-x);
+    padding-bottom: var(--padding-y);
+    padding-left: var(--padding-x);
 }
 
 .input:focus ~ .label,
@@ -71,23 +61,12 @@
     color: transparent;
 }
 
-.input:user-invalid {
-    outline: 1px solid red;
+.has_placeholder .input:focus::placeholder {
+    color: #ccc;
 }
 
 .field.required .label:after,
 .input:required ~ .label:after {
     content: "*";
     color: red;
-}
-
-.input:read-only {
-    border-color: #e6e6e6;
-    background-color: #fafafa;
-}
-
-.input:disabled,
-.input:disabled ~ .label {
-    border-color: #e6e6e6;
-    color: #bebebe;
 }

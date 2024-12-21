@@ -46,7 +46,7 @@
     background-color: #fff;
     border: 1px solid #aaa;
     box-sizing: border-box;
-    height: var(--height);
+    min-height: var(--height);
     min-width: 300px;
     width: 100%;
     animation-duration: 10ms;
@@ -57,6 +57,10 @@
     transition: 0.3s;
     transition-property: background-color, border, box-shadow;
     text-align: left;
+}
+
+.input.has_search {
+    border-color: transparent;
 }
 
 .collapsed .input:hover {
@@ -126,6 +130,15 @@
 
 .scroller {
     overflow-y: auto;
+    scroll-snap-type: y mandatory;
+}
+
+.option {
+    scroll-snap-align: start;
+}
+
+.search {
+    margin-bottom: 12px;
 }
 
 @keyframes scaleZ {
