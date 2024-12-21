@@ -14,7 +14,7 @@ type UserResponse = {
     users: User[];
 };
 
-function searchUsers(query: string, signal: AbortSignal) {
+function searchUsers(query: string, signal: AbortSignal): Promise<User[]> {
     return fetch(
         `https://dummyjson.com/users/search?q=${query}&select=firstName,lastName,email`,
         { signal },
@@ -32,12 +32,16 @@ function searchUsers(query: string, signal: AbortSignal) {
 }
 
 let lastAbort: (reason?: string) => void = () => {};
+type OptionType = {
+    value: number;
+    label: string;
+};
 
 const dropdownRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "dropdown",
     component: () => {
-        const [data, setData] = useState<User[]>([]);
+        const [data, setData] = useState<OptionType[]>([]);
         const [value, setValue] = useState<number | undefined>();
         const deferredData = useDeferredValue(data);
 
@@ -58,15 +62,19 @@ const dropdownRoute = createRoute({
                 <Dropdown
                     label={value == null ? "Select a country" : "Country"}
                     value={value}
-                    items={deferredData.map((x) => ({
-                        value: x.id,
-                        label: `${x.firstName} ${x.lastName}`,
-                    }))}
+                    items={deferredData}
+                    displayTpl={(x) =>
+                        deferredData.find((y) => y.value === x[0])?.label ?? ""}
                     onChange={setValue}
                     onSearch={(query) => {
                         lastAbort();
                         const controller = new AbortController();
-                        searchUsers(query, controller.signal).then(setData);
+                        searchUsers(query, controller.signal).then((data) =>
+                            setData(data.map((x) => ({
+                                value: x.id,
+                                label: `${x.firstName} ${x.lastName}`,
+                            })))
+                        );
                         lastAbort = controller.abort.bind(controller);
                     }}
                 />

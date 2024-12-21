@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import { ErrorBoundary } from "../components/ErrorBoundary";
+import { ErrorBoundary } from "../ErrorBoundary";
 import css from "./root.module.css";
 
 function Root() {

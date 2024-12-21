@@ -17,6 +17,11 @@ function TextFieldPage() {
 					defaultValue="disabled field"
 					disabled
 				/>
+				<TextField
+					label="Username"
+					placeholder="This is a placeholder"
+					required
+				/>
 			</div>
 			<div>
 				<TextField label="Username" style={{ width: "100%" }} />

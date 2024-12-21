@@ -2,12 +2,15 @@ import { createRoute } from "@tanstack/react-router";
 import { DateField } from "framework2/datefield";
 import { useState } from "react";
 import { rootRoute } from "./root";
+import { Calendar } from "framework2/calendar";
 
 const weekends = [0, 6];
-const disabledDates = ["2023-12-25", "2023-12-26"];
+const disabledDates = ["2024-12-25", "2024-12-26"];
 
 function DateFieldPage() {
-	const [value, setValue] = useState<string | undefined>("2024-12-25");
+	const [value, setValue] = useState<string | undefined>("2024-12-27");
+
+	console.log("value", value);
 
 	return (
 		<div>
@@ -16,6 +19,14 @@ function DateFieldPage() {
 				value={value}
 				onChange={setValue}
 				dateFormat="d.m.Y"
+				placeholder="DD.MM.YYYY"
+			/>
+			<Calendar
+				key={value}
+				weekStartDay={0}
+				disabledDates={disabledDates}
+				value={value}
+				onChange={setValue}
 			/>
 		</div>
 	);
