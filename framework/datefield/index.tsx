@@ -10,10 +10,11 @@ import {
 import { createDateParser } from "../utils/date.parser";
 import { isFunction } from "../utils/function";
 import { Portal } from "../portal";
-
-import css from "./datefield.module.css";
 import { Calendar } from "../calendar";
 import { useFloating } from "./useFloating";
+
+import css from "./datefield.module.css";
+import { ConditionalRender } from "../conditional-render";
 
 type InputProps = React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
@@ -94,23 +95,25 @@ function DateField(props: DateFieldProps) {
                         📅
                     </button>
                     <Portal>
-                        {expanded
-                            ? (
-                                <div ref={setFloating} style={floatingStyle}>
-                                    <Calendar
-                                        key={value}
-                                        weekStartDay={0}
-                                        value={value}
-                                        onChange={(date) => {
-                                            setExpanded(false);
-                                            if (isFunction(onChange)) {
-                                                onChange(date);
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            )
-                            : null}
+                        <ConditionalRender when={expanded}>
+                            <div
+                                className={css.floating}
+                                ref={setFloating}
+                                style={floatingStyle}
+                            >
+                                <Calendar
+                                    key={value}
+                                    weekStartDay={0}
+                                    value={value}
+                                    onChange={(date) => {
+                                        setExpanded(false);
+                                        if (isFunction(onChange)) {
+                                            onChange(date);
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </ConditionalRender>
                     </Portal>
                 </>
             }

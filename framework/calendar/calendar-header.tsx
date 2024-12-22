@@ -32,6 +32,7 @@ function CalendarHeader(props: CalendarHeaderProps) {
 	return (
 		<div className={style.header}>
 			<BaseButton
+				className={style.square}
 				disabled={view === CAL_VIEW_MONTH_SELECTOR}
 				title="Previous"
 				onClick={() => dispatch({ type: ACTION_TYPE_PREV })}
@@ -60,6 +61,7 @@ function CalendarHeader(props: CalendarHeaderProps) {
 				disabled={view === CAL_VIEW_MONTH_SELECTOR}
 				title="Next"
 				onClick={() => dispatch({ type: ACTION_TYPE_NEXT })}
+				className={style.square}
 			>
 				<svg
 					focusable="false"

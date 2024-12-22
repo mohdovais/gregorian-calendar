@@ -1,5 +1,5 @@
 import { getWeekdayNames } from "../utils/date";
-import style from "./week-header.module.css";
+import style from "./month.module.css";
 import { useMemo } from "react";
 
 interface WeekHeaderProps {
@@ -19,9 +19,9 @@ function WeekHeader(props: WeekHeaderProps) {
 	}, [format, locale, start]);
 
 	return (
-		<div className={style.week}>
+		<div className={style.header}>
 			{names.map((name) => (
-				<div className={style.day} key={name}>
+				<div className={style.name} key={name}>
 					{name}
 				</div>
 			))}

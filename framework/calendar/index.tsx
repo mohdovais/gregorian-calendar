@@ -102,7 +102,7 @@ function Calendar(props: CalendarProps) {
 	return (
 		<div
 			{...divProps}
-			className={classNames(style.wrapper, className)}
+			className={classNames(style.calander, className)}
 			data-name="calendar"
 		>
 			<CalendarHeader
@@ -112,7 +112,7 @@ function Calendar(props: CalendarProps) {
 				dispatch={dispatch}
 				locale={locale}
 			/>
-			<div style={{ padding: 10 }}>{view}</div>
+			<div>{view}</div>
 		</div>
 	);
 }

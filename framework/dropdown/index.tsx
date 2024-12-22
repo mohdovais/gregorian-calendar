@@ -19,6 +19,7 @@ import {
 import css from "./dropdown.module.css";
 import { classNames } from "../utils/string";
 import { useFloating } from "./useFloating";
+import { ConditionalRender } from "../conditional-render";
 
 const icon = (
 	<svg
@@ -119,7 +120,8 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		) {
 			return;
 		}
-		//setExpanded(false);
+
+		dispatch({ type: DROPDOWN_ACTION_TYPE_Close });
 	};
 
 	const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -178,13 +180,14 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		state.effect,
 		state.focusDropdown,
 		state.event,
+		state.focusSearch,
 	]);
 
 	return (
 		<div
 			id={id}
 			className={classNames(
-				css.wrapper,
+				css.dropdown,
 				expanded ? css.expanded : css.collapsed,
 				className,
 			)}
@@ -229,59 +232,57 @@ function Dropdown<T>(props: DropdownProps<T>) {
 			<label id={labelId} className={css.label}>{label}</label>
 			{icon}
 			<Portal>
-				{expanded
-					? (
-						<div
-							className={classNames(
-								css.picker,
-								placement === "top" ? css.top : css.bottom,
-							)}
-							style={floatingStyle}
-							ref={setFloating}
-							onBlur={onBlur}
+				<div
+					className={classNames(
+						css.picker,
+						placement === "top" ? css.top : css.bottom,
+					)}
+					style={floatingStyle}
+					ref={setFloating}
+					onBlur={onBlur}
+					hidden={!expanded}
+				>
+					<ConditionalRender when={expanded}>
+						<ConditionalRender when={hasSearch}>
+							<Search
+								id={searchId}
+								className={css.search}
+								placeholder={searchPlaceholder}
+								onChange={(event) =>
+									dispatch({
+										type: DROPDOWN_ACTION_TYPE_Search,
+										search: event.target.value
+											.trim(),
+									})}
+								ref={searchRef}
+							/>
+						</ConditionalRender>
+						<ConditionalRender
+							when={hasSearch && search !== "" &&
+								items.length === 0}
 						>
-							{hasSearch
-								? (
-									<Search
-										id={searchId}
-										className={css.search}
-										placeholder={searchPlaceholder}
-										onChange={(event) =>
-											dispatch({
-												type:
-													DROPDOWN_ACTION_TYPE_Search,
-												search: event.target.value
-													.trim(),
-											})}
-										ref={searchRef}
-									/>
-								)
-								: null}
-							{hasSearch && search !== "" && items.length === 0
-								? searchEmptyMessage
-								: null}
-							<div className={css.scroller}>
-								<Listbox
-									items={items}
-									id={listboxId}
-									optionClassName={css.option}
-									activeItemId={flatItems[activeIndex]?.id}
-									multiple={multiple}
-									value={value}
-									onChange={(value) => {
-										if (isFunction(onChange)) {
-											dispatch({
-												type:
-													DROPDOWN_ACTION_TYPE_Close,
-											});
-											onChange(value);
-										}
-									}}
-								/>
-							</div>
+							{searchEmptyMessage}
+						</ConditionalRender>
+						<div className={css.scroller}>
+							<Listbox
+								items={items}
+								id={listboxId}
+								optionClassName={css.option}
+								activeItemId={flatItems[activeIndex]?.id}
+								multiple={multiple}
+								value={value}
+								onChange={(value) => {
+									if (isFunction(onChange)) {
+										dispatch({
+											type: DROPDOWN_ACTION_TYPE_Close,
+										});
+										onChange(value);
+									}
+								}}
+							/>
 						</div>
-					)
-					: null}
+					</ConditionalRender>
+				</div>
 			</Portal>
 		</div>
 	);

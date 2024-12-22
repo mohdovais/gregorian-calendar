@@ -14,9 +14,9 @@
 }
 
 .wrapper button {
-    outline: 1px solid rgba(0, 0, 0, 0.02);
     font-variant: tabular-nums;
     aspect-ratio: 1;
+    border-radius: 2px;
 }
 
 .days {
@@ -28,17 +28,28 @@
 .today {
     text-decoration-line: underline;
     text-decoration-thickness: 2px;
-    text-decoration-color: red;
+    text-decoration-color: #e60000;
     text-underline-offset: 5px;
 }
 
-.start,
-.end,
-.selected,
-.hover {
-    color: red;
+.selected {
+    background-color: #2d2d2d;
+    color: #fff;
 }
 
 .between {
     background-color: hsl(225, 80%, 80%);
+}
+
+.header {
+    display: flex;
+    font-size: 0.75em;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.name {
+    flex: 1;
+    text-align: center;
+    padding: 0.5em 0;
 }

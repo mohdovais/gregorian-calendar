@@ -2,6 +2,7 @@ import {
     autoPlacement,
     computePosition,
     ComputePositionConfig,
+    shift,
 } from "@floating-ui/dom";
 import {
     startTransition,
@@ -68,8 +69,9 @@ const positionConfig: Partial<ComputePositionConfig> = {
     placement: "bottom-start",
     middleware: [
         autoPlacement({
-            allowedPlacements: ["top-start", "bottom-start"],
+            allowedPlacements: ["top", "bottom"],
         }),
+        shift(),
     ],
 };
 

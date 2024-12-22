@@ -379,7 +379,6 @@ function dropdownStore<T>(
         }
 
         case DROPDOWN_ACTION_TYPE_SelectNext: {
-            console.log("SELECT NEXT", state.activeIndex);
             const activeIndex = Math.min(
                 state.flatItems.length - 1,
                 state.activeIndex + 1,
