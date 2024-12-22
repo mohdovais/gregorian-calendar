@@ -274,13 +274,15 @@ function createScrollIntoViewEffect<T>(
     const id = option?.id;
     if (id != null) {
         return () => {
-            const el = document.getElementById(id);
-            if (el != null) {
-                el.scrollIntoView({
-                    block: "center",
-                    behavior: "smooth",
-                });
-            }
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el != null) {
+                    el.scrollIntoView({
+                        block: "center",
+                        behavior: "smooth",
+                    });
+                }
+            }, 500);
         };
     }
 }
@@ -318,25 +320,14 @@ function dropdownStore<T>(
                 state.flatItems,
                 action.values,
             );
+
             return copy(state, {
                 activeIndex,
                 expanded: true,
                 focusSearch: true,
-                effect: () => {
-                    const option = state.flatItems[activeIndex];
-                    if (option != null && option.id != null) {
-                        const el = document.getElementById(option.id);
-                        if (el != null) {
-                            setTimeout(
-                                () =>
-                                    el.scrollIntoView({
-                                        block: "center",
-                                    }),
-                                500,
-                            );
-                        }
-                    }
-                },
+                effect: createScrollIntoViewEffect(
+                    state.flatItems[activeIndex],
+                ),
             });
         }
 
@@ -388,6 +379,7 @@ function dropdownStore<T>(
         }
 
         case DROPDOWN_ACTION_TYPE_SelectNext: {
+            console.log("SELECT NEXT", state.activeIndex);
             const activeIndex = Math.min(
                 state.flatItems.length - 1,
                 state.activeIndex + 1,

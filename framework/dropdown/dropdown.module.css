@@ -5,6 +5,7 @@
     --padding-y: 8px;
     display: inline-block;
     font-size: var(--font-size);
+    line-height: 1;
     position: relative;
     vertical-align: top;
 }
@@ -41,7 +42,7 @@
 .input {
     display: block;
     font: inherit;
-    color: #646464;
+    color: #1c1c1c;
     caret-color: red;
     background-color: #fff;
     border: 1px solid #aaa;
@@ -102,13 +103,22 @@
     box-sizing: border-box;
     background-color: #fff;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.16);
-    padding: 68px 10px 10px 10px;
+    padding: 10px;
     z-index: 1;
     display: flex;
     flex-direction: column;
     border-radius: 2px;
     animation: scaleZ 0.2s ease-in-out;
     transform-origin: center 24px;
+}
+
+.picker.bottom {
+    padding-top: 68px;
+    flex-direction: column;
+}
+.picker.top {
+    padding-bottom: 68px;
+    flex-direction: column-reverse;
 }
 
 .icon {
@@ -129,6 +139,7 @@
 }
 
 .scroller {
+    flex: 1;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
 }
@@ -137,8 +148,11 @@
     scroll-snap-align: start;
 }
 
-.search {
+.picker.bottom .search {
     margin-bottom: 12px;
+}
+.picker.top .search {
+    margin-top: 12px;
 }
 
 @keyframes scaleZ {

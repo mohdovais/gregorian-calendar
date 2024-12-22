@@ -1,5 +1,4 @@
 import { ensureArray } from "../utils/array";
-
 import { ListboxGroup } from "./ListboxGroup";
 import { ListboxItem } from "./ListboxItem";
 import css from "./Listbox.module.css";
@@ -38,8 +37,6 @@ type ListboxProps<T> = {
 	onChange?: (value: T) => void;
 };
 
-const defaultItemTpl = (value: unknown) => String(value);
-
 function Listbox<T>(props: ListboxProps<T>) {
 	const {
 		id,
@@ -52,7 +49,6 @@ function Listbox<T>(props: ListboxProps<T>) {
 		items,
 		value,
 		onChange,
-		itemTpl = defaultItemTpl,
 		activeItemId,
 	} = props;
 
@@ -69,7 +65,6 @@ function Listbox<T>(props: ListboxProps<T>) {
 		>
 			{renderItems(
 				items,
-				itemTpl,
 				effectiveValue,
 				disabled,
 				activeItemId,
@@ -89,7 +84,6 @@ function isGroupType<T>(
 
 function renderItems<T>(
 	items: ListboxProps<T>["items"],
-	itemTpl: Exclude<ListboxProps<T>["itemTpl"], undefined>,
 	selected: T[],
 	parentDisabled: boolean,
 	activeItemId?: string,
@@ -97,8 +91,6 @@ function renderItems<T>(
 	groupClassName?: string,
 	onClick?: ListboxProps<T>["onChange"],
 ) {
-	const hasItemTpl = typeof itemTpl === "function";
-
 	return ensureArray(items).map((item) => {
 		const { id, disabled = false, label, value } = item;
 		const isDisabled = parentDisabled || disabled;
@@ -112,7 +104,6 @@ function renderItems<T>(
 				>
 					{renderItems(
 						item.children,
-						itemTpl,
 						selected,
 						isDisabled,
 						activeItemId,
@@ -133,7 +124,7 @@ function renderItems<T>(
 					selected={selected.includes(item.value)}
 					onClick={onClick}
 				>
-					{hasItemTpl ? itemTpl(value!) : label}
+					{label}
 				</ListboxItem>
 			);
 	});

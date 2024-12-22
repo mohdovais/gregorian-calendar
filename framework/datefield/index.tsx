@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { TextField } from "../textfield";
 import {
     DateString,
@@ -12,6 +12,8 @@ import { isFunction } from "../utils/function";
 import { Portal } from "../portal";
 
 import css from "./datefield.module.css";
+import { Calendar } from "../calendar";
+import { useFloating } from "./useFloating";
 
 type InputProps = React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
@@ -48,6 +50,8 @@ function DateField(props: DateFieldProps) {
     max = isDateString(max) ? max : MAX_DATE_STRING;
     value = isDateString(value) ? value : "";
 
+    const [expanded, setExpanded] = useState(false);
+    const { floatingStyle, setFloating, setReference } = useFloating(expanded);
     const parser = useMemo(() => createDateParser(dateFormat), [dateFormat]);
 
     const inputChangeHandler = useCallback(
@@ -73,6 +77,7 @@ function DateField(props: DateFieldProps) {
             placeholder={placeholder}
             defaultValue={formatDate(new Date(value), dateFormat)}
             onChange={inputChangeHandler}
+            ref={setReference}
             __children={
                 <>
                     <input
@@ -81,11 +86,31 @@ function DateField(props: DateFieldProps) {
                         name={name}
                         value={value}
                     />
-                    <button type="button" className={css.trigger}>
+                    <button
+                        type="button"
+                        className={css.trigger}
+                        onClick={() => setExpanded((x) => !x)}
+                    >
                         📅
                     </button>
                     <Portal>
-                        <div>sss</div>
+                        {expanded
+                            ? (
+                                <div ref={setFloating} style={floatingStyle}>
+                                    <Calendar
+                                        key={value}
+                                        weekStartDay={0}
+                                        value={value}
+                                        onChange={(date) => {
+                                            setExpanded(false);
+                                            if (isFunction(onChange)) {
+                                                onChange(date);
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )
+                            : null}
                     </Portal>
                 </>
             }

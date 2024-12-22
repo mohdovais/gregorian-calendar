@@ -1,5 +1,4 @@
 import { useDeferredValue, useEffect, useReducer, useRef } from "react";
-import { ResultStyle, usePosition } from "../hooks/usePosition";
 import { Portal } from "../portal";
 import { ensureArray } from "../utils/array";
 import { Listbox, ListboxProps } from "../listbox";
@@ -19,28 +18,7 @@ import {
 
 import css from "./dropdown.module.css";
 import { classNames } from "../utils/string";
-
-const positionSettings = {
-	transform: (css: ResultStyle, target: HTMLElement) => {
-		const draft = Object.assign({}, css);
-		const { top, left, maxHeight } = draft;
-		if (top != null && top !== 0) {
-			draft.top = top - 58;
-		}
-
-		if (left != null && left !== 0) {
-			draft.left = left - 10;
-		}
-
-		if (maxHeight != null) {
-			draft.maxHeight = maxHeight + 48;
-		}
-
-		// @ts-expect-error
-		draft.width = target.offsetWidth + 20;
-		return draft;
-	},
-};
+import { useFloating } from "./useFloating";
 
 const icon = (
 	<svg
@@ -72,7 +50,6 @@ interface DropdownProps<T> extends ListboxProps<T> {
 	required?: boolean;
 	readonly?: boolean;
 	displayTpl?: (selection: T[]) => React.ReactElement | string;
-	optionTpl?: (value: T) => React.ReactElement | string;
 	searchPlaceholder?: string;
 	searchEmptyMessage?: React.ReactElement | string;
 	onSearch?: (search: string) => void;
@@ -87,7 +64,6 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		className,
 		disabled,
 		displayTpl = defaultDisplayTpl,
-		optionTpl,
 		multiple = false,
 		name,
 		onChange,
@@ -124,12 +100,20 @@ function Dropdown<T>(props: DropdownProps<T>) {
 	} = state;
 
 	const search = useDeferredValue(state.search);
-	const position = usePosition(expanded, positionSettings);
+
+	const {
+		reference,
+		floating,
+		setFloating,
+		setReference,
+		floatingStyle,
+		placement,
+	} = useFloating(expanded);
+
 	const values = ensureArray(props.value);
 
 	const onBlur = (event: React.FocusEvent<HTMLElement>) => {
 		const target = event.relatedTarget;
-		const { floating, reference } = position.refs;
 		if (
 			reference?.contains(target) || floating?.contains(target)
 		) {
@@ -175,7 +159,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 		}
 
 		if (state.focusDropdown) {
-			position.refs.reference?.focus({
+			reference?.focus({
 				preventScroll: true,
 			});
 			delete state.focusDropdown;
@@ -190,7 +174,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 			delete state.focusSearch;
 		}
 	}, [
-		position.refs.reference,
+		reference,
 		state.effect,
 		state.focusDropdown,
 		state.event,
@@ -238,7 +222,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 						dispatch({ type: DROPDOWN_ACTION_TYPE_Open, values });
 					}
 				}}
-				ref={position.refs.setReference}
+				ref={setReference}
 			>
 				<span>{displayTpl(values)}</span>
 			</button>
@@ -248,9 +232,12 @@ function Dropdown<T>(props: DropdownProps<T>) {
 				{expanded
 					? (
 						<div
-							className={css.picker}
-							style={position.style}
-							ref={position.refs.setFloating}
+							className={classNames(
+								css.picker,
+								placement === "top" ? css.top : css.bottom,
+							)}
+							style={floatingStyle}
+							ref={setFloating}
 							onBlur={onBlur}
 						>
 							{hasSearch
@@ -281,7 +268,6 @@ function Dropdown<T>(props: DropdownProps<T>) {
 									activeItemId={flatItems[activeIndex]?.id}
 									multiple={multiple}
 									value={value}
-									itemTpl={optionTpl}
 									onChange={(value) => {
 										if (isFunction(onChange)) {
 											dispatch({
