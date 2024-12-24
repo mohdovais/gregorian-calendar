@@ -6,6 +6,7 @@
     border: 1px solid transparent;
     font-size: inherit;
     transition: background-image 0.2s, color 0.2s;
+    border-radius: 2px;
 }
 
 button:disabled {

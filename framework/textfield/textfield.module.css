@@ -36,6 +36,7 @@
 }
 
 input.input {
+    box-sizing: border-box;
     display: block;
     font: inherit;
     color: currentColor;
@@ -65,8 +66,13 @@ input.input {
     color: #ccc;
 }
 
-.field.required .label:after,
 .input:required ~ .label:after {
     content: "*";
-    color: red;
+    color: #e60000;
+}
+
+.field.optional .label:after {
+    content: " (optional)";
+    font-size: 12px;
+    line-height: 16px;
 }

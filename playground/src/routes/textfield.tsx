@@ -4,28 +4,39 @@ import { rootRoute } from "./root";
 
 function TextFieldPage() {
 	return (
-		<div style={{ display: "flex", gap: "1em", flexDirection: "column" }}>
-			<div style={{ display: "flex", gap: "1em" }}>
-				<TextField label="Username" defaultValue="Username" />
-				<TextField
-					label="Username"
-					defaultValue="read only field"
-					readOnly
-				/>
-				<TextField
-					label="Username"
-					defaultValue="disabled field"
-					disabled
-				/>
-				<TextField
-					label="Username"
-					placeholder="This is a placeholder"
-					required
-				/>
-			</div>
-			<div>
-				<TextField label="Username" style={{ width: "100%" }} />
-			</div>
+		<div>
+			<h2>TextField</h2>
+			<TextField label="Username" />
+			<h5>Readonly</h5>
+			<TextField
+				label="Username"
+				defaultValue="read only field"
+				readOnly
+			/>
+			<h5>Disabled</h5>
+			<TextField
+				label="Username"
+				value="disabled field"
+				disabled
+			/>
+			<h5>Placeholder</h5>
+			<TextField
+				label="Username"
+				placeholder="This is a placeholder"
+			/>
+			<h5>Required</h5>
+			<TextField
+				label="Username"
+				required
+			/>
+			<h5>Optional</h5>
+			<TextField
+				label="Username"
+				optional
+			/>
+
+			<h5>Full width</h5>
+			<TextField label="Username" style={{ width: "100%" }} />
 		</div>
 	);
 }

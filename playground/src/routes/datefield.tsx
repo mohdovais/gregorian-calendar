@@ -2,25 +2,37 @@ import { createRoute } from "@tanstack/react-router";
 import { DateField } from "framework/datefield";
 import { useState } from "react";
 import { rootRoute } from "./root";
-import { Button } from "framework/button";
-import { Toolbar } from "framework/toolbar";
 
 function DateFieldPage() {
-	const [value, setValue] = useState<string | undefined>(undefined);
+	const [value, setValue] = useState<string | undefined>("2024-12-25");
 	return (
 		<form>
-			<Toolbar>
-				<DateField
-					name="start_date"
-					label="Start Date"
-					dateFormat="d.m.Y"
-					placeholder="DD.MM.YYYY"
-					required
-					value={value}
-					onChange={setValue}
-				/>
-				<Button type="submit">Submit</Button>
-			</Toolbar>
+			<h2>DateField</h2>
+			<DateField
+				name="date"
+				label="Date"
+				value={value}
+				onChange={setValue}
+			/>
+			<h5>Locale (Polski)</h5>
+			<DateField
+				name="data"
+				label="Data"
+				dateFormat="d.m.Y"
+				placeholder="DD.MM.YYYY"
+				locale="pl"
+				value={value}
+				onChange={setValue}
+			/>
+			<h5>Min date</h5>
+
+			<DateField
+				name="min-date"
+				label="Date"
+				value={value}
+				onChange={setValue}
+			/>
+			<button type="submit">Submit</button>
 		</form>
 	);
 }

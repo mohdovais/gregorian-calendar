@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TextField } from "../textfield";
 import {
     DateString,
@@ -15,6 +15,8 @@ import { useFloating } from "./useFloating";
 
 import css from "./datefield.module.css";
 import { ConditionalRender } from "../conditional-render";
+import { classNames } from "../utils/string";
+import { BaseButton } from "../button/base-button";
 
 type InputProps = React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
@@ -29,7 +31,7 @@ interface DateFieldProps
     label: string;
     locale?: string;
     dateFormat?: string;
-    onChange?: (date: DateString | undefined) => void;
+    onChange?: (date: DateString | null) => void;
 }
 
 function DateField(props: DateFieldProps) {
@@ -52,19 +54,47 @@ function DateField(props: DateFieldProps) {
     value = isDateString(value) ? value : "";
 
     const [expanded, setExpanded] = useState(false);
-    const { floatingStyle, setFloating, setReference } = useFloating(expanded);
+    const { reference, floatingStyle, setFloating, setReference } = useFloating(
+        expanded,
+    );
     const parser = useMemo(() => createDateParser(dateFormat), [dateFormat]);
 
-    const inputChangeHandler = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (isFunction(onChange)) {
-                const value = event.target.value;
-                const result = parser(value);
-                onChange(result);
+    const inputChangeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (isFunction(onChange)) {
+            const input = event.target.value.trim();
+            if (input === "") {
+                if (value !== "") {
+                    onChange(null);
+                }
+                return;
             }
-        },
-        [onChange],
-    );
+            const result = parser(input);
+            if (result != null && result !== value) {
+                onChange(result || null);
+            }
+        }
+    };
+
+    const inputBlurHandler = (event: React.FocusEvent<HTMLInputElement>) => {
+        if (isFunction(onChange)) {
+            const input = event.target.value.trim();
+            const result = parser(input);
+            if (value !== result) {
+                onChange(result || null);
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (reference != null && value !== "") {
+            const validity = value < min
+                ? `Value must be ${min} or later`
+                : value > max
+                ? `Value must be ${max} or earlier`
+                : "";
+            (reference as HTMLInputElement).setCustomValidity(validity);
+        }
+    }, [reference, value, min, max]);
 
     return (
         <TextField
@@ -78,6 +108,7 @@ function DateField(props: DateFieldProps) {
             placeholder={placeholder}
             defaultValue={formatDate(new Date(value), dateFormat)}
             onChange={inputChangeHandler}
+            onBlur={inputBlurHandler}
             ref={setReference}
             __children={
                 <>
@@ -87,13 +118,15 @@ function DateField(props: DateFieldProps) {
                         name={name}
                         value={value}
                     />
-                    <button
-                        type="button"
-                        className={css.trigger}
+                    <BaseButton
+                        className={classNames(
+                            css.trigger,
+                            expanded && css.active,
+                        )}
                         onClick={() => setExpanded((x) => !x)}
                     >
                         📅
-                    </button>
+                    </BaseButton>
                     <Portal>
                         <ConditionalRender when={expanded}>
                             <div
@@ -105,6 +138,7 @@ function DateField(props: DateFieldProps) {
                                     key={value}
                                     weekStartDay={0}
                                     value={value}
+                                    locale={locale}
                                     onChange={(date) => {
                                         setExpanded(false);
                                         if (isFunction(onChange)) {

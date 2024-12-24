@@ -1,8 +1,8 @@
 import { useId } from "react";
 import { Input } from "../input";
+import { classNames } from "../utils/string";
 
 import css from "./textfield.module.css";
-import { classNames } from "../utils/string";
 
 interface TextFieldProps extends
 	React.DetailedHTMLProps<
@@ -10,7 +10,7 @@ interface TextFieldProps extends
 		HTMLInputElement
 	> {
 	label: string;
-	essential?: boolean;
+	optional?: boolean;
 	inputId?: string;
 	inputClassName?: string;
 	inputStyle?: React.CSSProperties;
@@ -30,7 +30,7 @@ function TextField(props: TextFieldProps) {
 		inputClassName,
 		inputStyle,
 		type = "text",
-		essential = false,
+		optional = false,
 		__children,
 		...restProps
 	} = props;
@@ -41,7 +41,7 @@ function TextField(props: TextFieldProps) {
 			className={classNames(
 				css.field,
 				props.placeholder != null && css.has_placeholder,
-				essential ? css.required : "",
+				optional ? css.optional : "",
 				className,
 			)}
 			style={style}
