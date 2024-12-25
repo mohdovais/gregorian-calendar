@@ -4,7 +4,7 @@ import { useState } from "react";
 import { rootRoute } from "./root";
 
 function DateFieldPage() {
-	const [value, setValue] = useState<string | undefined>("2024-12-25");
+	const [value, setValue] = useState<string | null>("2024-12-25");
 	return (
 		<form>
 			<h2>DateField</h2>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { TextField } from "../textfield";
 import {
     DateString,
@@ -53,6 +53,7 @@ function DateField(props: DateFieldProps) {
     max = isDateString(max) ? max : MAX_DATE_STRING;
     value = isDateString(value) ? value : "";
 
+    const describeById = useId();
     const [expanded, setExpanded] = useState(false);
     const { reference, floatingStyle, setFloating, setReference } = useFloating(
         expanded,
@@ -110,8 +111,12 @@ function DateField(props: DateFieldProps) {
             onChange={inputChangeHandler}
             onBlur={inputBlurHandler}
             ref={setReference}
+            aria-describedby={describeById}
             __children={
                 <>
+                    <div id={describeById} className={css.sr_only}>
+                        Date format: {dateFormat}
+                    </div>
                     <input
                         type="hidden"
                         form={form}
@@ -124,6 +129,7 @@ function DateField(props: DateFieldProps) {
                             expanded && css.active,
                         )}
                         onClick={() => setExpanded((x) => !x)}
+                        aria-label="Choose Date"
                     >
                         📅
                     </BaseButton>
@@ -133,6 +139,9 @@ function DateField(props: DateFieldProps) {
                                 className={css.floating}
                                 ref={setFloating}
                                 style={floatingStyle}
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label="Choose Date"
                             >
                                 <Calendar
                                     key={value}

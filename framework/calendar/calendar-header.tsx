@@ -35,6 +35,7 @@ function CalendarHeader(props: CalendarHeaderProps) {
 				className={style.square}
 				disabled={view === CAL_VIEW_MONTH_SELECTOR}
 				title="Previous"
+				aria-label="Previous"
 				onClick={() => dispatch({ type: ACTION_TYPE_PREV })}
 			>
 				<svg
@@ -51,7 +52,9 @@ function CalendarHeader(props: CalendarHeaderProps) {
 				</svg>
 			</BaseButton>
 			<BaseButton
+				id="calander-title"
 				className={style.title}
+				aria-live="polite"
 				disabled={view === CAL_VIEW_YEAR_SELECTOR}
 				onClick={() => dispatch({ type: ACTION_TYPE_CHANGE_VIEW })}
 			>
@@ -60,6 +63,7 @@ function CalendarHeader(props: CalendarHeaderProps) {
 			<BaseButton
 				disabled={view === CAL_VIEW_MONTH_SELECTOR}
 				title="Next"
+				aria-label="Next"
 				onClick={() => dispatch({ type: ACTION_TYPE_NEXT })}
 				className={style.square}
 			>

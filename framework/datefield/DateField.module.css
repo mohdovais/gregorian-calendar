@@ -19,3 +19,9 @@
     background-color: #fff;
     z-index: 2;
 }
+
+.sr_only {
+    position: absolute;
+    top: -2000em;
+    left: -3000em;
+}

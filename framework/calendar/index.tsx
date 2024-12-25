@@ -112,7 +112,7 @@ function Calendar(props: CalendarProps) {
 				dispatch={dispatch}
 				locale={locale}
 			/>
-			<div>{view}</div>
+			<div role="grid" aria-labelledby="calander-title">{view}</div>
 		</div>
 	);
 }

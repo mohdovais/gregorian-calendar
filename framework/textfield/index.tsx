@@ -1,14 +1,10 @@
 import { useId } from "react";
-import { Input } from "../input";
+import { Input, InputProps } from "../input";
 import { classNames } from "../utils/string";
 
 import css from "./textfield.module.css";
 
-interface TextFieldProps extends
-	React.DetailedHTMLProps<
-		React.InputHTMLAttributes<HTMLInputElement>,
-		HTMLInputElement
-	> {
+interface TextFieldProps extends InputProps {
 	label: string;
 	optional?: boolean;
 	inputId?: string;

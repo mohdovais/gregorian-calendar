@@ -1,6 +1,8 @@
 import { createRoute } from "@tanstack/react-router";
 import { TextField } from "framework/textfield";
 import { rootRoute } from "./root";
+import { Toolbar } from "framework/toolbar";
+import { Button } from "framework/button";
 
 function TextFieldPage() {
 	return (
@@ -25,10 +27,31 @@ function TextFieldPage() {
 				placeholder="This is a placeholder"
 			/>
 			<h5>Required</h5>
-			<TextField
-				label="Username"
-				required
-			/>
+			<form
+				onSubmit={(event) => {
+					event.preventDefault();
+				}}
+				onInvalid={(event) => {
+					event.preventDefault();
+				}}
+			>
+				<Toolbar>
+					<TextField
+						label="Username"
+						name="username"
+						autoComplete="username"
+						required
+					/>
+					<TextField
+						label="Password"
+						name="password"
+						type="password"
+						autoComplete="current-password"
+						required
+					/>
+					<Button type="submit">Submit</Button>
+				</Toolbar>
+			</form>
 			<h5>Optional</h5>
 			<TextField
 				label="Username"

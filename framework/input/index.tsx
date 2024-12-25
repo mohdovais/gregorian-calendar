@@ -3,14 +3,17 @@ import { forwardRef } from "react";
 import css from "./Input.module.css";
 import { classNames } from "../utils/string";
 
-type InputProps = React.DetailedHTMLProps<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
->;
+interface InputProps extends
+    React.DetailedHTMLProps<
+        React.InputHTMLAttributes<HTMLInputElement>,
+        HTMLInputElement
+    > {
+    ref?: React.Ref<HTMLInputElement>;
+}
 
 const Input = forwardRef(function Input(
     props: InputProps,
-    ref?: React.Ref<HTMLInputElement>,
+    outerRef?: React.Ref<HTMLInputElement>,
 ) {
     const {
         type = "text",
@@ -22,8 +25,8 @@ const Input = forwardRef(function Input(
         <input
             {...restInputProps}
             type={type}
+            ref={outerRef}
             className={classNames(css.input, className)}
-            ref={ref}
         />
     );
 });

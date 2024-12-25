@@ -1,0 +1,34 @@
+.table {
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.tr:nth-child(even) {
+    background-color: #f9f9f7;
+}
+
+.th {
+    font-weight: 300;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+.td {
+    padding: 8px;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+.left {
+    text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
