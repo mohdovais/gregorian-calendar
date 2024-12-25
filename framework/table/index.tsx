@@ -3,7 +3,7 @@ import { emptyFn, isFunction } from "../utils/function";
 import { classNames } from "../utils/string";
 import css from "./table.module.css";
 
-function getAlignClassName(align: TableColumnBase<unknown>["align"]) {
+function getAlignClassName(align: TableColumnBase<unknown, unknown>["align"]) {
     return align === "left"
         ? css.left
         : align === "right"
@@ -11,69 +11,74 @@ function getAlignClassName(align: TableColumnBase<unknown>["align"]) {
         : css.center;
 }
 
-type RenderMetaData<T> = {
+type RenderSettings<T, U> = {
     data: T[];
-    columns: TableColumn<T>[];
+    metaData?: U;
+    columns: TableColumn<T, U>[];
     sendMessage: (message: string) => void;
 };
 
-type HeaderRenderer<T> = (
-    column: TableColumn<T>,
-    meta: RenderMetaData<T>,
+type HeaderRenderer<T, U> = (
+    column: TableColumn<T, U>,
+    settings: RenderSettings<T, U>,
 ) => React.ReactNode;
 
-type CellRenderer<T> = (
+type CellRenderer<T, U> = (
     record: T,
-    column: TableColumn<T>,
-    meta: RenderMetaData<T>,
+    column: TableColumn<T, U>,
+    settings: RenderSettings<T, U>,
 ) => React.ReactNode;
 
-interface TableColumnBase<T> {
+interface TableColumnBase<T, U> {
     id: string | number;
     className?: string;
     align?: "left" | "center" | "right";
-    header?: React.ReactNode | HeaderRenderer<T>;
+    header?: React.ReactNode | HeaderRenderer<T, U>;
     width?: number;
     editable?: boolean;
     editor?: React.ReactElement;
     hidden?: boolean;
     th?: boolean;
-    summary?: React.ReactNode | HeaderRenderer<T>;
-    columns?: TableColumn<T>[];
+    summary?: React.ReactNode | HeaderRenderer<T, U>;
+    columns?: TableColumn<T, U>[];
     sortable?: boolean;
 }
 
-interface TableColumnDataIndex<T> extends TableColumnBase<T> {
+interface TableColumnDataIndex<T, U> extends TableColumnBase<T, U> {
     dataIndex: keyof T;
     renderer?: never;
 }
 
-interface TableColumnRenderer<T> extends TableColumnBase<T> {
+interface TableColumnRenderer<T, U> extends TableColumnBase<T, U> {
     dataIndex?: never;
-    renderer: CellRenderer<T>;
+    renderer: CellRenderer<T, U>;
 }
 
-type TableColumn<T> = TableColumnDataIndex<T> | TableColumnRenderer<T>;
+type TableColumn<T, U = unknown> =
+    | TableColumnDataIndex<T, U>
+    | TableColumnRenderer<T, U>;
 
-interface TableProps<T> extends
+interface TableProps<T, U> extends
     React.DetailedHTMLProps<
         React.TableHTMLAttributes<HTMLTableElement>,
         HTMLTableElement
     > {
     data: T[];
-    columns: TableColumn<T>[];
-    rowClassName?: TableBodyProps<T>["rowClassName"];
-    rowKey: TableBodyProps<T>["rowId"];
+    metaData?: U;
+    columns: TableColumn<T, U>[];
+    rowClassName?: TableBodyProps<T, U>["rowClassName"];
+    rowKey: TableBodyProps<T, U>["rowId"];
     hideHeaders?: boolean;
     sortable?: boolean;
-    onCellMessage?: TableBodyProps<T>["onMessage"];
-    onHeaderMessage?: TableHeaderProps<T>["onMessage"];
+    onCellMessage?: TableBodyProps<T, U>["onMessage"];
+    onHeaderMessage?: TableHeaderProps<T, U>["onMessage"];
 }
 
-function Table<T>(props: TableProps<T>) {
+function Table<T, U>(props: TableProps<T, U>) {
     const {
         className,
         data,
+        metaData,
         columns,
         rowKey,
         rowClassName,
@@ -93,6 +98,7 @@ function Table<T>(props: TableProps<T>) {
             {hideHeaders ? null : (
                 <TableHeader
                     data={_data}
+                    metaData={metaData}
                     columns={_columns}
                     sortable={sortable}
                     onMessage={onHeaderMessage}
@@ -100,27 +106,35 @@ function Table<T>(props: TableProps<T>) {
             )}
             <TableBody
                 columns={_columns}
+                metaData={metaData}
                 data={_data}
                 rowId={rowKey}
                 rowClassName={rowClassName}
                 onMessage={onCellMessage}
             />
             {hasSummary
-                ? <TableFooter columns={_columns} data={_data} />
+                ? (
+                    <TableFooter
+                        columns={_columns}
+                        data={_data}
+                        metaData={metaData}
+                    />
+                )
                 : null}
         </table>
     );
 }
 
-type TableHeaderProps<T> = {
+type TableHeaderProps<T, U> = {
     data: T[];
-    columns: TableColumn<T>[];
-    onMessage?: (message: string, column: TableColumn<T>) => void;
+    metaData?: U;
+    columns: TableColumn<T, U>[];
+    onMessage?: (message: string, column: TableColumn<T, U>) => void;
     sortable: boolean;
 };
 
-function TableHeader<T>(props: TableHeaderProps<T>) {
-    const { columns, data, sortable, onMessage } = props;
+function TableHeader<T, U>(props: TableHeaderProps<T, U>) {
+    const { columns, data, metaData, sortable, onMessage } = props;
 
     return (
         <thead>
@@ -136,10 +150,11 @@ function TableHeader<T>(props: TableHeaderProps<T>) {
                         ? header(column, {
                             columns,
                             data,
+                            metaData,
                             sendMessage: isFunction(onMessage)
                                 ? (message: string) =>
                                     onMessage(message, column)
-                                : emptyFn as RenderMetaData<T>[
+                                : emptyFn as RenderSettings<T, U>[
                                     "sendMessage"
                                 ],
                         })
@@ -156,24 +171,25 @@ function TableHeader<T>(props: TableHeaderProps<T>) {
     );
 }
 
-function hasRenderer<T>(
-    column: TableColumn<T>,
-): column is TableColumnRenderer<T> {
+function hasRenderer<T, U>(
+    column: TableColumn<T, U>,
+): column is TableColumnRenderer<T, U> {
     return isFunction(column.renderer);
 }
 
-type TableBodyProps<T> = {
-    columns: TableColumn<T>[];
+type TableBodyProps<T, U> = {
+    columns: TableColumn<T, U>[];
     data: T[];
+    metaData?: U;
     rowClassName?:
         | string
         | ((record: T) => string | undefined | null);
     rowId: keyof T | ((record: T) => string | number);
-    onMessage?: TableDataProps<T>["onMessage"];
+    onMessage?: TableDataProps<T, U>["onMessage"];
 };
 
-function TableBody<T>(props: TableBodyProps<T>) {
-    const { columns, data, rowClassName, rowId, onMessage } = props;
+function TableBody<T, U>(props: TableBodyProps<T, U>) {
+    const { columns, data, metaData, rowClassName, rowId, onMessage } = props;
     return (
         <tbody>
             {data.map((record) => {
@@ -192,6 +208,7 @@ function TableBody<T>(props: TableBodyProps<T>) {
                     <TableData
                         key={column.id}
                         data={data}
+                        metaData={metaData}
                         columns={columns}
                         column={column}
                         record={record}
@@ -205,20 +222,21 @@ function TableBody<T>(props: TableBodyProps<T>) {
     );
 }
 
-type TableDataProps<T> = {
+type TableDataProps<T, U> = {
     data: T[];
-    columns: TableColumn<T>[];
+    metaData?: U;
+    columns: TableColumn<T, U>[];
     record: T;
-    column: TableColumn<T>;
+    column: TableColumn<T, U>;
     onMessage?: (
         message: string,
         record: T,
-        column: TableColumn<T>,
+        column: TableColumn<T, U>,
     ) => void;
 };
 
-function TableData<T>(props: TableDataProps<T>) {
-    const { data, columns, column, record, onMessage } = props;
+function TableData<T, U>(props: TableDataProps<T, U>) {
+    const { data, columns, column, metaData, record, onMessage } = props;
     const {
         align = "left",
         className,
@@ -243,11 +261,12 @@ function TableData<T>(props: TableDataProps<T>) {
         ? column.renderer(record, column, {
             columns,
             data,
+            metaData,
             sendMessage: isFunction(onMessage)
                 ? (message: string) => {
                     onMessage(message, record, column);
                 }
-                : emptyFn as RenderMetaData<T>["sendMessage"],
+                : emptyFn as RenderSettings<T, U>["sendMessage"],
         })
         : String(record[column.dataIndex]);
 
@@ -264,10 +283,10 @@ function TableData<T>(props: TableDataProps<T>) {
         );
 }
 
-type TableFooterProps<T> = Omit<TableHeaderProps<T>, "sortable">;
+type TableFooterProps<T, U> = Omit<TableHeaderProps<T, U>, "sortable">;
 
-function TableFooter<T>(props: TableFooterProps<T>) {
-    const { data, columns, onMessage } = props;
+function TableFooter<T, U>(props: TableFooterProps<T, U>) {
+    const { data, columns, metaData, onMessage } = props;
 
     const content = columns.map((column) => {
         const { summary } = column;
@@ -277,11 +296,12 @@ function TableFooter<T>(props: TableFooterProps<T>) {
                     ? summary(column, {
                         data,
                         columns,
+                        metaData,
                         sendMessage: isFunction(onMessage)
                             ? (message: string) => {
                                 onMessage(message, column);
                             }
-                            : emptyFn as RenderMetaData<T>["sendMessage"],
+                            : emptyFn as RenderSettings<T, U>["sendMessage"],
                     })
                     : summary}
             </td>

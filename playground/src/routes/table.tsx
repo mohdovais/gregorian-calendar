@@ -3,6 +3,9 @@ import { rootRoute } from "./root";
 import { Table, TableColumn } from "framework/table";
 import css from "./table.module.css";
 import { Button } from "framework/button";
+import { startTransition, useState } from "react";
+import { Checkbox } from "framework/checkbox";
+import { classNames } from "framework/utils/string";
 
 type User = {
     id: number;
@@ -12,12 +15,36 @@ type User = {
     gender: string;
 };
 
-const columns: TableColumn<User>[] = [{
+const columns: TableColumn<User, Record<number, boolean>>[] = [{
     id: "select",
     th: true,
-    header: <input type="checkbox" title="Select all" />,
-    renderer: (record) => {
-        return <input type="checkbox" title="Select row" />;
+    header: (column, settings) => {
+        const count = Object.keys(settings.metaData || {}).length;
+        const checked = count > 0;
+        const intermediate = checked && count !== settings.data.length;
+        return (
+            <Checkbox
+                key={count}
+                name="select-all"
+                type="checkbox"
+                title="Select all"
+                defaultChecked={checked}
+                intermediate={intermediate}
+            />
+        );
+    },
+    renderer: (record, column, settings) => {
+        const count = Object.keys(settings.metaData || {}).length;
+        return (
+            <input
+                key={count}
+                type="checkbox"
+                name="row-selection"
+                value={record.id}
+                title="Select row"
+                defaultChecked={settings.metaData?.[record.id]}
+            />
+        );
     },
 }, {
     id: "fname",
@@ -54,31 +81,73 @@ const unknownGender = [
     "Non-binary",
 ];
 
-const rowClassName = (record: User) =>
-    record.gender === "Male"
+const getGenderClassName = (gender: string) =>
+    gender === "Male"
         ? css.blue
-        : record.gender === "Female"
+        : gender === "Female"
         ? css.green
         : unknownGender.includes(
-                record.gender,
+                gender,
             )
         ? css.red
         : null;
 
 function TablePage() {
     const data = useLoaderData({ from: "/table" });
+    const [selection, setSelection] = useState<Record<number, boolean>>({});
+
+    const changeHandler = (event: React.FormEvent<HTMLFormElement>) => {
+        const el = event.target as HTMLInputElement;
+        startTransition(() => {
+            if (el.name === "row-selection") {
+                setSelection((state) => {
+                    const draft = Object.assign({}, state);
+
+                    if (el.checked) {
+                        draft[parseInt(el.value)] = true;
+                    } else {
+                        delete draft[parseInt(el.value)];
+                    }
+
+                    return draft;
+                });
+            } else if (el.name === "select-all") {
+                setSelection((state) => {
+                    if (el.checked) {
+                        const draft = Object.assign({}, state);
+                        data.forEach((record) => {
+                            draft[record.id] = true;
+                        });
+                        return draft;
+                    } else {
+                        return {};
+                    }
+                });
+            }
+        });
+    };
 
     return (
-        <Table
-            columns={columns}
-            data={data}
-            rowKey="id"
-            rowClassName={rowClassName}
-            onCellMessage={(messsage, record) => {
-                console.log(messsage, record);
-            }}
-            width="100%"
-        />
+        <form
+            onSubmit={(event) => event.preventDefault()}
+            onChange={changeHandler}
+        >
+            <Table
+                columns={columns}
+                data={data}
+                metaData={selection}
+                rowKey="id"
+                rowClassName={(record) =>
+                    classNames(
+                        getGenderClassName(record.gender),
+                        selection[record.id] && css.selected,
+                    )}
+                onCellMessage={(messsage, record) => {
+                    console.log(messsage, record);
+                }}
+                width="100%"
+            />
+        </form>
     );
 }
 

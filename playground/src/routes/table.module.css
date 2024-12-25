@@ -9,3 +9,7 @@
 .blue {
     color: blueviolet;
 }
+
+.selected {
+    background-color: yellow;
+}
