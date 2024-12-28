@@ -1,5 +1,5 @@
-.red {
-    color: red;
+.pink {
+    color: rgb(248, 135, 154);
 }
 
 .green {
@@ -7,7 +7,7 @@
 }
 
 .blue {
-    color: blueviolet;
+    color: blue;
 }
 
 .selected {

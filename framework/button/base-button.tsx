@@ -15,13 +15,20 @@ function BaseButton(
 	props: BaseButtonProps,
 	ref?: React.Ref<HTMLButtonElement>,
 ) {
-	const { active, children, className, type = "button", ...restProps } =
-		props;
+	const {
+		active,
+		children,
+		className,
+		type = "button",
+		tabIndex = 0,
+		...restProps
+	} = props;
 	return (
 		<button
 			{...restProps}
 			className={classNames(style.btn, active && style.active, className)}
 			type={type}
+			tabIndex={tabIndex}
 			ref={ref}
 		>
 			{children}

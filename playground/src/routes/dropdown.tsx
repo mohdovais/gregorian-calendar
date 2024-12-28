@@ -1,7 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
 import { Dropdown } from "framework/dropdown";
 import { rootRoute } from "./root";
-import { useDeferredValue, useState } from "react";
+import { startTransition, useDeferredValue, useEffect, useState } from "react";
+import { Toolbar } from "framework/toolbar";
+import { Button } from "framework/button";
+import { ProxyFormInput } from "framework/proxy-form-input";
 
 type User = {
     "id": 1;
@@ -38,43 +41,63 @@ type OptionType = {
 };
 
 function RouteComponent() {
-    const [data, setData] = useState<OptionType[]>([]);
+    const [query, setQuery] = useState("");
+    const [options, setOptions] = useState<OptionType[]>([]);
     const [value, setValue] = useState<User | undefined>();
-    const deferredData = useDeferredValue(data);
+    const deferredQuery = useDeferredValue(query).trim();
+
+    useEffect(() => {
+        const controller = new AbortController();
+        if (deferredQuery === "") {
+            setOptions([]);
+        } else {
+            searchUsers(deferredQuery, controller.signal).then((data) => {
+                const options = data.map((user) => {
+                    return {
+                        value: user,
+                        label: (
+                            <div>
+                                <div>
+                                    {`${user.firstName} ${user.lastName}`}
+                                </div>
+                                <small>{user.email}</small>
+                            </div>
+                        ),
+                    };
+                });
+                startTransition(() => {
+                    setOptions(options);
+                });
+            });
+        }
+
+        return () => {
+            controller.abort();
+        };
+    }, [deferredQuery]);
 
     return (
         <div>
-            <Dropdown
-                label={value == null ? "Select a user" : "User"}
-                value={value}
-                items={deferredData}
-                displayTpl={() => value?.email ?? ""}
-                onChange={setValue}
-                onSearch={(query) => {
-                    lastAbort();
-                    const controller = new AbortController();
-                    if (query.trim().length !== 0) {
-                        searchUsers(query, controller.signal).then((data) =>
-                            setData(data.map((x) => ({
-                                value: x,
-                                label: (
-                                    <div>
-                                        <div>
-                                            {`${x.firstName} ${x.lastName}`}
-                                        </div>
-                                        <small>{x.email}</small>
-                                    </div>
-                                ),
-                            })))
-                        );
-                    }
-                    lastAbort = controller.abort.bind(controller);
-                }}
-            />
-            <Dropdown
-                label="Country"
-                items={countries.map((x) => ({ value: x, label: x.name }))}
-            />
+            <form>
+                <Toolbar>
+                    <ProxyFormInput
+                        name="user"
+                        value={value?.email ?? ""}
+                        required
+                    >
+                        <Dropdown
+                            label={value == null ? "Select a user" : "User"}
+                            required
+                            value={value}
+                            items={options}
+                            displayTpl={() => value?.email ?? ""}
+                            onChange={setValue}
+                            onSearch={setQuery}
+                        />
+                    </ProxyFormInput>
+                    <Button type="submit">Submit</Button>
+                </Toolbar>
+            </form>
             <p>
                 Lorem Ipsum is simply dummy text of the printing and typesetting
                 industry. Lorem Ipsum has been the industry's standard dummy

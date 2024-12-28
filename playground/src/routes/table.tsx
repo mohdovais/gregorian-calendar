@@ -1,11 +1,12 @@
+import { startTransition, useMemo, useState } from "react";
 import { createRoute, useLoaderData } from "@tanstack/react-router";
 import { rootRoute } from "./root";
-import { Table, TableColumn } from "framework/table";
-import css from "./table.module.css";
+import { SortInfo, Table, TableColumn } from "framework/table";
 import { Button } from "framework/button";
-import { startTransition, useState } from "react";
 import { Checkbox } from "framework/checkbox";
 import { classNames } from "framework/utils/string";
+
+import css from "./table.module.css";
 
 type User = {
     id: number;
@@ -36,9 +37,8 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
     renderer: (record, column, settings) => {
         const count = Object.keys(settings.metaData || {}).length;
         return (
-            <input
+            <Checkbox
                 key={count}
-                type="checkbox"
                 name="row-selection"
                 value={record.id}
                 title="Select row"
@@ -46,17 +46,19 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
             />
         );
     },
+    sortable: false,
 }, {
-    id: "fname",
+    id: "first_name",
     header: "First Name",
     dataIndex: "first_name",
 }, {
-    id: "lname",
+    id: "last_name",
     header: "Last Name",
     dataIndex: "last_name",
 }, {
     id: "name",
     header: "Name",
+    sortable: false,
     renderer: (record) => `${record.first_name} ${record.last_name}`,
 }, {
     id: "email",
@@ -68,35 +70,32 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
     dataIndex: "gender",
 }, {
     id: "edit",
+    sortable: false,
     renderer: (record, col, meta) => {
-        return <Button onClick={() => meta.sendMessage("edit")}>Edit</Button>;
+        return (
+            <Button
+                onClick={(event) => {
+                    event.stopPropagation();
+                    meta.sendMessage("edit");
+                }}
+            >
+                Edit
+            </Button>
+        );
     },
 }];
 
-const unknownGender = [
-    "Genderfluid",
-    "Polygender",
-    "Bigender",
-    "Genderqueer",
-    "Non-binary",
-];
-
 const getGenderClassName = (gender: string) =>
-    gender === "Male"
-        ? css.blue
-        : gender === "Female"
-        ? css.green
-        : unknownGender.includes(
-                gender,
-            )
-        ? css.red
-        : null;
+    gender === "Male" ? css.blue : gender === "Female" ? css.pink : null;
 
 function TablePage() {
     const data = useLoaderData({ from: "/table" });
     const [selection, setSelection] = useState<Record<number, boolean>>({});
+    const [sortInfo, setSortInfo] = useState<
+        SortInfo<User, Record<number, boolean>> | undefined
+    >(undefined);
 
-    const changeHandler = (event: React.FormEvent<HTMLFormElement>) => {
+    const formcChangeHandler = (event: React.FormEvent<HTMLFormElement>) => {
         const el = event.target as HTMLInputElement;
         startTransition(() => {
             if (el.name === "row-selection") {
@@ -127,25 +126,90 @@ function TablePage() {
         });
     };
 
+    const rowClassName = (record: User) =>
+        classNames(
+            getGenderClassName(record.gender),
+            selection[record.id] && css.selected,
+        );
+
+    const cellMessageHandler = (messsage: string, record: User) => {
+        console.log(messsage, record);
+    };
+
+    const cellClickHandler = (event: unknown, record: User) => {
+        startTransition(() => {
+            const id = record.id;
+            setSelection((state) => {
+                const draft = Object.assign({}, state);
+
+                if (draft[id]) {
+                    delete draft[id];
+                } else {
+                    draft[id] = true;
+                }
+
+                return draft;
+            });
+        });
+    };
+
+    const headerClickHandler = (
+        event: React.MouseEvent<HTMLTableCellElement>,
+        column: TableColumn<User, Record<number, boolean>>,
+    ) => {
+        if (column.sortable !== false) {
+            if (sortInfo != null && sortInfo.columnId === column.id) {
+                setSortInfo({
+                    columnId: column.id,
+                    direction: sortInfo.direction === "ASC" ? "DSC" : "ASC",
+                });
+            } else {
+                setSortInfo({
+                    columnId: column.id,
+                    direction: "ASC",
+                });
+            }
+        }
+    };
+
+    const sortedData = useMemo(() => {
+        if (sortInfo == null) {
+            return data;
+        }
+
+        const prop = sortInfo.columnId;
+
+        switch (prop) {
+            case "first_name":
+            case "last_name":
+            case "gender":
+            case "email":
+                return data.slice().sort((a, b) => {
+                    return a[prop].localeCompare(b[prop]) *
+                        (sortInfo.direction === "ASC" ? 1 : -1);
+                });
+        }
+
+        return data;
+    }, [sortInfo, data]);
+
     return (
         <form
             onSubmit={(event) => event.preventDefault()}
-            onChange={changeHandler}
+            onChange={formcChangeHandler}
         >
             <Table
-                columns={columns}
-                data={data}
-                metaData={selection}
                 rowKey="id"
-                rowClassName={(record) =>
-                    classNames(
-                        getGenderClassName(record.gender),
-                        selection[record.id] && css.selected,
-                    )}
-                onCellMessage={(messsage, record) => {
-                    console.log(messsage, record);
-                }}
+                columns={columns}
+                data={sortedData}
+                metaData={selection}
+                rowClassName={rowClassName}
+                onCellMessage={cellMessageHandler}
+                onCellClick={cellClickHandler}
+                onHeaderClick={headerClickHandler}
                 width="100%"
+                sortable
+                sortInfo={sortInfo}
             />
         </form>
     );
@@ -156,7 +220,8 @@ const tableRoute = createRoute({
     path: "table",
     loader: async () => {
         const response = await fetch("/data/users.json");
-        return await response.json() as User[];
+        const users = await response.json() as User[];
+        return users.slice(0, 100);
     },
     component: TablePage,
 });

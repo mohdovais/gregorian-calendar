@@ -309,7 +309,7 @@ function dropdownStore<T>(
                 event: () => {
                     if (isFunction(action.onChange)) {
                         action.onChange(
-                            state.flatItems[state.activeIndex].value,
+                            state.flatItems[state.activeIndex]?.value,
                         );
                     }
                 },

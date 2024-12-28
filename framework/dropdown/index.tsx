@@ -20,6 +20,7 @@ import css from "./dropdown.module.css";
 import { classNames } from "../utils/string";
 import { useFloating } from "./useFloating";
 import { ConditionalRender } from "../conditional-render";
+import { ProxyFormInput } from "../proxy-input";
 
 const icon = (
 	<svg
@@ -196,10 +197,13 @@ function Dropdown<T>(props: DropdownProps<T>) {
 			onKeyDown={onKeyDown}
 		>
 			<input
-				name={name}
 				type="hidden"
-				required={required}
-				value={values.join(",")}
+				name={name}
+				value={values.map((x) =>
+					["string", "number", "boolean"].includes(typeof x)
+						? x
+						: JSON.stringify(x)
+				).join(",")}
 			/>
 			<button
 				type="button"
@@ -222,7 +226,10 @@ function Dropdown<T>(props: DropdownProps<T>) {
 					if (expanded) {
 						dispatch({ type: DROPDOWN_ACTION_TYPE_Close });
 					} else {
-						dispatch({ type: DROPDOWN_ACTION_TYPE_Open, values });
+						dispatch({
+							type: DROPDOWN_ACTION_TYPE_Open,
+							values,
+						});
 					}
 				}}
 				ref={setReference}
@@ -230,6 +237,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 				<span>{displayTpl(values)}</span>
 			</button>
 			<label id={labelId} className={css.label}>{label}</label>
+
 			{icon}
 			<Portal>
 				<div
@@ -247,6 +255,7 @@ function Dropdown<T>(props: DropdownProps<T>) {
 							<Search
 								id={searchId}
 								className={css.search}
+								type="text"
 								placeholder={searchPlaceholder}
 								onChange={(event) =>
 									dispatch({

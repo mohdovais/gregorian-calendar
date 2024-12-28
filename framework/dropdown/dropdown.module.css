@@ -80,8 +80,15 @@
         scale(0.75);
 }
 
+:invalid .input,
 .input:user-invalid {
-    outline: 1px solid red;
+    border-color: red;
+}
+
+:invalid .input:focus,
+.input:user-invalid:focus {
+    border-color: red;
+    box-shadow: inset 0 0 0 1px red;
 }
 
 .input.required ~ .label:after {

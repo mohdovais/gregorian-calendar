@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { classNames } from "../utils/string";
+import css from "./checkbox.module.css";
 
 interface CheckboxProps extends
     React.DetailedHTMLProps<
@@ -11,7 +13,7 @@ interface CheckboxProps extends
 function Checkbox(
     props: CheckboxProps,
 ) {
-    const { type, intermediate = false, ...checkboxProps } = props;
+    const { type, intermediate = false, className, ...checkboxProps } = props;
     const ref = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -20,7 +22,14 @@ function Checkbox(
         }
     }, [intermediate]);
 
-    return <input type="checkbox" {...checkboxProps} ref={ref} />;
+    return (
+        <input
+            type="checkbox"
+            ref={ref}
+            className={classNames(css.checkbox, className)}
+            {...checkboxProps}
+        />
+    );
 }
 
 export { Checkbox };
