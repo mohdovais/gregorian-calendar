@@ -1,0 +1,29 @@
+.group {
+    margin-bottom: 32px;
+}
+
+.group,
+.group legend {
+    display: block;
+    border: none;
+    margin-inline: 0;
+    padding-block: 0;
+    padding-inline: 0;
+}
+
+.group legend {
+    color: #3f3f3f;
+    margin-bottom: 16px;
+}
+
+.horozontal .radio + .radio {
+    margin-left: 32px;
+}
+
+.vertical .radio {
+    width: 100%;
+}
+
+.vertical .radio + .radio {
+    margin-top: 16px;
+}

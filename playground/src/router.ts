@@ -5,8 +5,12 @@ import { rootRoute } from "./routes/root";
 import { textFieldRoute } from "./routes/textfield";
 import { tabsRoute } from "./routes/tabs";
 import { tableRoute } from "./routes/table";
+import { checkboxRoute } from "./routes/checkbox";
+import { radioRoute } from "./routes/radio";
 
 const routeTree = rootRoute.addChildren([
+	radioRoute,
+	checkboxRoute,
 	tableRoute,
 	tabsRoute,
 	textFieldRoute,

@@ -8,12 +8,19 @@ interface CheckboxProps extends
         HTMLInputElement
     > {
     intermediate?: boolean;
+    label?: React.ReactNode;
+    value: string;
 }
 
-function Checkbox(
-    props: CheckboxProps,
-) {
-    const { type, intermediate = false, className, ...checkboxProps } = props;
+function Checkbox(props: CheckboxProps) {
+    const {
+        type,
+        intermediate = false,
+        className,
+        label,
+        ...checkboxProps
+    } = props;
+
     const ref = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -22,14 +29,24 @@ function Checkbox(
         }
     }, [intermediate]);
 
-    return (
+    const input = (
         <input
             type="checkbox"
             ref={ref}
-            className={classNames(css.checkbox, className)}
+            className={css.checkbox}
             {...checkboxProps}
         />
     );
+
+    return label == null
+        ? input
+        : (
+            <label className={classNames(css.label, className)}>
+                {input}
+                <span>{label}</span>
+            </label>
+        );
 }
 
 export { Checkbox };
+export type { CheckboxProps };

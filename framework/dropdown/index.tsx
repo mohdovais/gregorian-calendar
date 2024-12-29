@@ -20,7 +20,7 @@ import css from "./dropdown.module.css";
 import { classNames } from "../utils/string";
 import { useFloating } from "./useFloating";
 import { ConditionalRender } from "../conditional-render";
-import { ProxyFormInput } from "../proxy-input";
+import { ProxyFormInput } from "../proxy-form-input";
 
 const icon = (
 	<svg
