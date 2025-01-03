@@ -7,6 +7,7 @@ import { Checkbox } from "framework/checkbox";
 import { classNames } from "framework/utils/string";
 
 import css from "./table.module.css";
+import { ScrollableTable } from "framework/scrollable-table";
 
 type User = {
     id: number;
@@ -31,6 +32,7 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
                 title="Select all"
                 defaultChecked={checked}
                 intermediate={intermediate}
+                small
             />
         );
     },
@@ -40,9 +42,10 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
             <Checkbox
                 key={count}
                 name="row-selection"
-                value={record.id}
+                value={record.id.toString()}
                 title="Select row"
                 defaultChecked={settings.metaData?.[record.id]}
+                small
             />
         );
     },
@@ -68,6 +71,9 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
     id: "gender",
     header: "Gender",
     dataIndex: "gender",
+    summary: (_, { data }) => {
+        return data.filter((x) => x.gender === "Male").length;
+    },
 }, {
     id: "edit",
     sortable: false,
@@ -198,7 +204,7 @@ function TablePage() {
             onSubmit={(event) => event.preventDefault()}
             onChange={formcChangeHandler}
         >
-            <Table
+            <ScrollableTable
                 rowKey="id"
                 columns={columns}
                 data={sortedData}
@@ -207,7 +213,6 @@ function TablePage() {
                 onCellMessage={cellMessageHandler}
                 onCellClick={cellClickHandler}
                 onHeaderClick={headerClickHandler}
-                width="100%"
                 sortable
                 sortInfo={sortInfo}
             />

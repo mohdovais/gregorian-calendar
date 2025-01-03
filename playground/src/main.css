@@ -13,3 +13,18 @@ body {
         "Segoe UI Emoji",
         "Segoe UI Symbol";
 }
+
+a {
+    color: #000066;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    margin: 0 0 1em 0;
+    padding: 0;
+    font-weight: 300;
+}
