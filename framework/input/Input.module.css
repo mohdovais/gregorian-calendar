@@ -1,19 +1,22 @@
 .input {
-    background-color: #fff;
+    appearance: none;
+
     color: inherit;
+    caret-color: #e60000;
+    background-color: #fff;
+
+    font: inherit;
     font-size: 16px;
     font-weight: 400;
     line-height: 20px;
 
+    box-sizing: border-box;
+    padding-block: 0;
+    padding-inline: 0;
+    padding: 13px 12px;
     border: 1px solid #aaa;
     border-radius: 2px;
     outline: none;
-    box-sizing: border-box;
-
-    padding: 13px 12px;
-    height: auto;
-
-    caret-color: #e60000;
 
     transition: border-color 0.3s;
 }

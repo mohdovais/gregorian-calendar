@@ -36,10 +36,6 @@
 }
 
 input.input {
-    box-sizing: border-box;
-    display: block;
-    font: inherit;
-    color: currentColor;
     height: var(--height);
     min-width: 0;
     width: 100%;

@@ -47,7 +47,7 @@ function TableBody<T, U>(props: TableBodyProps<T, U>) {
             : String(record[rowId]);
 
         const trClassName = classNames(
-            css.tr,
+            css.body_tr,
             isFunction(rowClassName) ? rowClassName(record) : rowClassName,
         );
 
@@ -126,7 +126,7 @@ function TableData<T, U>(props: TableDataProps<T, U>) {
     }
 
     const tdClassName = classNames(
-        css.td,
+        css.tbody_td,
         getAlignClassName(align),
         className,
     );

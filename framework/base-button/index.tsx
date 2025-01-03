@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
+import { forwardRef, JSX } from "react";
+import { classNames } from "../utils/string";
 
 import style from "./base-button.module.css";
-import { classNames } from "../utils/string";
 
 interface BaseButtonProps extends
 	React.DetailedHTMLProps<
@@ -14,7 +14,7 @@ interface BaseButtonProps extends
 function BaseButton(
 	props: BaseButtonProps,
 	ref?: React.Ref<HTMLButtonElement>,
-) {
+): JSX.Element {
 	const {
 		active,
 		children,
@@ -23,6 +23,7 @@ function BaseButton(
 		tabIndex = 0,
 		...restProps
 	} = props;
+
 	return (
 		<button
 			{...restProps}

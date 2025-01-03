@@ -13,6 +13,8 @@ type RadioGroupProps<T> = {
     name: string;
     value?: T;
     horizontal?: boolean;
+    small?: boolean;
+    required?: boolean;
     children: React.ReactElement<RadioGroupItemProps> | React.ReactElement<
         RadioGroupItemProps
     >[];
@@ -23,18 +25,20 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
     const {
         legend,
         value: parentValue,
-        disabled,
+        disabled: parentDisabled,
         name,
         className,
         id,
         onChange,
         horizontal = false,
+        small,
+        required,
         style,
     } = props;
 
     var children = Children.map(props.children, (child) => {
         if (isValidElement(child) && child.type === RadioGroupItem) {
-            const { value, ...radioProps } = child.props;
+            const { value, disabled, ...radioProps } = child.props;
 
             return (
                 <Radio
@@ -43,6 +47,9 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
                     value={value}
                     defaultChecked={value === parentValue}
                     className={css.radio}
+                    small={small}
+                    required={required}
+                    disabled={parentDisabled || disabled}
                     {...radioProps}
                 />
             );
@@ -60,17 +67,20 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
                 className,
             )}
             style={style}
-            disabled={disabled}
+            disabled={parentDisabled}
             onChange={onChange}
         >
-            <legend>{legend}</legend>
+            {legend == null ? null : <legend>{legend}</legend>}
             {children}
         </fieldset>
     );
 }
 
-interface RadioGroupItemProps
-    extends Exclude<RadioProps, "name" | "checked" | "defaultChecked"> {
+interface RadioGroupItemProps extends
+    Exclude<
+        RadioProps,
+        "name" | "checked" | "defaultChecked" | "required"
+    > {
     label: string;
 }
 

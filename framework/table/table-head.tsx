@@ -12,7 +12,7 @@ type SortInfo<T, U> = {
     direction: "ASC" | "DSC";
 };
 
-type TableHeaderProps<T, U> = {
+type TableHeadProps<T, U> = {
     data: T[];
     metaData?: U;
     columns: TableColumn<T, U>[];
@@ -25,7 +25,7 @@ type TableHeaderProps<T, U> = {
     ) => void;
 };
 
-function TableHeader<T, U>(props: TableHeaderProps<T, U>) {
+function TableHead<T, U>(props: TableHeadProps<T, U>) {
     const { columns, data, metaData, sortable, onMessage, onClick } = props;
     const sortInfo = ensureArray(props.sortInfo);
     const children = columns.map((column) => {
@@ -50,7 +50,7 @@ function TableHeader<T, U>(props: TableHeaderProps<T, U>) {
             : undefined;
 
         const thClassName = classNames(
-            css.th,
+            css.thead_th,
             getAlignClassName(align),
             isSortable && css.sortable,
         );
@@ -84,7 +84,7 @@ function TableHeader<T, U>(props: TableHeaderProps<T, U>) {
                 tabIndex={isSortable || hasOnClick ? 0 : undefined}
                 onClick={clickHandler}
             >
-                <span>
+                <span className={css.thead_cell}>
                     <span>{content}</span>
                     {isSortable
                         ? (
@@ -100,11 +100,11 @@ function TableHeader<T, U>(props: TableHeaderProps<T, U>) {
     });
 
     return (
-        <thead>
-            <tr>{children}</tr>
+        <thead className={css.thead}>
+            <tr className={css.thead_tr}>{children}</tr>
         </thead>
     );
 }
 
-export { TableHeader };
-export type { SortInfo, TableHeaderProps };
+export { TableHead };
+export type { SortInfo, TableHeadProps };

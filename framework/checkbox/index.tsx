@@ -9,15 +9,18 @@ interface CheckboxProps extends
     > {
     intermediate?: boolean;
     label?: React.ReactNode;
-    value: string;
+    small?: boolean;
+    value?: string;
 }
 
 function Checkbox(props: CheckboxProps) {
     const {
         type,
         intermediate = false,
+        small = false,
         className,
         label,
+        disabled,
         ...checkboxProps
     } = props;
 
@@ -33,19 +36,24 @@ function Checkbox(props: CheckboxProps) {
         <input
             type="checkbox"
             ref={ref}
-            className={css.checkbox}
+            className={classNames(css.checkbox, small && css.small)}
+            disabled={disabled}
             {...checkboxProps}
         />
     );
 
-    return label == null
-        ? input
-        : (
-            <label className={classNames(css.label, className)}>
-                {input}
-                <span>{label}</span>
-            </label>
-        );
+    return label == null ? input : (
+        <label
+            className={classNames(
+                css.label,
+                disabled && css.disabled,
+                className,
+            )}
+        >
+            {input}
+            <span>{label}</span>
+        </label>
+    );
 }
 
 export { Checkbox };

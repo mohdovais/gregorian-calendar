@@ -1,7 +1,8 @@
-import { classNames } from "../utils/string";
-import style from "./Button.module.css";
-import { BaseButton, BaseButtonProps } from "./base-button";
 import { forwardRef, ReactNode } from "react";
+import { classNames } from "../utils/string";
+import { BaseButton, BaseButtonProps } from "../base-button";
+
+import style from "./Button.module.css";
 
 const COLOR_PRIMARY = "primary";
 const COLOR_NEUTRAL = "neutral";

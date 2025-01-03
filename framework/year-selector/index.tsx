@@ -1,4 +1,4 @@
-import { BaseButton } from "../button/base-button";
+import { BaseButton } from "../base-button";
 import { classNames } from "../utils/string";
 
 import style from "./year-selector.module.css";

@@ -1,10 +1,10 @@
 import { Children, isValidElement } from "react";
-import { Checkbox, CheckboxProps } from ".";
+import { Checkbox, CheckboxProps } from "../checkbox";
 import { classNames } from "../utils/string";
-
-import css from "./checkbox-group.module.css";
 import { isFunction } from "../utils/function";
 import { ensureArray } from "../utils/array";
+
+import css from "./checkbox-group.module.css";
 
 type CheckboxGroupProps = {
     id?: string;
@@ -13,25 +13,26 @@ type CheckboxGroupProps = {
     legend: React.ReactNode;
     disabled?: boolean;
     name: string;
-    value?: string[];
+    value?: string | string[];
     horizontal?: boolean;
     children: React.ReactElement<CheckboxGroupItemProps> | React.ReactElement<
         CheckboxGroupItemProps
     >[];
     onChange?: (value: string[]) => void;
+    small?: boolean;
 };
 
 function CheckboxGroup(props: CheckboxGroupProps) {
     const {
         legend,
         value,
-        disabled,
+        disabled: parentDisabled,
         name,
         id,
         className,
         style,
         horizontal = false,
-
+        small,
         onChange,
     } = props;
 
@@ -41,6 +42,7 @@ function CheckboxGroup(props: CheckboxGroupProps) {
         if (isValidElement(child) && child.type === CheckboxGroupItem) {
             const {
                 value,
+                disabled,
                 ...checkboxProps
             } = child.props;
 
@@ -50,7 +52,10 @@ function CheckboxGroup(props: CheckboxGroupProps) {
                     className={css.label}
                     name={name}
                     value={value}
-                    defaultChecked={parentValue.includes(value)}
+                    defaultChecked={value != null &&
+                        parentValue.includes(value)}
+                    small={small}
+                    disabled={parentDisabled || disabled}
                     {...checkboxProps}
                 />
             );
@@ -86,7 +91,7 @@ function CheckboxGroup(props: CheckboxGroupProps) {
                 className,
             )}
             style={style}
-            disabled={disabled}
+            disabled={parentDisabled}
             onChange={changeHandler}
         >
             <legend>{legend}</legend>
@@ -95,8 +100,11 @@ function CheckboxGroup(props: CheckboxGroupProps) {
     );
 }
 
-interface CheckboxGroupItemProps
-    extends Exclude<CheckboxProps, "name" | "checked" | "defaultChecked"> {
+interface CheckboxGroupItemProps extends
+    Exclude<
+        CheckboxProps,
+        "name" | "checked" | "defaultChecked" | "required"
+    > {
     label: React.ReactNode;
 }
 

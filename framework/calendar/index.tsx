@@ -1,6 +1,6 @@
 import { useReducer } from "react";
 import { Month, MonthProps } from "../month";
-import { MonthSelector } from "../month/month-selector";
+import { MonthSelector } from "../month-selector";
 
 import { DateString } from "../utils/date";
 import { emptyFn } from "../utils/function";

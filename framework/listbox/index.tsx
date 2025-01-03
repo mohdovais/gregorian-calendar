@@ -1,8 +1,9 @@
 import { ensureArray } from "../utils/array";
 import { ListboxGroup } from "./ListboxGroup";
 import { ListboxItem } from "./ListboxItem";
-import css from "./Listbox.module.css";
 import { classNames } from "../utils/string";
+
+import css from "./Listbox.module.css";
 
 type ListboxGroupType<T> = {
 	id?: string;

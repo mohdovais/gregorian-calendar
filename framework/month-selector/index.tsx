@@ -1,4 +1,4 @@
-import { BaseButton } from "../button/base-button";
+import { BaseButton } from "../base-button";
 
 import { getMonthNames } from "../utils/date";
 import { classNames } from "../utils/string";

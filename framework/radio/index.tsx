@@ -7,6 +7,7 @@ interface RadioProps extends
         HTMLInputElement
     > {
     label?: string;
+    small?: boolean;
 }
 
 function Radio(
@@ -17,26 +18,34 @@ function Radio(
         id,
         className,
         label,
+        small = false,
+        disabled = false,
         ...radioProps
     } = props;
 
     const radio = (
         <input
             type="radio"
-            className={css.radio}
+            className={classNames(css.radio, small && css.small)}
             id={id}
+            disabled={disabled}
             {...radioProps}
         />
     );
 
-    return label == null
-        ? radio
-        : (
-            <label htmlFor={id} className={classNames(css.label, className)}>
-                {radio}
-                <span>{label}</span>
-            </label>
-        );
+    return label == null ? radio : (
+        <label
+            htmlFor={id}
+            className={classNames(
+                css.label,
+                disabled && css.disabled,
+                className,
+            )}
+        >
+            {radio}
+            <span>{label}</span>
+        </label>
+    );
 }
 
 export { Radio };

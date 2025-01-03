@@ -1,13 +1,13 @@
 .btn {
-    background-color: transparent;
     box-sizing: border-box;
     padding: 0.5em;
     margin: 0;
+    background-color: transparent;
     border: 1px solid transparent;
     font-size: inherit;
-    transition: border-color 0.2s, color 0.2s;
     border-radius: 2px;
-    outline: 1px solid transparent;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
 }
 
 button:disabled {

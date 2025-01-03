@@ -16,7 +16,7 @@ import { useFloating } from "./useFloating";
 import css from "./datefield.module.css";
 import { ConditionalRender } from "../conditional-render";
 import { classNames } from "../utils/string";
-import { BaseButton } from "../button/base-button";
+import { BaseButton } from "../base-button";
 
 type InputProps = React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,

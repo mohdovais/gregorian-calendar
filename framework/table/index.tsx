@@ -1,8 +1,8 @@
 import { ensureArray } from "../utils/array";
 import { classNames } from "../utils/string";
-import { TableBody, TableBodyProps } from "./TableBody";
-import { TableFooter } from "./TableFooter";
-import { SortInfo, TableHeader, TableHeaderProps } from "./TableHeader";
+import { TableBody, TableBodyProps } from "./table-body";
+import { TableFoot } from "./table-foot";
+import { SortInfo, TableHead, TableHeadProps } from "./table-head";
 import { TableColumn } from "./table.common";
 
 import css from "./table.module.css";
@@ -23,9 +23,9 @@ interface TableProps<T, U> extends
     rowKey: TableBodyProps<T, U>["rowId"];
     hideHeaders?: boolean;
     sortable?: boolean;
-    sortInfo?: TableHeaderProps<T, U>["sortInfo"];
-    onHeaderMessage?: TableHeaderProps<T, U>["onMessage"];
-    onHeaderClick?: TableHeaderProps<T, U>["onClick"];
+    sortInfo?: ExpandedSortInfo<T,U>;
+    onHeaderMessage?: TableHeadProps<T, U>["onMessage"];
+    onHeaderClick?: TableHeadProps<T, U>["onClick"];
     onCellMessage?: TableBodyProps<T, U>["onMessage"];
     onCellClick?: TableBodyProps<T, U>["onCellClick"];
     onCellRightClick?: TableBodyProps<T, U>["onCellRightClick"];
@@ -43,6 +43,7 @@ function Table<DataType, MetaDataType>(
         rowKey,
         rowClassName,
         hideHeaders = false,
+        width = "100%",
         sortable,
         sortInfo,
         onCellMessage,
@@ -59,9 +60,13 @@ function Table<DataType, MetaDataType>(
     const hasSummary = _columns.some((column) => column.summary != null);
 
     return (
-        <table className={classNames(css.table, className)} {...tableProps}>
+        <table
+            className={classNames(css.table, className)}
+            width={width}
+            {...tableProps}
+        >
             {hideHeaders ? null : (
-                <TableHeader
+                <TableHead
                     data={_data}
                     metaData={metaData}
                     columns={_columns}
@@ -84,7 +89,7 @@ function Table<DataType, MetaDataType>(
             />
             {hasSummary
                 ? (
-                    <TableFooter
+                    <TableFoot
                         columns={_columns}
                         data={_data}
                         metaData={metaData}

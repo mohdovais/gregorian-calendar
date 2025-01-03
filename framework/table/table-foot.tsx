@@ -1,10 +1,11 @@
 import { emptyFn, isFunction } from "../utils/function";
 import { RenderSettings } from "./table.common";
-import { TableHeaderProps } from "./TableHeader";
+import { TableHeadProps } from "./table-head";
+import css from "./table.module.css";
 
-type TableFooterProps<T, U> = Omit<TableHeaderProps<T, U>, "sortable">;
+type TableFootProps<T, U> = Omit<TableHeadProps<T, U>, "sortable">;
 
-function TableFooter<T, U>(props: TableFooterProps<T, U>) {
+function TableFoot<T, U>(props: TableFootProps<T, U>) {
     const { data, columns, metaData, onMessage } = props;
 
     const children = columns.map((column) => {
@@ -22,15 +23,19 @@ function TableFooter<T, U>(props: TableFooterProps<T, U>) {
             })
             : summary;
 
-        return <td>{content}</td>;
+        return (
+            <td key={column.id} className={css.tfoot_td}>
+                <span className={css.tfoot_cell}>{content}</span>
+            </td>
+        );
     });
 
     return (
-        <tfoot>
-            <tr>{children}</tr>
+        <tfoot className={css.tfoot}>
+            <tr className={css.tfoot_tr}>{children}</tr>
         </tfoot>
     );
 }
 
-export { TableFooter };
-export type { TableFooterProps };
+export { TableFoot };
+export type { TableFootProps };
