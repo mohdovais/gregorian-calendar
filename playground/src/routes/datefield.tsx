@@ -1,7 +1,7 @@
 import { createRoute } from "@tanstack/react-router";
 import { DateField } from "framework/datefield";
 import { useState } from "react";
-import { rootRoute } from "./root";
+import { indexRoute } from "./index.route";
 
 function DateFieldPage() {
 	const [value, setValue] = useState<string | null>("2024-12-25");
@@ -38,7 +38,7 @@ function DateFieldPage() {
 }
 
 const dateFieldRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => indexRoute,
 	path: "datefield",
 	component: DateFieldPage,
 });

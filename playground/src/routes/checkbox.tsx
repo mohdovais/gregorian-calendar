@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
-import { rootRoute } from "./root";
 import { CheckboxGroup } from "framework/checkbox-group";
+import { indexRoute } from "./index.route";
 
 function CheckboxPage() {
 	return (
@@ -61,7 +61,7 @@ function CheckboxPage() {
 }
 
 const checkboxRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => indexRoute,
 	path: "checkbox",
 	component: CheckboxPage,
 });

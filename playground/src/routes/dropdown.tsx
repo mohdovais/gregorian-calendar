@@ -1,10 +1,10 @@
 import { createRoute } from "@tanstack/react-router";
 import { Dropdown } from "framework/dropdown";
-import { rootRoute } from "./root";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { Toolbar } from "framework/toolbar";
 import { Button } from "framework/button";
 import { ProxyFormInput } from "framework/proxy-form-input";
+import { indexRoute } from "./index.route";
 
 type User = {
     "id": 1;
@@ -187,7 +187,7 @@ function RouteComponent() {
 }
 
 const dropdownRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => indexRoute,
     path: "dropdown",
     component: RouteComponent,
 });

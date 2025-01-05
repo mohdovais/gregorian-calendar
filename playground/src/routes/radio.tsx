@@ -1,6 +1,6 @@
 import { createRoute } from "@tanstack/react-router";
-import { rootRoute } from "./root";
 import { RadioGroup } from "framework/radio/radio-group";
+import { indexRoute } from "./index.route";
 
 function RadioPage() {
 	return (
@@ -64,7 +64,7 @@ function RadioPage() {
 }
 
 const radioRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => indexRoute,
 	path: "radio",
 	component: RadioPage,
 });

@@ -1,7 +1,7 @@
 import { createRoute } from "@tanstack/react-router";
 import { Tabs } from "framework/step-tabs";
-import { rootRoute } from "./root";
 import { useEffect, useId, useState } from "react";
+import { indexRoute } from "./index.route";
 
 const tabs = [
 	{ label: "Step 1", value: "step-1" },
@@ -96,7 +96,7 @@ function Section(props: SectionProps) {
 }
 
 const tabsRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => indexRoute,
 	path: "tabs",
 	component: () => {
 		const [active, setActive] = useState("step-1");

@@ -1,6 +1,5 @@
 import { startTransition, useMemo, useState } from "react";
 import { createRoute, useLoaderData } from "@tanstack/react-router";
-import { rootRoute } from "./root";
 import { SortInfo, Table, TableColumn } from "framework/table";
 import { Button } from "framework/button";
 import { Checkbox } from "framework/checkbox";
@@ -8,6 +7,7 @@ import { classNames } from "framework/utils/string";
 
 import css from "./table.module.css";
 import { ScrollableTable } from "framework/scrollable-table";
+import { indexRoute } from "./index.route";
 
 type User = {
     id: number;
@@ -19,8 +19,7 @@ type User = {
 
 const columns: TableColumn<User, Record<number, boolean>>[] = [{
     id: "select",
-    th: true,
-    header: (column, settings) => {
+    header: (_, settings) => {
         const count = Object.keys(settings.metaData || {}).length;
         const checked = count > 0;
         const intermediate = checked && count !== settings.data.length;
@@ -36,7 +35,7 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
             />
         );
     },
-    renderer: (record, column, settings) => {
+    renderer: (record, _, settings) => {
         const count = Object.keys(settings.metaData || {}).length;
         return (
             <Checkbox
@@ -95,7 +94,7 @@ const getGenderClassName = (gender: string) =>
     gender === "Male" ? css.blue : gender === "Female" ? css.pink : null;
 
 function TablePage() {
-    const data = useLoaderData({ from: "/table" });
+    const data = useLoaderData({ from: "/some-framework/table" });
     const [selection, setSelection] = useState<Record<number, boolean>>({});
     const [sortInfo, setSortInfo] = useState<
         SortInfo<User, Record<number, boolean>> | undefined
@@ -215,16 +214,17 @@ function TablePage() {
                 onHeaderClick={headerClickHandler}
                 sortable
                 sortInfo={sortInfo}
+                style={{ height: 400 }}
             />
         </form>
     );
 }
 
 const tableRoute = createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => indexRoute,
     path: "table",
     loader: async () => {
-        const response = await fetch("/data/users.json");
+        const response = await fetch("/some-framework/data/users.json");
         const users = await response.json() as User[];
         return users.slice(0, 100);
     },

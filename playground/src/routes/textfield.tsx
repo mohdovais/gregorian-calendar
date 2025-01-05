@@ -2,7 +2,7 @@ import { createRoute } from "@tanstack/react-router";
 import { TextField } from "framework/textfield";
 import { Toolbar } from "framework/toolbar";
 import { Button } from "framework/button";
-import { rootRoute } from "./root";
+import { indexRoute } from "./index.route";
 
 function TextFieldPage() {
 	return (
@@ -85,7 +85,7 @@ function TextFieldPage() {
 }
 
 const textFieldRoute = createRoute({
-	getParentRoute: () => rootRoute,
+	getParentRoute: () => indexRoute,
 	path: "textfield",
 	component: TextFieldPage,
 });
