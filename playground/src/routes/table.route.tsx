@@ -19,6 +19,7 @@ type User = {
 
 const columns: TableColumn<User, Record<number, boolean>>[] = [{
     id: "select",
+    width: 1,
     header: (_, settings) => {
         const count = Object.keys(settings.metaData || {}).length;
         const checked = count > 0;
@@ -71,11 +72,12 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
     header: "Gender",
     dataIndex: "gender",
     summary: (_, { data }) => {
-        return data.filter((x) => x.gender === "Male").length;
+        return data.filter((x) => x.gender === "Male").length + " males";
     },
 }, {
     id: "edit",
     sortable: false,
+    width: 1,
     renderer: (record, col, meta) => {
         return (
             <Button

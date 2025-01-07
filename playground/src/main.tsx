@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import { RouterProvider } from "@tanstack/react-router";
+import "framework/global.css";
 import "./main.css";
 import { router } from "./router";
 
