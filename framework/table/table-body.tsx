@@ -117,7 +117,6 @@ function TableData<T, U>(props: TableDataProps<T, U>) {
         align = "left",
         className,
         hidden = false,
-        width,
         th = false,
     } = column;
 
@@ -177,7 +176,6 @@ function TableData<T, U>(props: TableDataProps<T, U>) {
         : (
             <td
                 className={tdClassName}
-                width={width}
                 onClick={clickHandler}
                 onDoubleClick={doubleClickHandler}
                 onContextMenu={rightClickHandler}

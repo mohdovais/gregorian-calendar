@@ -99,7 +99,7 @@ function getDateParserRegExp(format: string): DateParserRegExp {
     };
 }
 
-function ensureTwoDigit(number: number) {
+function ensureTwoDigit(number: number): string | undefined {
     if (number < 0) {
         return;
     }

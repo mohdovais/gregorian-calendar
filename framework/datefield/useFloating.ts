@@ -127,6 +127,7 @@ function useFloating(show: boolean = false) {
             window.addEventListener("resize", compute, {
                 signal: abortController.signal,
             });
+
             window.addEventListener("scroll", compute, {
                 signal: abortController.signal,
             });

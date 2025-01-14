@@ -6,7 +6,7 @@ const dateRegex = /(\d{4})-(\d{2})-(\d{2})/;
 const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 const DEFAULT_LOCALE = "en-gb";
 
-function ensureTwoDigits(number: number) {
+function ensureTwoDigits(number: number): string {
     return `${number < 10 ? "0" : ""}${number}`;
 }
 
@@ -15,7 +15,7 @@ const cache = new Map<string, string[]>();
 function getMonthNames(
     format: "numeric" | "2-digit" | "long" | "short" | "narrow" = "long",
     locale = DEFAULT_LOCALE,
-) {
+): string[] {
     const key = "month" + format + (locale || "");
     let names = cache.get(key);
     if (names == null) {
@@ -32,7 +32,7 @@ function getMonthNames(
 function getWeekdayNames(
     format: "long" | "short" | "narrow" = "long",
     locale = DEFAULT_LOCALE,
-) {
+): string[] {
     const key = "week" + format + (locale || "");
     let names = cache.get(key);
     if (names == null) {
@@ -51,10 +51,10 @@ function isDateString(date: string | undefined | null): date is DateString {
         !isNaN(Date.parse(date));
 }
 
-function ensureDateString<T>(
+function ensureDateString(
     possibleDateString: string | undefined | null,
-    defaultValue: T,
-) {
+    defaultValue: DateString,
+): DateString {
     return isDateString(possibleDateString) ? possibleDateString : defaultValue;
 }
 

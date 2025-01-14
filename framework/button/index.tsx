@@ -1,8 +1,8 @@
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, JSX, ReactNode } from "react";
 import { classNames } from "../utils/string";
 import { BaseButton, BaseButtonProps } from "../base-button";
 
-import style from "./Button.module.css";
+import css from "./Button.module.css";
 
 const COLOR_PRIMARY = "primary";
 const COLOR_NEUTRAL = "neutral";
@@ -36,37 +36,40 @@ interface ButtonProps extends BaseButtonProps {
 	icon?: ReactNode;
 }
 
-const getColorClassName = (color?: Color) => {
+function getColorClassName(color?: Color) {
 	switch (color) {
 		case COLOR_DANGER:
-			return style.danger;
+			return css.danger;
 		case COLOR_INFO:
-			return style.info;
+			return css.info;
 		case COLOR_PRIMARY:
-			return style.primary;
+			return css.primary;
 		case COLOR_SUCCESS:
-			return style.success;
+			return css.success;
 		case COLOR_WARNING:
-			return style.warning;
+			return css.warning;
 		default:
-			return style.neutral;
+			return css.neutral;
 	}
-};
+}
 
 const getUiClassName = (ui?: UI) => {
 	switch (ui) {
 		case UI_GHOST:
-			return style.ghost;
+			return css.ghost;
 		case UI_LINK:
-			return style.link;
+			return css.link;
 		case UI_OUTLINED:
-			return style.outlined;
+			return css.outlined;
 		default:
-			return style.solid;
+			return css.solid;
 	}
 };
 
-function Button(props: ButtonProps, ref?: React.LegacyRef<HTMLButtonElement>) {
+function Button(
+	props: ButtonProps,
+	ref?: React.Ref<HTMLButtonElement>,
+): JSX.Element {
 	const {
 		ui,
 		color,
@@ -80,7 +83,7 @@ function Button(props: ButtonProps, ref?: React.LegacyRef<HTMLButtonElement>) {
 		<BaseButton
 			{...restProps}
 			className={classNames(
-				style.btn,
+				css.btn,
 				getUiClassName(ui),
 				getColorClassName(color),
 				className,
@@ -88,8 +91,8 @@ function Button(props: ButtonProps, ref?: React.LegacyRef<HTMLButtonElement>) {
 			type={type}
 			ref={ref}
 		>
-			<span className={style.icon}>{icon}</span>
-			<span className={style.text}>{children}</span>
+			<span className={css.icon}>{icon}</span>
+			<span className={css.text}>{children}</span>
 		</BaseButton>
 	);
 }

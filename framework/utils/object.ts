@@ -25,9 +25,9 @@ function hasKey<T>(obj: T, propName: Key): propName is keyof T {
 	return obj != null && Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
-function typeOf(subject: unknown) {
+function typeOf(subject: unknown): ObjectType {
 	const str = Object.prototype.toString.call(subject);
 	return str.substring(8, str.length - 1) as ObjectType;
 }
 
-export { ensureNotNullOrUndefined, copy, hasKey, typeOf };
+export { copy, ensureNotNullOrUndefined, hasKey, typeOf };

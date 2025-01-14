@@ -34,6 +34,7 @@ function TableHead<T, U>(props: TableHeadProps<T, U>) {
             align = "left",
             header,
             hidden = false,
+            width,
         } = column;
 
         if (hidden) {
@@ -82,6 +83,7 @@ function TableHead<T, U>(props: TableHeadProps<T, U>) {
                 className={thClassName}
                 scope="col"
                 tabIndex={isSortable || hasOnClick ? 0 : undefined}
+                style={{ width }}
                 onClick={clickHandler}
             >
                 <span className={css.thead_cell}>
