@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { BaseButton } from "../base-button";
 
 import { getMonthNames } from "../utils/date";
@@ -11,7 +12,7 @@ type MonthSelectorProps = {
 	onChange: (month: number, year: number) => void;
 };
 
-function MonthSelector(props: MonthSelectorProps) {
+function MonthSelector(props: MonthSelectorProps): JSX.Element {
 	const today = new Date();
 	const currentMonth = today.getMonth();
 	const currentYear = today.getFullYear();

@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { isFunction } from "../utils/function";
 import { classNames } from "../utils/string";
 import css from "./Listbox.module.css";
@@ -13,7 +14,7 @@ type ListboxItemProps<T> = {
 	onClick?: (value: T) => void;
 };
 
-function ListboxItem<T>(props: ListboxItemProps<T>) {
+function ListboxItem<T>(props: ListboxItemProps<T>): JSX.Element {
 	const {
 		active,
 		children,

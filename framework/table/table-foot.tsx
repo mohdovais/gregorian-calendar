@@ -2,10 +2,11 @@ import { emptyFn, isFunction } from "../utils/function";
 import { RenderSettings } from "./table.common";
 import { TableHeadProps } from "./table-head";
 import css from "./table.module.css";
+import { JSX } from "react";
 
 type TableFootProps<T, U> = Omit<TableHeadProps<T, U>, "sortable">;
 
-function TableFoot<T, U>(props: TableFootProps<T, U>) {
+function TableFoot<T, U>(props: TableFootProps<T, U>): JSX.Element {
     const { data, columns, metaData, onMessage } = props;
 
     const children = columns.map((column) => {

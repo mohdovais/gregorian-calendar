@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { JSX, useId } from "react";
 
 import css from "./Listbox.module.css";
 import { classNames } from "../utils/string";
@@ -10,7 +10,7 @@ type ListboxGroupProps = {
 	children: React.ReactElement | React.ReactElement[];
 };
 
-function ListboxGroup(props: ListboxGroupProps) {
+function ListboxGroup(props: ListboxGroupProps): JSX.Element {
 	const { children, className, id, label } = props;
 	const labelId = useId();
 	return (

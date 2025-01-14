@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { JSX, useEffect, useId, useMemo, useState } from "react";
 import { TextField } from "../textfield";
 import {
     DateString,
@@ -60,7 +60,7 @@ interface DateFieldProps
     onChange?: (date: DateString | null) => void;
 }
 
-function DateField(props: DateFieldProps) {
+function DateField(props: DateFieldProps): JSX.Element {
     let {
         min,
         max,

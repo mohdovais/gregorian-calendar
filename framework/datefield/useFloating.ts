@@ -75,7 +75,16 @@ const positionConfig: Partial<ComputePositionConfig> = {
     ],
 };
 
-function useFloating(show: boolean = false) {
+type FloatingResult = {
+    floating: HTMLElement | null;
+    reference: HTMLElement | null;
+    setReference: (reference: HTMLElement | null) => void;
+    setFloating: (floating: HTMLElement | null) => void;
+    floatingStyle: React.CSSProperties;
+    placement: "top" | "bottom";
+};
+
+function useFloating(show: boolean = false): FloatingResult {
     const [state, dispatch] = useReducer(reducer, defaultState);
 
     const setReference = useCallback((reference: HTMLElement | null) => {

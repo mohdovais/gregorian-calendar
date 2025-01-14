@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { TableColumn } from ".";
 import { emptyFn, isFunction } from "../utils/function";
 import { classNames } from "../utils/string";
@@ -28,7 +29,7 @@ type TableBodyProps<T, U> = {
     onCellDoubleClick?: TableDataProps<T, U>["onDoubleClick"];
 };
 
-function TableBody<T, U>(props: TableBodyProps<T, U>) {
+function TableBody<T, U>(props: TableBodyProps<T, U>): JSX.Element {
     const {
         columns,
         data,
@@ -100,7 +101,7 @@ type TableDataProps<T, U> = {
     ) => void;
 };
 
-function TableData<T, U>(props: TableDataProps<T, U>) {
+function TableData<T, U>(props: TableDataProps<T, U>): JSX.Element {
     const {
         data,
         columns,

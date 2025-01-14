@@ -4,6 +4,7 @@ import { ListboxItem } from "./ListboxItem";
 import { classNames } from "../utils/string";
 
 import css from "./Listbox.module.css";
+import { JSX } from "react";
 
 type ListboxGroupType<T> = {
 	id?: string;
@@ -38,7 +39,7 @@ type ListboxProps<T> = {
 	onChange?: (value: T) => void;
 };
 
-function Listbox<T>(props: ListboxProps<T>) {
+function Listbox<T>(props: ListboxProps<T>): JSX.Element {
 	const {
 		id,
 		className,

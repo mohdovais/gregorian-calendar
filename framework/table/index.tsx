@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { ensureArray } from "../utils/array";
 import { classNames } from "../utils/string";
 import { TableBody, TableBodyProps } from "./table-body";
@@ -23,7 +24,7 @@ interface TableProps<T, U> extends
     rowKey: TableBodyProps<T, U>["rowId"];
     hideHeaders?: boolean;
     sortable?: boolean;
-    sortInfo?: ExpandedSortInfo<T,U>;
+    sortInfo?: ExpandedSortInfo<T, U>;
     onHeaderMessage?: TableHeadProps<T, U>["onMessage"];
     onHeaderClick?: TableHeadProps<T, U>["onClick"];
     onCellMessage?: TableBodyProps<T, U>["onMessage"];
@@ -34,7 +35,7 @@ interface TableProps<T, U> extends
 
 function Table<DataType, MetaDataType>(
     props: Expand<TableProps<DataType, MetaDataType>>,
-) {
+): JSX.Element {
     const {
         className,
         data,

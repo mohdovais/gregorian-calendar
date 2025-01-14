@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { Table, TableProps } from "../table";
 import { classNames } from "../utils/string";
 
@@ -32,7 +32,7 @@ const setStickyState = (
   });
 };
 
-function ScrollableTable<T, U>(props: TableProps<T, U>) {
+function ScrollableTable<T, U>(props: TableProps<T, U>): JSX.Element {
   const { width, id, className, style, ...tableProps } = props;
   const [sticky, setSticky] = useState({
     head: false,

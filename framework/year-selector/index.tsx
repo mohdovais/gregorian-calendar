@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { BaseButton } from "../base-button";
 import { classNames } from "../utils/string";
 
@@ -20,7 +21,7 @@ type YearSelectorProps = {
 	onSelect: (year: number) => void;
 };
 
-function YearSelector(props: YearSelectorProps) {
+function YearSelector(props: YearSelectorProps): JSX.Element {
 	const currentYear = new Date().getFullYear();
 	const { decade = currentYear, value, min = 0, max = 9999, onSelect } =
 		props;

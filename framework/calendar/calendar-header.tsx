@@ -1,3 +1,4 @@
+import { JSX } from "react";
 import { BaseButton } from "../base-button";
 import { getMonthNames } from "../utils/date";
 import style from "./Calendar.module.css";
@@ -20,7 +21,7 @@ type CalendarHeaderProps = {
 	dispatch: React.Dispatch<CalendarAction>;
 };
 
-function CalendarHeader(props: CalendarHeaderProps) {
+function CalendarHeader(props: CalendarHeaderProps): JSX.Element {
 	const { month, year, view, locale, dispatch } = props;
 
 	const label = view === CAL_VIEW_DATE_SELECTOR

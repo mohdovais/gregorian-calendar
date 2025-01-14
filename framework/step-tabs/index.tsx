@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { JSX, useRef } from "react";
 import { ensureArray } from "../utils/array";
 
 import { isFunction } from "../utils/function";
@@ -20,7 +20,7 @@ type TabsProps<T> = {
     onChange?: (value: T) => void;
 };
 
-function Tabs<T extends string | number>(props: TabsProps<T>) {
+function Tabs<T extends string | number>(props: TabsProps<T>): JSX.Element {
     const { items, className, id, style, active, disabled, onChange } = props;
     const indices = useRef({
         curr: -1,

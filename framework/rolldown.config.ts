@@ -1,5 +1,5 @@
 import { defineConfig, RolldownOptions } from "rolldown";
-//import IsolatedDecl from "unplugin-isolated-decl/rolldown";
+import UnpluginIsolatedDecl from "unplugin-isolated-decl/rolldown";
 
 const folders_tsx = [
     "base-button",
@@ -45,6 +45,7 @@ export default defineConfig(folders_tsx.map((name) => {
                 return true;
             }
         },
+        plugins: [UnpluginIsolatedDecl()],
     };
 
     return config;

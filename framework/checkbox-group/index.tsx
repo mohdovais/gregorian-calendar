@@ -1,4 +1,4 @@
-import { Children, isValidElement } from "react";
+import { Children, isValidElement, JSX } from "react";
 import { Checkbox, CheckboxProps } from "../checkbox";
 import { classNames } from "../utils/string";
 import { isFunction } from "../utils/function";
@@ -22,7 +22,7 @@ type CheckboxGroupProps = {
     small?: boolean;
 };
 
-function CheckboxGroup(props: CheckboxGroupProps) {
+function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
     const {
         legend,
         value,
@@ -110,6 +110,10 @@ interface CheckboxGroupItemProps extends
 
 function CheckboxGroupItem(props: CheckboxGroupItemProps) {
     return null;
+}
+
+declare namespace CheckboxGroup {
+    export function Item(props: CheckboxGroupItemProps): null;
 }
 
 CheckboxGroup.Item = CheckboxGroupItem;

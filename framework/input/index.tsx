@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, JSX } from "react";
 
 import css from "./Input.module.css";
 import { classNames } from "../utils/string";
@@ -11,10 +11,10 @@ interface InputProps extends
     ref?: React.Ref<HTMLInputElement>;
 }
 
-const Input = forwardRef(function Input(
+function Input(
     props: InputProps,
     outerRef?: React.Ref<HTMLInputElement>,
-) {
+): JSX.Element {
     const {
         type = "text",
         className,
@@ -29,7 +29,11 @@ const Input = forwardRef(function Input(
             className={classNames(css.input, className)}
         />
     );
-});
+}
 
-export { Input };
+const ForwardRef: React.ForwardRefExoticComponent<
+    Omit<InputProps, "ref"> & React.RefAttributes<HTMLInputElement>
+> = forwardRef(Input);
+
+export { ForwardRef as Input };
 export type { InputProps };

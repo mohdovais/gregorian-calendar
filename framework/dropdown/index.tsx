@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useReducer, useRef } from "react";
+import { JSX, useDeferredValue, useEffect, useReducer, useRef } from "react";
 import { Portal } from "../portal";
 import { ensureArray } from "../utils/array";
 import { Listbox, ListboxProps } from "../listbox";
@@ -15,12 +15,11 @@ import {
 	getActionFromKeyboardEvent,
 	initDropdownState,
 } from "./dropdown.store";
-
-import css from "./dropdown.module.css";
 import { classNames } from "../utils/string";
 import { useFloating } from "./useFloating";
 import { ConditionalRender } from "../conditional-render";
-import { ProxyFormInput } from "../proxy-form-input";
+
+import css from "./dropdown.module.css";
 
 const icon = (
 	<svg
@@ -59,7 +58,7 @@ interface DropdownProps<T> extends ListboxProps<T> {
 
 const defaultDisplayTpl = (selection: unknown[]) => selection.join(", ");
 
-function Dropdown<T>(props: DropdownProps<T>) {
+function Dropdown<T>(props: DropdownProps<T>): JSX.Element {
 	const {
 		label,
 		id,

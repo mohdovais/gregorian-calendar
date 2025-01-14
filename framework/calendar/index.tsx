@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { JSX, useReducer } from "react";
 import { Month, MonthProps } from "../month";
 import { MonthSelector } from "../month-selector";
 
@@ -35,7 +35,7 @@ interface CalendarProps extends Omit<ReactDiv, "onChange"> {
 	onChange?: (date: DateString) => void;
 }
 
-function Calendar(props: CalendarProps) {
+function Calendar(props: CalendarProps): JSX.Element {
 	const {
 		className,
 		locale,

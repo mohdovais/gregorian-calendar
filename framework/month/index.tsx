@@ -1,6 +1,5 @@
 import { BaseButton } from "../base-button";
 import { ensureArray } from "../utils/array";
-
 import {
 	DateString,
 	DAYS_IN_MONTH,
@@ -11,9 +10,9 @@ import {
 import { bound } from "../utils/number";
 import { ensureNotNullOrUndefined } from "../utils/object";
 import { WeekHeader, WeekHeaderProps } from "./week-header";
-
 import style from "./month.module.css";
 import { classNames } from "../utils/string";
+import { JSX } from "react";
 
 interface MonthProps {
 	className?: string;
@@ -31,7 +30,7 @@ interface MonthProps {
 	onChange?: (date: DateString) => void;
 }
 
-function Month(props: MonthProps) {
+function Month(props: MonthProps): JSX.Element {
 	const now = new Date();
 	const {
 		className,

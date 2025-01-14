@@ -1,9 +1,11 @@
+import { JSX } from "react";
+
 type SortIconProps = {
     dir?: "ASC" | "DSC";
     className?: string;
 };
 
-function SortIcon(props: SortIconProps) {
+function SortIcon(props: SortIconProps): JSX.Element {
     const dir = props.dir;
 
     return (

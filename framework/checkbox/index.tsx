@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { JSX, useEffect, useRef } from "react";
 import { classNames } from "../utils/string";
 import css from "./checkbox.module.css";
 
@@ -13,7 +13,7 @@ interface CheckboxProps extends
     value?: string;
 }
 
-function Checkbox(props: CheckboxProps) {
+function Checkbox(props: CheckboxProps): JSX.Element {
     const {
         type,
         intermediate = false,

@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { JSX, useId } from "react";
 import { Input, InputProps } from "../input";
 import { classNames } from "../utils/string";
 
@@ -13,7 +13,7 @@ interface TextFieldProps extends InputProps {
 	__children?: React.ReactNode;
 }
 
-function TextField(props: TextFieldProps) {
+function TextField(props: TextFieldProps): JSX.Element {
 	const randomId = useId();
 
 	const {

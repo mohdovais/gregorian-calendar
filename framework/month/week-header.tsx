@@ -1,6 +1,6 @@
 import { getWeekdayNames } from "../utils/date";
 import style from "./month.module.css";
-import { useMemo } from "react";
+import { JSX, useMemo } from "react";
 
 interface WeekHeaderProps {
 	locale?: string;
@@ -8,7 +8,7 @@ interface WeekHeaderProps {
 	format?: "short" | "long" | "narrow";
 }
 
-function WeekHeader(props: WeekHeaderProps) {
+function WeekHeader(props: WeekHeaderProps): JSX.Element {
 	const { format = "short", locale, start = 1 } = props;
 	const names = useMemo(() => {
 		const isNarrow = format === "narrow";

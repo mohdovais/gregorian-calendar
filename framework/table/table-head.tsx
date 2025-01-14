@@ -6,6 +6,7 @@ import { classNames } from "../utils/string";
 import { getAlignClassName, RenderSettings } from "./table.common";
 
 import css from "./table.module.css";
+import { JSX } from "react";
 
 type SortInfo<T, U> = {
     columnId: TableColumn<T, U>["id"];
@@ -25,7 +26,7 @@ type TableHeadProps<T, U> = {
     ) => void;
 };
 
-function TableHead<T, U>(props: TableHeadProps<T, U>) {
+function TableHead<T, U>(props: TableHeadProps<T, U>): JSX.Element {
     const { columns, data, metaData, sortable, onMessage, onClick } = props;
     const sortInfo = ensureArray(props.sortInfo);
     const children = columns.map((column) => {

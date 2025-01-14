@@ -1,4 +1,4 @@
-import React from "react";
+import React, { JSX } from "react";
 import css from "./Toolbar.module.css";
 import { classNames } from "../utils/string";
 
@@ -8,7 +8,7 @@ interface ToolbarProps extends React.PropsWithChildren {
     style?: React.CSSProperties;
 }
 
-function Toolbar(props: ToolbarProps) {
+function Toolbar(props: ToolbarProps): JSX.Element {
     const { id, className, style, children } = props;
     return (
         <div

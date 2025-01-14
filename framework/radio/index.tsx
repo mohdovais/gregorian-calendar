@@ -1,4 +1,6 @@
+import { JSX } from "react";
 import { classNames } from "../utils/string";
+
 import css from "./radio.module.css";
 
 interface RadioProps extends
@@ -10,9 +12,7 @@ interface RadioProps extends
     small?: boolean;
 }
 
-function Radio(
-    props: RadioProps,
-) {
+function Radio(props: RadioProps): JSX.Element {
     const {
         type,
         id,

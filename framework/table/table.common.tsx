@@ -1,6 +1,8 @@
 import css from "./table.module.css";
 
-function getAlignClassName(align: TableColumnBase<unknown, unknown>["align"]) {
+function getAlignClassName(
+    align: TableColumnBase<unknown, unknown>["align"],
+): string {
     return align === "left"
         ? css.left
         : align === "right"
@@ -55,7 +57,9 @@ interface TableColumnWithRenderer<T, U> extends TableColumnBase<T, U> {
     renderer: CellRenderer<T, U>;
 }
 
-type TableColumn<T, U = unknown> = Expand<TableColumnWithDataIndex<T, U> | TableColumnWithRenderer<T, U>>;
+type TableColumn<T, U = unknown> = Expand<
+    TableColumnWithDataIndex<T, U> | TableColumnWithRenderer<T, U>
+>;
 
 export { getAlignClassName };
 
