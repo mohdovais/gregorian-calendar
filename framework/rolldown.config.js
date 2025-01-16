@@ -1,5 +1,6 @@
-import { defineConfig, RolldownOptions } from "rolldown";
+import { defineConfig } from "rolldown";
 import UnpluginIsolatedDecl from "unplugin-isolated-decl/rolldown";
+import { cssCopyPlugin } from "./rollup-plugin-copy-css.js";
 
 const folders_tsx = [
     "base-button",
@@ -28,7 +29,7 @@ const folders_tsx = [
 ];
 
 export default defineConfig(folders_tsx.map((name) => {
-    const config: RolldownOptions = {
+    const config = {
         input: `${name}/index.tsx`,
         output: {
             format: "esm",
@@ -45,7 +46,12 @@ export default defineConfig(folders_tsx.map((name) => {
                 return true;
             }
         },
-        plugins: [UnpluginIsolatedDecl()],
+        plugins: [
+            UnpluginIsolatedDecl({
+                extraOutdir: `dist/${name}/`,
+            }),
+            cssCopyPlugin(),
+        ],
     };
 
     return config;

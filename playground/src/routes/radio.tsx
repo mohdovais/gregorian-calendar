@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { RadioGroup } from "framework/radio/radio-group";
+import { RadioGroup } from "framework/radio-group";
 import { indexRoute } from "./index.route";
 
 function RadioPage() {

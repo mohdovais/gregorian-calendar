@@ -11,6 +11,8 @@ function cssCopyPlugin(options = {}) {
             const { facadeModuleId } = chunk;
             const { file } = outputOptions;
 
+            console.log(chunk);
+
             await Promise.all(
                 chunk.imports.map((id) => {
                     if (cssRe.test(id)) {

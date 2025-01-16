@@ -1,6 +1,7 @@
 import { Children, isValidElement } from "react";
-import { Radio, RadioProps } from ".";
+import { Radio } from "../radio";
 import { classNames } from "../utils/string";
+import { RadioGroupItem, RadioGroupItemProps } from "./radio-group-item";
 
 import css from "./radio-group.module.css";
 
@@ -76,16 +77,8 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
     );
 }
 
-interface RadioGroupItemProps extends
-    Exclude<
-        RadioProps,
-        "name" | "checked" | "defaultChecked" | "required"
-    > {
-    label: string;
-}
-
-function RadioGroupItem(props: RadioGroupItemProps) {
-    return null;
+declare namespace RadioGroup {
+    export function Item(props: RadioGroupItemProps): null;
 }
 
 RadioGroup.Item = RadioGroupItem;

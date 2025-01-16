@@ -18,7 +18,7 @@ function CheckboxPage() {
 			<CheckboxGroup
 				name="b"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
+				display="inline"
 			>
 				<CheckboxGroup.Item label="Yes" value="1" />
 				<CheckboxGroup.Item label="No" value="0" />
@@ -28,7 +28,6 @@ function CheckboxPage() {
 			<CheckboxGroup
 				name="c"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
 			>
 				<CheckboxGroup.Item label="Yes" value="1" />
 				<CheckboxGroup.Item label="No" value="0" />
@@ -38,7 +37,6 @@ function CheckboxPage() {
 			<CheckboxGroup
 				name="c"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
 				disabled
 				value="0"
 			>
@@ -50,11 +48,25 @@ function CheckboxPage() {
 			<CheckboxGroup
 				name="c"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
+				required
 			>
-				<CheckboxGroup.Item label="Yes" value="1" required />
+				<CheckboxGroup.Item label="Yes" value="1" />
 				<CheckboxGroup.Item label="No" value="0" />
 				<CheckboxGroup.Item label="May be" value="2" />
+			</CheckboxGroup>
+			<h5>Grid</h5>
+			<CheckboxGroup
+				name="e"
+				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
+				display="grid"
+			>
+				<CheckboxGroup.Item label="One" value="1" />
+				<CheckboxGroup.Item label="Two" value="2" />
+				<CheckboxGroup.Item label="Three" value="3" />
+				<CheckboxGroup.Item label="Four" value="4" />
+				<CheckboxGroup.Item label="Five" value="5" />
+				<CheckboxGroup.Item label="Six" value="6" />
+				<CheckboxGroup.Item label="Sevene" value="7" />
 			</CheckboxGroup>
 		</div>
 	);

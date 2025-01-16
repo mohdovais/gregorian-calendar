@@ -101,7 +101,7 @@ type TableDataProps<T, U> = {
     ) => void;
 };
 
-function TableData<T, U>(props: TableDataProps<T, U>): JSX.Element {
+function TableData<T, U>(props: TableDataProps<T, U>): JSX.Element | null {
     const {
         data,
         columns,

@@ -3,18 +3,24 @@ import { Checkbox, CheckboxProps } from "../checkbox";
 import { classNames } from "../utils/string";
 import { isFunction } from "../utils/function";
 import { ensureArray } from "../utils/array";
-
+import {
+    CheckboxGroupItem,
+    CheckboxGroupItemProps,
+} from "./checkbpx-group-item";
 import css from "./checkbox-group.module.css";
 
 type CheckboxGroupProps = {
     id?: string;
     className?: string;
+    containerClassName?: string;
     style?: React.CSSProperties;
     legend: React.ReactNode;
+    required?: boolean;
     disabled?: boolean;
     name: string;
     value?: string | string[];
-    horizontal?: boolean;
+    display?: "inline" | "block" | "grid";
+    columns?: number;
     children: React.ReactElement<CheckboxGroupItemProps> | React.ReactElement<
         CheckboxGroupItemProps
     >[];
@@ -31,24 +37,28 @@ function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
         id,
         className,
         style,
-        horizontal = false,
+        display,
+        columns = 3,
+        containerClassName,
         small,
         onChange,
     } = props;
 
     const parentValue = ensureArray(value);
+    const parentRequired = props.required && parentValue.length === 0;
 
     var children = Children.map(props.children, (child) => {
         if (isValidElement(child) && child.type === CheckboxGroupItem) {
             const {
                 value,
                 disabled,
+                required,
                 ...checkboxProps
             } = child.props;
 
             return (
                 <Checkbox
-                    key={String(value)}
+                    key={value}
                     className={css.label}
                     name={name}
                     value={value}
@@ -56,6 +66,7 @@ function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
                         parentValue.includes(value)}
                     small={small}
                     disabled={parentDisabled || disabled}
+                    required={parentRequired || required}
                     {...checkboxProps}
                 />
             );
@@ -85,31 +96,28 @@ function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
     return (
         <fieldset
             id={id}
-            className={classNames(
-                css.group,
-                horizontal ? css.horozontal : css.vertical,
-                className,
-            )}
+            className={classNames(css.group, className)}
             style={style}
             disabled={parentDisabled}
             onChange={changeHandler}
         >
             <legend>{legend}</legend>
-            {children}
+            <div
+                className={classNames(
+                    display === "inline"
+                        ? css.inline
+                        : display === "grid"
+                        ? css.grid
+                        : css.block,
+                    containerClassName,
+                )}
+                // @ts-expect-error
+                style={{ "--columns": columns }}
+            >
+                {children}
+            </div>
         </fieldset>
     );
-}
-
-interface CheckboxGroupItemProps extends
-    Exclude<
-        CheckboxProps,
-        "name" | "checked" | "defaultChecked" | "required"
-    > {
-    label: React.ReactNode;
-}
-
-function CheckboxGroupItem(props: CheckboxGroupItemProps) {
-    return null;
 }
 
 declare namespace CheckboxGroup {
