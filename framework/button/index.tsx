@@ -91,8 +91,10 @@ function Button(
 			type={type}
 			ref={ref}
 		>
-			<span className={css.icon}>{icon}</span>
-			<span className={css.text}>{children}</span>
+			{icon == null ? null : <span className={css.icon}>{icon}</span>}
+			{children == null
+				? null
+				: <span className={css.text}>{children}</span>}
 		</BaseButton>
 	);
 }

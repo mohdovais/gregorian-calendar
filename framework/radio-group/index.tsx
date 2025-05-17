@@ -13,7 +13,7 @@ type RadioGroupProps<T> = {
     disabled?: boolean;
     name: string;
     value?: T;
-    horizontal?: boolean;
+    display?: "inline" | "block";
     small?: boolean;
     required?: boolean;
     children: React.ReactElement<RadioGroupItemProps> | React.ReactElement<
@@ -31,7 +31,7 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
         className,
         id,
         onChange,
-        horizontal = false,
+        display,
         small,
         required,
         style,
@@ -47,7 +47,7 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
                     name={name}
                     value={value}
                     defaultChecked={value === parentValue}
-                    className={css.radio}
+                    className={css.item}
                     small={small}
                     required={required}
                     disabled={parentDisabled || disabled}
@@ -64,7 +64,7 @@ function RadioGroup<T>(props: RadioGroupProps<T>) {
             id={id}
             className={classNames(
                 css.group,
-                horizontal ? css.horozontal : css.vertical,
+                display === "inline" ? css.inline : css.block,
                 className,
             )}
             style={style}

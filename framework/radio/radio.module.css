@@ -10,6 +10,12 @@
     border-radius: 12px;
     background-size: cover;
     outline: none;
+    vertical-align: middle;
+}
+
+.label {
+    vertical-align: middle;
+    margin-left: 8px;
 }
 
 .small {
@@ -22,7 +28,8 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E3C/circle%3E%3Ccircle cx='12' cy='12' r='7' fill='curentcolor'%3E%3C/circle%3E%3C/svg%3E");
 }
 
-.radio:not(:disabled):hover {
+.radio:not(:disabled):hover,
+.radio:invalid:hover {
     border-color: #000;
 }
 
@@ -44,14 +51,6 @@
     border-color: red;
 }
 
-.label {
-    padding: 0;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.label.disabled {
+.disabled {
     color: #aaa;
 }

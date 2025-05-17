@@ -6,9 +6,8 @@
 .group legend {
     display: block;
     border: none;
-    margin-inline: 0;
-    padding-block: 0;
-    padding-inline: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .group legend {
@@ -16,14 +15,18 @@
     margin-bottom: 16px;
 }
 
-.horozontal .radio + .radio {
-    margin-left: 32px;
+.inline .item {
+    display: inline-block;
 }
 
-.vertical .radio {
-    width: 100%;
+.inline .item + .item {
+    margin-left: 24px;
 }
 
-.vertical .radio + .radio {
+.block .item {
+    display: table;
+}
+
+.block .item + .item {
     margin-top: 16px;
 }

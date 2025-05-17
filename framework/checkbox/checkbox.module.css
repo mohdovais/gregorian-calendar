@@ -10,6 +10,12 @@
     background-color: #fff;
     background-size: cover;
     outline: none;
+    vertical-align: middle;
+}
+
+.label {
+    vertical-align: middle;
+    margin-left: 8px;
 }
 
 .small {
@@ -40,17 +46,13 @@
 }
 
 .checkbox:invalid:not(:focus-visible) {
-    border-color: red;
+    border-color: #e60000;
 }
 
-.label {
-    padding: 0;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+.checkbox:invalid:hover {
+    border-color: #000;
 }
 
-.label.disabled {
+.disabled {
     color: #aaa;
 }

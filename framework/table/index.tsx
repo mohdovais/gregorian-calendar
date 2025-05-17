@@ -10,8 +10,6 @@ import css from "./table.module.css";
 
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
-type ExpandedSortInfo<T, U> = Expand<SortInfo<T, U>>;
-
 interface TableProps<T, U> extends
     React.DetailedHTMLProps<
         React.TableHTMLAttributes<HTMLTableElement>,
@@ -24,7 +22,7 @@ interface TableProps<T, U> extends
     rowKey: TableBodyProps<T, U>["rowId"];
     hideHeaders?: boolean;
     sortable?: boolean;
-    sortInfo?: ExpandedSortInfo<T, U>;
+    sortInfo?: SortInfo<T, U>;
     onHeaderMessage?: TableHeadProps<T, U>["onMessage"];
     onHeaderClick?: TableHeadProps<T, U>["onClick"];
     onCellMessage?: TableBodyProps<T, U>["onMessage"];
@@ -102,4 +100,4 @@ function Table<DataType, MetaDataType>(
 }
 
 export { Table };
-export type { ExpandedSortInfo as SortInfo, TableColumn, TableProps };
+export type { SortInfo, TableColumn, TableProps };

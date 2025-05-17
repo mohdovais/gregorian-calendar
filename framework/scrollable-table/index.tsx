@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, startTransition, useCallback, useState } from "react";
 import { Table, TableProps } from "../table";
 import { classNames } from "../utils/string";
 
@@ -42,6 +42,25 @@ function ScrollableTable<T, U>(props: TableProps<T, U>): JSX.Element {
   const scrollHandler = (event: React.UIEvent<HTMLDivElement>) => {
     setStickyState(event.target as HTMLDivElement, setSticky);
   };
+
+  const onScroll = useCallback(() => {
+    let busy = false;
+
+    return function onScroll(event: React.UIEvent<HTMLDivElement>) {
+      // Prevent multiple rAF callbacks.
+      if (busy) {
+        return;
+      }
+
+      busy = true;
+      requestAnimationFrame(() => {
+        startTransition(() => {
+          setStickyState(event.target as HTMLDivElement, setSticky);
+        });
+        busy = false;
+      });
+    };
+  }, []);
 
   return (
     <div

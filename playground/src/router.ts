@@ -8,6 +8,7 @@ import { tableRoute } from "./routes/table.route";
 import { checkboxRoute } from "./routes/checkbox";
 import { radioRoute } from "./routes/radio";
 import { indexRoute } from "./routes/index.route";
+import { menuButtonRoute } from "./routes/menu-button";
 
 const routeTree = rootRoute.addChildren([
 	indexRoute,
@@ -17,6 +18,7 @@ const routeTree = rootRoute.addChildren([
 	tabsRoute,
 	textFieldRoute,
 	dropdownRoute,
+	menuButtonRoute,
 	dateFieldRoute,
 ]);
 

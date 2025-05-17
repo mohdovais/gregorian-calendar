@@ -2,7 +2,6 @@ import { ensureArray } from "../utils/array";
 import { ListboxGroup } from "./ListboxGroup";
 import { ListboxItem } from "./ListboxItem";
 import { classNames } from "../utils/string";
-
 import css from "./Listbox.module.css";
 import { JSX } from "react";
 

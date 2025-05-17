@@ -45,13 +45,12 @@ function Checkbox(props: CheckboxProps): JSX.Element {
     return label == null ? input : (
         <label
             className={classNames(
-                css.label,
                 disabled && css.disabled,
                 className,
             )}
         >
             {input}
-            <span>{label}</span>
+            <span className={css.label}>{label}</span>
         </label>
     );
 }

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        th {
+            cursor: move;
+        }
+
+        .dragstart {
+            opacity: 0.5;
+        }
+
+        .dragover {
+            outline: 2px solid red;
+        }
+
+        .dragenter {
+            background-color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <table class="sc-bdVaJa gldOUe">
+        <thead>
+            <tr>
+                <th draggable="true">pet name</th>
+                <th draggable="true">email</th>
+                <th draggable="true">parent name</th>
+                <th draggable="true">last visit</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Prohaska</td>
+                <td>Erwin25@yahoo.com</td>
+                <td>Arno Wuckert</td>
+                <td>5/10/2024</td>
+            </tr>
+            <tr>
+                <td>Kris</td>
+                <td>Maymie_Buckridge@yahoo.com</td>
+                <td>Vance Lebsack</td>
+                <td>10/25/2024</td>
+            </tr>
+            <tr>
+                <td>Simonis</td>
+                <td>Jarod_Greenfelder92@hotmail.com</td>
+                <td>Allen Parker</td>
+                <td>8/20/2024</td>
+            </tr>
+            <tr>
+                <td>Hahn</td>
+                <td>Laney.Stamm20@hotmail.com</td>
+                <td>Wallace Jacobson</td>
+                <td>12/13/2024</td>
+            </tr>
+            <tr>
+                <td>Koch</td>
+                <td>Domingo_Schiller@yahoo.com</td>
+                <td>Yasmin Hirthe</td>
+                <td>2/13/2024</td>
+            </tr>
+        </tbody>
+    </table>
+    <script>
+        Array.from(document.getElementsByTagName('th')).forEach(el => {
+            el.addEventListener("dragstart", (event) => {
+                event.dataTransfer.dropEffect = "move";
+                event.target.classList.add("dragstart")
+            });
+
+            el.addEventListener("dragend", event => {
+                event.target.classList.remove("dragstart")
+            })
+
+            el.addEventListener("dragenter", (event) => {
+                event.target.classList.add("dragenter")
+            });
+
+            el.addEventListener("dragleave", (event) => {
+                event.target.classList.remove("dragenter")
+            });
+
+            el.addEventListener("dragover", (event) => {
+                //event.preventDefault();
+                //event.target.classList.add("dragover")
+            });
+
+            el.addEventListener("drop", (event) => {
+                event.target.classList.add("drop")
+            });
+        })
+    </script>
+</body>
+
+</html>

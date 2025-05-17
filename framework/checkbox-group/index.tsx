@@ -59,7 +59,7 @@ function CheckboxGroup(props: CheckboxGroupProps): JSX.Element {
             return (
                 <Checkbox
                     key={value}
-                    className={css.label}
+                    className={css.item}
                     name={name}
                     value={value}
                     defaultChecked={value != null &&

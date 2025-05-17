@@ -18,7 +18,7 @@ function RadioPage() {
 			<RadioGroup
 				name="b"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
+				display="inline"
 			>
 				<RadioGroup.Item label="Yes" value="1" />
 				<RadioGroup.Item label="No" value="0" />
@@ -28,7 +28,6 @@ function RadioPage() {
 			<RadioGroup
 				name="c"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				horizontal
 			>
 				<RadioGroup.Item label="Yes" value="1" />
 				<RadioGroup.Item label="No" value="0" />
@@ -39,7 +38,6 @@ function RadioPage() {
 				name="d"
 				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
 				value="0"
-				horizontal
 				disabled
 			>
 				<RadioGroup.Item label="Yes" value="1" />
@@ -51,7 +49,6 @@ function RadioPage() {
 				<RadioGroup
 					name="e"
 					legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-					horizontal
 					required
 				>
 					<RadioGroup.Item label="Yes" value="1" />

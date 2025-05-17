@@ -236,7 +236,6 @@ function Dropdown<T>(props: DropdownProps<T>): JSX.Element {
 				<span>{displayTpl(values)}</span>
 			</button>
 			<label id={labelId} className={css.label}>{label}</label>
-
 			{icon}
 			<Portal>
 				<div

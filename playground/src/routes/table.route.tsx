@@ -1,10 +1,9 @@
 import { startTransition, useMemo, useState } from "react";
 import { createRoute, useLoaderData } from "@tanstack/react-router";
-import { SortInfo, Table, TableColumn } from "framework/table";
+import { SortInfo, TableColumn } from "framework/table";
 import { Button } from "framework/button";
 import { Checkbox } from "framework/checkbox";
 import { classNames } from "framework/utils/string";
-
 import css from "./table.module.css";
 import { ScrollableTable } from "framework/scrollable-table";
 import { indexRoute } from "./index.route";

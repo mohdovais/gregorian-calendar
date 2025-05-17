@@ -37,13 +37,12 @@ function Radio(props: RadioProps): JSX.Element {
         <label
             htmlFor={id}
             className={classNames(
-                css.label,
                 disabled && css.disabled,
                 className,
             )}
         >
             {radio}
-            <span>{label}</span>
+            <span className={css.label}>{label}</span>
         </label>
     );
 }

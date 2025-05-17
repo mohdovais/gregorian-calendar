@@ -20,7 +20,6 @@ import { BaseButton } from "../base-button";
 
 const icon = (
     <svg
-        enable-background="new 0 0 32 32"
         height="16"
         viewBox="0 0 32 32"
         width="16"
