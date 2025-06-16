@@ -1,19 +1,23 @@
 import { createRoute } from "@tanstack/react-router";
 import { RadioGroup } from "framework/radio-group";
 import { indexRoute } from "./index.route";
+import { Button } from "framework/button";
 
 function RadioPage() {
 	return (
 		<div>
-			<RadioGroup
-				name="a"
-				legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
-				value="0"
-			>
-				<RadioGroup.Item label="Yes" value="1" />
-				<RadioGroup.Item label="No" value="0" />
-				<RadioGroup.Item label="May be" value="2" />
-			</RadioGroup>
+			<form>
+				<RadioGroup
+					name="a"
+					legend="Combine <fieldset> with the <legend> tag to provide a caption or title for the group."
+					value="0"
+				>
+					<RadioGroup.Item label="Yes" value="1" />
+					<RadioGroup.Item label="No" value="0" />
+					<RadioGroup.Item label="May be" value="2" />
+				</RadioGroup>
+				<Button type="reset">Reset</Button>
+			</form>
 			<h5>Horizontal</h5>
 			<RadioGroup
 				name="b"

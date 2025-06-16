@@ -9,16 +9,16 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@tanstack/react-router": "^1.120.5",
+        "@tanstack/react-router": "^1.121.12",
         "framework": "file:../framework",
         "react": "^19.1.0",
         "react-dom": "^19.1.0"
     },
     "devDependencies": {
-        "@types/node": "^22.15.18",
-        "@types/react": "^19.1.4",
-        "@types/react-dom": "^19.1.5",
-        "@vitejs/plugin-react-swc": "^3.9.0",
+        "@types/node": "^22.15.31",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
+        "@vitejs/plugin-react-swc": "^3.10.2",
         "typescript": "^5.8.3",
         "vite": "^6.3.5"
     }

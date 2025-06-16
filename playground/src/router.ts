@@ -9,6 +9,7 @@ import { checkboxRoute } from "./routes/checkbox";
 import { radioRoute } from "./routes/radio";
 import { indexRoute } from "./routes/index.route";
 import { menuButtonRoute } from "./routes/menu-button";
+import { rangeSliderRoute } from "./routes/range-slider/route";
 
 const routeTree = rootRoute.addChildren([
 	indexRoute,
@@ -20,6 +21,7 @@ const routeTree = rootRoute.addChildren([
 	dropdownRoute,
 	menuButtonRoute,
 	dateFieldRoute,
+	rangeSliderRoute,
 ]);
 
 const router = createRouter({ routeTree });

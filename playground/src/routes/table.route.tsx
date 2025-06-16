@@ -1,11 +1,10 @@
 import { startTransition, useMemo, useState } from "react";
 import { createRoute, useLoaderData } from "@tanstack/react-router";
-import { SortInfo, TableColumn } from "framework/table";
+import { SortInfo, Table, TableColumn } from "framework/table";
 import { Button } from "framework/button";
 import { Checkbox } from "framework/checkbox";
 import { classNames } from "framework/utils/string";
 import css from "./table.module.css";
-import { ScrollableTable } from "framework/scrollable-table";
 import { indexRoute } from "./index.route";
 
 type User = {
@@ -18,7 +17,7 @@ type User = {
 
 const columns: TableColumn<User, Record<number, boolean>>[] = [{
     id: "select",
-    width: 1,
+    width: 40,
     header: (_, settings) => {
         const count = Object.keys(settings.metaData || {}).length;
         const checked = count > 0;
@@ -65,6 +64,7 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
 }, {
     id: "email",
     header: "Email",
+    width: "25%",
     renderer: (record) => <a href={`mailto:${record.email}`}>{record.email}</a>,
 }, {
     id: "gender",
@@ -76,7 +76,7 @@ const columns: TableColumn<User, Record<number, boolean>>[] = [{
 }, {
     id: "edit",
     sortable: false,
-    width: 1,
+    width: 80,
     renderer: (record, col, meta) => {
         return (
             <Button
@@ -204,7 +204,7 @@ function TablePage() {
             onSubmit={(event) => event.preventDefault()}
             onChange={formcChangeHandler}
         >
-            <ScrollableTable
+            <Table
                 rowKey="id"
                 columns={columns}
                 data={sortedData}
@@ -215,7 +215,7 @@ function TablePage() {
                 onHeaderClick={headerClickHandler}
                 sortable
                 sortInfo={sortInfo}
-                style={{ height: 400 }}
+                style={{ tableLayout: "fixed" }}
             />
         </form>
     );
